@@ -59,19 +59,19 @@ export interface JournalEntry {
 }
 
 export interface Notification {
-    id: string;
-    userId: string;
-    type: 'like' | 'proximity' | 'system';
-    content: string;
-    isRead: boolean;
-    createdAt: string;
+  id: string;
+  userId: string;
+  type: 'like' | 'proximity' | 'system';
+  content: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface Like {
-    id: string;
-    fromUserId: string;
-    toUserId: string;
-    createdAt: string;
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  createdAt: string;
 }
 
 export enum AppView {
@@ -80,4 +80,12 @@ export enum AppView {
   JOURNAL = 'JOURNAL',
   ANALYTICS = 'ANALYTICS',
   PROFILE = 'PROFILE',
+}
+
+export interface Hotspot {
+  id: string;
+  name: string;
+  distance: number;
+  count: number;
+  label: string;
 }

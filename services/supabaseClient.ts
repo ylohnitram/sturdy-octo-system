@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 // ------------------------------------------------------------------
-// KONFIGURACE SUPABASE
-// Údaje doplněny na základě tvého projektu (ciwvtqyhdxjnuywjswkp)
-// ------------------------------------------------------------------
-const SUPABASE_URL = 'https://ciwvtqyhdxjnuywjswkp.supabase.co';
-// Toto je tvůj public anon key, který jsi poslal
-const SUPABASE_ANON_KEY = 'sb_publishable_H6Pj37PdVvMNlTiXa0Fpzg_TKvjDhvd';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('Missing Supabase environment variables');
+}
+
 // Vytvoření klienta
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /**

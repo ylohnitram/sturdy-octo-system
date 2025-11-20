@@ -3,17 +3,17 @@ import { supabase } from './supabaseClient';
 import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender } from '../types';
 
 const RESTRICTED_KEYWORDS = [
-    'admin', 
-    'support', 
-    'notch', 
-    'skalp', 
-    'root', 
-    'system', 
-    'moderator', 
-    'helpdesk', 
-    'staff', 
-    'official', 
-    'server', 
+    'admin',
+    'support',
+    'notch',
+    'skalp',
+    'root',
+    'system',
+    'moderator',
+    'helpdesk',
+    'staff',
+    'official',
+    'server',
     'bot'
 ];
 
@@ -44,89 +44,89 @@ export const checkUsernameAvailability = async (username: string): Promise<boole
             .from('profiles')
             .select('id', { count: 'exact', head: true })
             .eq('username', username);
-        
+
         if (error) {
             console.warn('Error checking username availability:', error.message);
-            return false; 
+            return false;
         }
-        
-        return count === 0; 
+
+        return count === 0;
     } catch (e) {
         console.error('Unexpected error checking username:', e);
-        return false; 
+        return false;
     }
 };
 
 export const fetchUserData = async (userId: string): Promise<{ profile: UserProfile | null, stats: UserStats | null, restored?: boolean, isOnboardingNeeded?: boolean }> => {
-  try {
-    let restored = false;
+    try {
+        let restored = false;
 
-    let { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+        let { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
 
-    if (profileData && profileData.deletion_scheduled_at) {
-        await supabase.from('profiles').update({ deletion_scheduled_at: null }).eq('id', userId);
-        restored = true;
-        profileData.deletion_scheduled_at = null;
+        if (profileData && profileData.deletion_scheduled_at) {
+            await supabase.from('profiles').update({ deletion_scheduled_at: null }).eq('id', userId);
+            restored = true;
+            profileData.deletion_scheduled_at = null;
+        }
+
+        let { data: statsData, error: statsError } = await supabase
+            .from('user_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+        if (profileError || statsError) {
+            console.error('Error fetching user data:', profileError, statsError);
+            return { profile: null, stats: null };
+        }
+
+        // Calculate Age Dynamically
+        const dynamicAge = profileData.birth_date ? calculateAge(profileData.birth_date) : (profileData.age || 0);
+
+        // Onboarding check: Needs birth_date OR (legacy age > 0) AND avatar AND gender
+        const hasAge = profileData.birth_date || (profileData.age && profileData.age > 0);
+        const isOnboardingNeeded = !hasAge || !profileData.avatar_url || !profileData.gender;
+
+        const userStats: UserStats = {
+            bodyCount: statsData.body_count,
+            weeklyScore: statsData.weekly_score || 0,
+            matches: 0,
+            avgPartnerAge: 0,
+            preferredType: 'Neznámý',
+            streakDays: 0,
+            aiCredits: statsData.ai_credits,
+            coins: statsData.coins,
+            inviteCode: statsData.invite_code,
+            invitesAvailable: statsData.invites_left
+        };
+
+        const userProfile: UserProfile = {
+            id: profileData.id,
+            name: profileData.username || 'Lovce',
+            age: dynamicAge,
+            birthDate: profileData.birth_date,
+            gender: profileData.gender,
+            targetGender: profileData.target_gender || 'both',
+            radarRadius: profileData.radar_radius || 10,
+            notifyProximity: profileData.notify_proximity !== false, // Default true
+            notifyLikes: profileData.notify_likes !== false, // Default true
+            bio: profileData.bio || '',
+            avatarUrl: profileData.avatar_url || 'https://picsum.photos/200',
+            stats: userStats,
+            tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+            isOnline: true,
+            distanceKm: 0
+        };
+
+        return { profile: userProfile, stats: userStats, restored, isOnboardingNeeded };
+    } catch (e) {
+        console.error(e);
+        return { profile: null, stats: null };
     }
-
-    let { data: statsData, error: statsError } = await supabase
-      .from('user_stats')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileError || statsError) {
-      console.error('Error fetching user data:', profileError, statsError);
-      return { profile: null, stats: null };
-    }
-
-    // Calculate Age Dynamically
-    const dynamicAge = profileData.birth_date ? calculateAge(profileData.birth_date) : (profileData.age || 0);
-    
-    // Onboarding check: Needs birth_date OR (legacy age > 0) AND avatar AND gender
-    const hasAge = profileData.birth_date || (profileData.age && profileData.age > 0);
-    const isOnboardingNeeded = !hasAge || !profileData.avatar_url || !profileData.gender;
-
-    const userStats: UserStats = {
-      bodyCount: statsData.body_count,
-      weeklyScore: statsData.weekly_score || 0,
-      matches: 0,
-      avgPartnerAge: 0, 
-      preferredType: 'Neznámý',
-      streakDays: 0,
-      aiCredits: statsData.ai_credits,
-      coins: statsData.coins,
-      inviteCode: statsData.invite_code,
-      invitesAvailable: statsData.invites_left
-    };
-
-    const userProfile: UserProfile = {
-      id: profileData.id,
-      name: profileData.username || 'Lovce',
-      age: dynamicAge,
-      birthDate: profileData.birth_date,
-      gender: profileData.gender,
-      targetGender: profileData.target_gender || 'both',
-      radarRadius: profileData.radar_radius || 10,
-      notifyProximity: profileData.notify_proximity !== false, // Default true
-      notifyLikes: profileData.notify_likes !== false, // Default true
-      bio: profileData.bio || '',
-      avatarUrl: profileData.avatar_url || 'https://picsum.photos/200',
-      stats: userStats,
-      tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
-      isOnline: true,
-      distanceKm: 0
-    };
-
-    return { profile: userProfile, stats: userStats, restored, isOnboardingNeeded };
-  } catch (e) {
-    console.error(e);
-    return { profile: null, stats: null };
-  }
 };
 
 export const updateUserPreferences = async (userId: string, gender: Gender, targetGender: TargetGender) => {
@@ -154,6 +154,35 @@ export const updateRadarRadius = async (userId: string, radius: number) => {
         .eq('id', userId);
 };
 
+export const updateUserLocation = async (userId: string, lat: number, long: number) => {
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            latitude: lat,
+            longitude: long,
+            last_location_update: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+    if (error) console.error('Error updating location:', error);
+};
+
+export const fetchActiveHotspots = async (radius: number, lat: number, long: number): Promise<Hotspot[]> => {
+    const { data, error } = await supabase
+        .rpc('get_active_hotspots', {
+            radius_km: radius,
+            current_lat: lat,
+            current_long: long
+        });
+
+    if (error) {
+        console.error('Error fetching hotspots:', error);
+        return [];
+    }
+
+    return data || [];
+};
+
 export const sendLike = async (fromUserId: string, toUserId: string) => {
     try {
         // 1. Insert Like
@@ -174,7 +203,7 @@ export const sendLike = async (fromUserId: string, toUserId: string) => {
                 type: 'like',
                 content: 'Někdo ti dal srdíčko! ❤️',
             });
-            
+
     } catch (e) {
         console.error('Error sending like:', e);
     }
@@ -227,7 +256,7 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
                 if (lookingForMen && myGender !== 'male') return false;
                 if (lookingForWomen && myGender !== 'female') return false;
             }
-            
+
             // Mock Distance Filter
             const mockDist = Math.floor(Math.random() * 20) + 1;
             if (mockDist > radius) return false;
@@ -256,7 +285,7 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
             },
             tier: p.user_stats?.is_premium ? UserTier.PREMIUM : UserTier.FREE,
             isOnline: Math.random() > 0.5,
-            distanceKm: Math.floor(Math.random() * radius) + 1 
+            distanceKm: Math.floor(Math.random() * radius) + 1
         }));
 
     } catch (e) {
@@ -266,34 +295,34 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
 };
 
 export const uploadAvatar = async (userId: string, file: File): Promise<string | null> => {
-  try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userId}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file);
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, file);
 
-    if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
-    await supabase
-      .from('profiles')
-      .update({ avatar_url: data.publicUrl })
-      .eq('id', userId);
+        await supabase
+            .from('profiles')
+            .update({ avatar_url: data.publicUrl })
+            .eq('id', userId);
 
-    return data.publicUrl;
-  } catch (error) {
-    console.error('Error uploading avatar:', error);
-    alert('Nepodařilo se nahrát fotku.');
-    return null;
-  }
+        return data.publicUrl;
+    } catch (error) {
+        console.error('Error uploading avatar:', error);
+        alert('Nepodařilo se nahrát fotku.');
+        return null;
+    }
 };
 
 export const updateUserBio = async (userId: string, bio: string) => {
-  await supabase.from('profiles').update({ bio }).eq('id', userId);
+    await supabase.from('profiles').update({ bio }).eq('id', userId);
 };
 
 export const saveUserBirthDate = async (userId: string, birthDate: string) => {
@@ -346,15 +375,15 @@ export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
             .limit(50);
 
         if (error) {
-             console.error('Detailed Leaderboard Error:', JSON.stringify(error, null, 2));
-             throw error;
+            console.error('Detailed Leaderboard Error:', JSON.stringify(error, null, 2));
+            throw error;
         }
-        
+
         if (!data) return [];
 
         return data.map((item: any, index: number) => {
-            const profile = item.profiles; 
-            
+            const profile = item.profiles;
+
             // Skip if profile is missing or scheduled for deletion (double check)
             if (!profile || profile.deletion_scheduled_at) return null;
 
@@ -413,7 +442,7 @@ export const fetchJournalStats = async (userId: string) => {
 
     const activityMap = new Map<string, number>();
     const months = ['Jan', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
-    
+
     entries.forEach(e => {
         const d = new Date(e.date);
         const monthName = months[d.getMonth()];
