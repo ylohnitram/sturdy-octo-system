@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'logo.jpg'],
+        includeAssets: ['favicon.ico', 'logo.png'],
         devOptions: {
           enabled: true,
           type: 'module'
@@ -32,19 +32,19 @@ export default defineConfig(({ mode }) => {
           orientation: 'portrait',
           icons: [
             {
-              src: 'logo.jpg',
+              src: 'logo.png',
               sizes: '192x192',
-              type: 'image/jpeg'
+              type: 'image/png'
             },
             {
-              src: 'logo.jpg',
+              src: 'logo.png',
               sizes: '512x512',
-              type: 'image/jpeg'
+              type: 'image/png'
             },
             {
-              src: 'logo.jpg',
+              src: 'logo.png',
               sizes: '512x512',
-              type: 'image/jpeg',
+              type: 'image/png',
               purpose: 'any maskable'
             }
           ]
