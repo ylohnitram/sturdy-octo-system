@@ -9,7 +9,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     HasUrl: !!import.meta.env.VITE_SUPABASE_URL,
     HasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
     Mode: import.meta.env.MODE,
-    BaseUrl: import.meta.env.BASE_URL
+    BaseUrl: import.meta.env.BASE_URL,
+    UrlValue: import.meta.env.VITE_SUPABASE_URL?.substring(0, 20) + '...' // First 20 chars only
   });
 }
 
