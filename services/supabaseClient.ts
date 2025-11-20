@@ -5,6 +5,12 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('Missing Supabase environment variables. Check your .env file or Vercel settings.');
+  console.log('Debug Info:', {
+    HasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+    HasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    Mode: import.meta.env.MODE,
+    BaseUrl: import.meta.env.BASE_URL
+  });
 }
 
 // Vytvoření klienta - prevent crash if empty
