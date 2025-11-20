@@ -91,7 +91,25 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
         const hasAge = profileData.birth_date || (profileData.age && profileData.age > 0);
         const isOnboardingNeeded = !hasAge || !profileData.avatar_url || !profileData.gender;
 
+        // Fetch user's rank from leaderboard
+        let userRank: number | undefined = undefined;
+        try {
+            const leaderboard = await fetchLeaderboard();
+            const userEntry = leaderboard.find(entry => entry.user.id === userId);
+            if (userEntry) {
+                userRank = userEntry.rank;
+            }
+        } catch (e) {
+            console.error('Error fetching rank:', e);
+        }
+
+        // Calculate heat (simplified - based on body count and weekly score)
+        const heat = statsData.body_count > 0 || statsData.weekly_score > 0
+            ? Math.min(100, Math.round(((statsData.body_count * 10) + (statsData.weekly_score * 2)) / 1.5))
+            : 0;
+
         const userStats: UserStats = {
+            username: profileData.username || 'Lovce',
             bodyCount: statsData.body_count,
             weeklyScore: statsData.weekly_score || 0,
             matches: 0,
@@ -101,7 +119,9 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             aiCredits: statsData.ai_credits,
             coins: statsData.coins,
             inviteCode: statsData.invite_code,
-            invitesAvailable: statsData.invites_left
+            invitesAvailable: statsData.invites_left,
+            rank: userRank,
+            heat: heat
         };
 
         const userProfile: UserProfile = {

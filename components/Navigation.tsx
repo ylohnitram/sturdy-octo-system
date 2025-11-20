@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Flame, Trophy, PieChart, User, BookLock } from 'lucide-react';
+import { Flame, Trophy, PieChart, User, BookLock, ImageIcon } from 'lucide-react';
 import { AppView } from '../types';
 
 interface NavigationProps {
@@ -13,6 +13,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate 
     { view: AppView.DISCOVERY, icon: Flame, label: 'Lov' },
     { view: AppView.LEADERBOARD, icon: Trophy, label: 'Žebříček' },
     { view: AppView.JOURNAL, icon: BookLock, label: 'Deník' },
+    { view: AppView.GALLERY, icon: ImageIcon, label: 'Galerie' },
     { view: AppView.ANALYTICS, icon: PieChart, label: 'Statistika' },
     { view: AppView.PROFILE, icon: User, label: 'Profil' },
   ];
@@ -26,9 +27,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate 
             <button
               key={item.view}
               onClick={() => onNavigate(item.view)}
-              className={`flex flex-col items-center justify-center w-12 transition-all duration-200 ${
-                isActive ? 'text-red-500 scale-110' : 'text-slate-500 hover:text-slate-300'
-              }`}
+              className={`flex flex-col items-center justify-center w-12 transition-all duration-200 ${isActive ? 'text-red-500 scale-110' : 'text-slate-500 hover:text-slate-300'
+                }`}
             >
               <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               <span className="text-[10px] mt-1 font-medium">{item.label}</span>

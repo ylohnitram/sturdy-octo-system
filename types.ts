@@ -9,6 +9,7 @@ export type Gender = 'male' | 'female';
 export type TargetGender = 'men' | 'women' | 'both';
 
 export interface UserStats {
+  username?: string;
   bodyCount: number;
   weeklyScore: number;
   matches: number;
@@ -19,6 +20,8 @@ export interface UserStats {
   coins: number;
   inviteCode: string;
   invitesAvailable: number;
+  rank?: number;
+  heat?: number;
 }
 
 export interface UserProfile {
@@ -78,6 +81,7 @@ export enum AppView {
   DISCOVERY = 'DISCOVERY',
   LEADERBOARD = 'LEADERBOARD',
   JOURNAL = 'JOURNAL',
+  GALLERY = 'GALLERY',
   ANALYTICS = 'ANALYTICS',
   PROFILE = 'PROFILE',
 }

@@ -8,6 +8,7 @@ import { LeaderboardView } from './components/LeaderboardView';
 import { StatsView } from './components/StatsView';
 import { ProfileView } from './components/ProfileView';
 import { JournalView } from './components/JournalView';
+import { GalleryView } from './components/GalleryView';
 import { PremiumModal } from './components/PremiumModal';
 import { StoreModal } from './components/StoreModal';
 import { CamoMode } from './components/CamoMode';
@@ -199,6 +200,8 @@ const App: React.FC = () => {
         return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.JOURNAL:
         return <JournalView />;
+      case AppView.GALLERY:
+        return <GalleryView />;
       case AppView.ANALYTICS:
         return <StatsView onOpenPremium={openPremium} />;
       case AppView.PROFILE:
