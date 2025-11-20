@@ -8,8 +8,18 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 // Vytvoření klienta - prevent crash if empty
+// NOTE: We must provide a valid URL format to avoid "Invalid URL" error during construction
+const validUrl = (url: string) => {
+  try {
+    new URL(url);
+    return url;
+  } catch (e) {
+    return 'https://placeholder.supabase.co';
+  }
+};
+
 export const supabase = createClient(
-  SUPABASE_URL || 'https://placeholder.supabase.co',
+  validUrl(SUPABASE_URL),
   SUPABASE_ANON_KEY || 'placeholder'
 );
 /**
