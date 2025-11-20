@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender } from '../types';
+import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender, Hotspot } from '../types';
 
 const RESTRICTED_KEYWORDS = [
     'admin',
@@ -467,4 +467,105 @@ export const scheduleAccountDeletion = async (userId: string) => {
         .from('profiles')
         .update({ deletion_scheduled_at: fourteenDaysFromNow.toISOString() })
         .eq('id', userId);
+};
+
+// --- GALLERY FUNCTIONS ---
+
+export interface GalleryImage {
+    id: string;
+    imageUrl: string;
+    isPrivate: boolean;
+    isUnlocked?: boolean; // For frontend logic
+    createdAt: string;
+}
+
+export const fetchUserGallery = async (userId: string): Promise<GalleryImage[]> => {
+    try {
+        const { data, error } = await supabase
+            .from('gallery_images')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return data.map((img: any) => ({
+            id: img.id,
+            imageUrl: img.image_url,
+            isPrivate: img.is_private,
+            isUnlocked: true, // Owner always sees unlocked
+            createdAt: img.created_at
+        }));
+    } catch (e) {
+        console.error('Error fetching gallery:', e);
+        return [];
+    }
+};
+
+export const uploadGalleryImage = async (userId: string, file: File, isPrivate: boolean): Promise<GalleryImage | null> => {
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `gallery/${userId}/${Date.now()}.${fileExt}`;
+
+        // 1. Upload to Storage
+        const { error: uploadError } = await supabase.storage
+            .from('gallery') // Ensure this bucket exists!
+            .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+        const imageUrl = publicUrlData.publicUrl;
+
+        // 2. Insert into DB
+        const { data, error: dbError } = await supabase
+            .from('gallery_images')
+            .insert({
+                user_id: userId,
+                image_url: imageUrl,
+                is_private: isPrivate
+            })
+            .select()
+            .single();
+
+        if (dbError) throw dbError;
+
+        return {
+            id: data.id,
+            imageUrl: data.image_url,
+            isPrivate: data.is_private,
+            isUnlocked: true,
+            createdAt: data.created_at
+        };
+
+    } catch (e) {
+        console.error('Error uploading gallery image:', e);
+        return null;
+    }
+};
+
+export const deleteGalleryImage = async (imageId: string) => {
+    try {
+        const { error } = await supabase
+            .from('gallery_images')
+            .delete()
+            .eq('id', imageId);
+
+        if (error) throw error;
+        return true;
+    } catch (e) {
+        console.error('Error deleting image:', e);
+        return false;
+    }
+};
+
+export const unlockGalleryImage = async (imageId: string): Promise<boolean> => {
+    try {
+        const { data, error } = await supabase.rpc('unlock_image', { img_id: imageId });
+        if (error) throw error;
+        return data; // Returns true if successful
+    } catch (e) {
+        console.error('Error unlocking image:', e);
+        return false;
+    }
 };
