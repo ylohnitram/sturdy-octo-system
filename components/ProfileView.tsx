@@ -25,11 +25,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     onConsumeCoins
 }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [bio, setBio] = useState('Život je hra a já hraju tvrdě. 🎯');
+    const [loading, setLoading] = useState(true);
+    const [bio, setBio] = useState('');
     const [generatingBio, setGeneratingBio] = useState(false);
     const [unlockedGalleries, setUnlockedGalleries] = useState<number[]>([]);
     const [uploading, setUploading] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState('https://picsum.photos/200/200');
+    const [avatarUrl, setAvatarUrl] = useState('');
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
@@ -49,16 +50,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     // Fetch profile data on mount
     useEffect(() => {
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data } = await supabase.from('profiles').select('bio, avatar_url, target_gender, notify_proximity, notify_likes').eq('id', user.id).single();
-                if (data) {
-                    if (data.bio) setBio(data.bio);
-                    if (data.avatar_url) setAvatarUrl(data.avatar_url);
-                    if (data.target_gender) setTargetGender(data.target_gender);
-                    if (data.notify_proximity !== undefined) setNotifyProximity(data.notify_proximity);
-                    if (data.notify_likes !== undefined) setNotifyLikes(data.notify_likes);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data } = await supabase.from('profiles').select('bio, avatar_url, target_gender, notify_proximity, notify_likes').eq('id', user.id).single();
+                    if (data) {
+                        if (data.bio) setBio(data.bio);
+                        if (data.avatar_url) setAvatarUrl(data.avatar_url);
+                        if (data.target_gender) setTargetGender(data.target_gender);
+                        if (data.notify_proximity !== undefined) setNotifyProximity(data.notify_proximity);
+                        if (data.notify_likes !== undefined) setNotifyLikes(data.notify_likes);
+                    }
                 }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            } finally {
+                setLoading(false);
             }
         }
         getUser();
@@ -206,59 +213,73 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
             {/* Header */}
             <div className="flex flex-col items-center mb-6">
-                <div className="relative w-32 h-32 rounded-full p-1 bg-gradient-to-br from-red-500 to-orange-600 mb-4 group">
-                    <img
-                        src={avatarUrl}
-                        alt="My Profile"
-                        className="w-full h-full object-cover rounded-full border-4 border-slate-900"
-                    />
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleAvatarUpload}
-                    />
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="absolute bottom-0 right-0 bg-slate-800 p-2 rounded-full text-white border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors"
-                    >
-                        {uploading ? <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : <Camera size={16} />}
-                    </button>
-                </div>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                    {userStats.username || 'Lovce'} <Shield size={16} className="text-blue-400" fill="currentColor" />
-                </h1>
+                {loading ? (
+                    // Skeleton Loading State
+                    <>
+                        <div className="relative w-32 h-32 rounded-full p-1 bg-slate-800 mb-4 animate-pulse">
+                            <div className="w-full h-full rounded-full bg-slate-700/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div className="h-8 w-48 bg-slate-800 rounded-lg animate-pulse mb-2"></div>
+                        <div className="h-4 w-64 bg-slate-800/50 rounded-lg animate-pulse"></div>
+                    </>
+                ) : (
+                    // Loaded Content
+                    <>
+                        <div className="relative w-32 h-32 rounded-full p-1 bg-gradient-to-br from-red-500 to-orange-600 mb-4 group">
+                            <img
+                                src={avatarUrl || 'https://picsum.photos/200/200'}
+                                alt="My Profile"
+                                className="w-full h-full object-cover rounded-full border-4 border-slate-900"
+                            />
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="absolute bottom-0 right-0 bg-slate-800 p-2 rounded-full text-white border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors"
+                            >
+                                {uploading ? <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : <Camera size={16} />}
+                            </button>
+                        </div>
+                        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                            {userStats.username || 'Lovce'} <Shield size={16} className="text-blue-400" fill="currentColor" />
+                        </h1>
 
-                {/* Editable Bio */}
-                <div className="w-full mt-2 relative group">
-                    {isEditing ? (
-                        <textarea
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            className="w-full bg-slate-800/50 rounded-xl p-2 text-center text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            onBlur={handleBioSave}
-                            autoFocus
-                        />
-                    ) : (
-                        <p
-                            className="text-slate-400 text-center px-4 py-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors italic"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            "{bio}"
-                        </p>
-                    )}
+                        {/* Editable Bio */}
+                        <div className="w-full mt-2 relative group">
+                            {isEditing ? (
+                                <textarea
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    className="w-full bg-slate-800/50 rounded-xl p-2 text-center text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    onBlur={handleBioSave}
+                                    autoFocus
+                                />
+                            ) : (
+                                <p
+                                    className="text-slate-400 text-center px-4 py-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors italic"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    "{bio || 'Napiš něco o sobě...'}"
+                                </p>
+                            )}
 
-                    {/* AI Magic Wand */}
-                    <button
-                        onClick={handleAiBio}
-                        className="absolute -right-2 top-1/2 -translate-y-1/2 p-2 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        title="AI Generate Bio (1 Credit)"
-                    >
-                        {generatingBio ? <div className="w-4 h-4 animate-spin border-2 border-white rounded-full border-t-transparent" /> : <Wand2 size={14} />}
-                    </button>
-                </div>
+                            {/* AI Magic Wand */}
+                            <button
+                                onClick={handleAiBio}
+                                className="absolute -right-2 top-1/2 -translate-y-1/2 p-2 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                title="AI Generate Bio (1 Credit)"
+                            >
+                                {generatingBio ? <div className="w-4 h-4 animate-spin border-2 border-white rounded-full border-t-transparent" /> : <Wand2 size={14} />}
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Stats Summary Row */}
