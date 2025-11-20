@@ -9,3 +9,5 @@ VITE_SUPABASE_ANON_KEY=${process.env.VITE_SUPABASE_ANON_KEY || ''}
 
 writeFileSync('.env.production', envContent);
 console.log('✅ Created .env.production with Vercel env vars');
+console.log('📄 File contents:');
+console.log(envContent.split('\n').map(line => '  ' + line).join('\n'));
