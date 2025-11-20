@@ -27,7 +27,14 @@ const validUrl = (url: string) => {
 
 export const supabase = createClient(
   validUrl(SUPABASE_URL),
-  SUPABASE_ANON_KEY || 'placeholder'
+  SUPABASE_ANON_KEY || 'placeholder',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 /**
 Realtime funkce pro sledování změn v tabulce uživatelů
