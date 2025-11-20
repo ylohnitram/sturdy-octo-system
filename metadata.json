@@ -1,0 +1,9 @@
+
+{
+  "name": "Notch",
+  "description": "Česká soutěžní seznamka. Sbírej trofeje, zvyšuj své skóre a ovládni žebříčky.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
