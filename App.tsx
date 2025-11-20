@@ -40,7 +40,7 @@ const App: React.FC = () => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [landingMessage, setLandingMessage] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<AppView>(AppView.DISCOVERY);
-  
+
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [isPanicMode, setIsPanicMode] = useState(false);
@@ -53,26 +53,53 @@ const App: React.FC = () => {
     // 1. Check Invite Persistence
     const verified = localStorage.getItem('notch_verified');
     if (verified === 'true') {
-        setHasValidInvite(true);
+      setHasValidInvite(true);
     }
 
     // 2. Check Session
     const initSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
+      try {
+        // Safety timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+        );
+
+        const sessionPromise = supabase.auth.getSession();
+
+        // Race between session check and timeout
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+
         setSession(session);
         if (session) {
-            // Load real data immediately if logged in
-            const { stats, restored, isOnboardingNeeded } = await fetchUserData(session.user.id);
+          // Load real data immediately if logged in with timeout protection
+          try {
+            const dataTimeout = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('User data fetch timeout')), 5000)
+            );
+
+            const userDataPromise = fetchUserData(session.user.id);
+            const { stats, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+
             if (stats) setUserStats(stats);
             if (restored) {
-                setShowRestoreNotification(true);
-                setTimeout(() => setShowRestoreNotification(false), 5000);
+              setShowRestoreNotification(true);
+              setTimeout(() => setShowRestoreNotification(false), 5000);
             }
             if (isOnboardingNeeded) setShowOnboarding(true);
+          } catch (userDataError) {
+            console.error('Error loading user data:', userDataError);
+            // Continue anyway - let user see the app with default stats
+          }
         }
+      } catch (error) {
+        console.error('Session initialization error:', error);
+        // Fallback: assume no session if check fails
+        setSession(null);
+      } finally {
         setLoadingSession(false);
+      }
     };
-    
+
     initSession();
 
     const {
@@ -80,13 +107,24 @@ const App: React.FC = () => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-          const { stats, restored, isOnboardingNeeded } = await fetchUserData(session.user.id);
+        try {
+          const dataTimeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('User data fetch timeout in auth listener')), 5000)
+          );
+
+          const userDataPromise = fetchUserData(session.user.id);
+          const { stats, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+
           if (stats) setUserStats(stats);
           if (restored) {
-              setShowRestoreNotification(true);
-              setTimeout(() => setShowRestoreNotification(false), 5000);
+            setShowRestoreNotification(true);
+            setTimeout(() => setShowRestoreNotification(false), 5000);
           }
           if (isOnboardingNeeded) setShowOnboarding(true);
+        } catch (error) {
+          console.error('Error loading user data in auth listener:', error);
+          // Continue anyway - let user see the app
+        }
       }
     });
 
@@ -96,7 +134,7 @@ const App: React.FC = () => {
   // Monetization & Features Logic
   const openPremium = () => setIsPremiumModalOpen(true);
   const closePremium = () => setIsPremiumModalOpen(false);
-  
+
   const openStore = () => setIsStoreModalOpen(true);
   const closeStore = () => setIsStoreModalOpen(false);
 
@@ -114,48 +152,48 @@ const App: React.FC = () => {
 
   const consumeCoins = (amount: number): boolean => {
     if (userStats.coins >= amount) {
-        setUserStats(prev => ({ ...prev, coins: prev.coins - amount }));
-        return true;
+      setUserStats(prev => ({ ...prev, coins: prev.coins - amount }));
+      return true;
     }
     openStore();
     return false;
   };
 
   const addCoins = (amount: number) => {
-      setUserStats(prev => ({ ...prev, coins: prev.coins + amount }));
-      closeStore();
+    setUserStats(prev => ({ ...prev, coins: prev.coins + amount }));
+    closeStore();
   };
-  
+
   const handleEnterApp = (mode: 'login' | 'signup' = 'signup') => {
-      setAuthMode(mode);
-      setHasValidInvite(true);
-      setLandingMessage(null);
+    setAuthMode(mode);
+    setHasValidInvite(true);
+    setLandingMessage(null);
   };
 
   const handleBackToLanding = (message?: string) => {
-      setHasValidInvite(false);
-      setAuthMode('signup');
-      localStorage.removeItem('notch_verified');
-      setLandingMessage(message || null);
+    setHasValidInvite(false);
+    setAuthMode('signup');
+    localStorage.removeItem('notch_verified');
+    setLandingMessage(message || null);
   };
 
   const handleOnboardingComplete = () => {
-      setShowOnboarding(false);
-      // Reload stats to reflect new avatar/bio
-      if (session) {
-          fetchUserData(session.user.id).then(({stats}) => {
-              if(stats) setUserStats(stats);
-          });
-      }
+    setShowOnboarding(false);
+    // Reload stats to reflect new avatar/bio
+    if (session) {
+      fetchUserData(session.user.id).then(({ stats }) => {
+        if (stats) setUserStats(stats);
+      });
+    }
   };
 
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
-        return <DiscoveryView 
-            userStats={userStats}
-            onConsumeAi={consumeAiCredit}
-            onConsumeCoins={consumeCoins}
+        return <DiscoveryView
+          userStats={userStats}
+          onConsumeAi={consumeAiCredit}
+          onConsumeCoins={consumeCoins}
         />;
       case AppView.LEADERBOARD:
         return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;
@@ -164,13 +202,13 @@ const App: React.FC = () => {
       case AppView.ANALYTICS:
         return <StatsView onOpenPremium={openPremium} />;
       case AppView.PROFILE:
-        return <ProfileView 
-            userStats={userStats} 
-            onActivatePanic={activatePanic} 
-            onOpenStore={openStore}
-            onOpenPremium={openPremium}
-            onConsumeAi={consumeAiCredit}
-            onConsumeCoins={consumeCoins}
+        return <ProfileView
+          userStats={userStats}
+          onActivatePanic={activatePanic}
+          onOpenStore={openStore}
+          onOpenPremium={openPremium}
+          onConsumeAi={consumeAiCredit}
+          onConsumeCoins={consumeCoins}
         />;
       default:
         return <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
@@ -180,7 +218,7 @@ const App: React.FC = () => {
   // 1. Loading State
   if (loadingSession) {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
     </div>;
   }
 
@@ -194,38 +232,38 @@ const App: React.FC = () => {
 
       {/* 2. Not Logged In Flow */}
       {!session ? (
-         (!hasValidInvite && authMode !== 'login') ? 
-             <LandingPage onEnter={handleEnterApp} initialMessage={landingMessage} /> :
-             <AuthView 
-                onLogin={() => { /* Session handled by listener */ }} 
-                initialView={authMode} 
-                onBackToLanding={handleBackToLanding}
-            />
+        (!hasValidInvite && authMode !== 'login') ?
+          <LandingPage onEnter={handleEnterApp} initialMessage={landingMessage} /> :
+          <AuthView
+            onLogin={() => { /* Session handled by listener */ }}
+            initialView={authMode}
+            onBackToLanding={handleBackToLanding}
+          />
       ) : (
-          /* 3. Main App (Logged In) */
-          <>
-            {showRestoreNotification && (
-                <div className="fixed top-4 left-4 right-4 z-50 bg-green-600 text-white p-4 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3">
-                    <CheckCircle size={24} />
-                    <div>
-                        <div className="font-bold">Vítej zpět!</div>
-                        <div className="text-xs opacity-90">Smazání tvého účtu bylo zrušeno.</div>
-                    </div>
-                </div>
-            )}
+        /* 3. Main App (Logged In) */
+        <>
+          {showRestoreNotification && (
+            <div className="fixed top-4 left-4 right-4 z-50 bg-green-600 text-white p-4 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3">
+              <CheckCircle size={24} />
+              <div>
+                <div className="font-bold">Vítej zpět!</div>
+                <div className="text-xs opacity-90">Smazání tvého účtu bylo zrušeno.</div>
+              </div>
+            </div>
+          )}
 
-            <main className="h-screen overflow-hidden relative">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
-                <div className="relative z-10 h-full">
-                    {renderView()}
-                </div>
-            </main>
+          <main className="h-screen overflow-hidden relative">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
+            <div className="relative z-10 h-full">
+              {renderView()}
+            </div>
+          </main>
 
-            <Navigation currentView={currentView} onNavigate={setCurrentView} />
+          <Navigation currentView={currentView} onNavigate={setCurrentView} />
 
-            <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
-            <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
-          </>
+          <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
+          <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
+        </>
       )}
     </div>
   );
