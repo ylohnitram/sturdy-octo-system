@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node -e \"console.log('ENV CHECK:', {hasUrl: !!process.env.VITE_SUPABASE_URL, hasKey: !!process.env.VITE_SUPABASE_ANON_KEY})\"",
+    "prebuild": "node scripts/generate-env.js",
     "build": "vite build",
     "preview": "vite preview"
   },
