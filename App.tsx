@@ -11,15 +11,40 @@ import { JournalView } from './components/JournalView';
 import { GalleryView } from './components/GalleryView';
 import { PremiumModal } from './components/PremiumModal';
 import { StoreModal } from './components/StoreModal';
-import { CamoMode } from './components/CamoMode';
 import { ReloadPrompt } from './components/ReloadPrompt';
 import { LandingPage } from './components/LandingPage';
 import { AuthView } from './components/AuthView';
 import { CookieConsent } from './components/CookieConsent';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { NotificationManager } from './components/NotificationManager';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import { AppView, UserStats } from './types';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
+
+// ... (rest of imports)
+
+// ... (inside App component return)
+
+          <Header 
+            userStats={userStats} 
+            avatarUrl={userAvatar}
+            onOpenStore={openStore}
+            onOpenPremium={openPremium}
+            onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
+            notificationsEnabled={true} // TODO: Load from user profile
+          />
+
+          <main className="h-screen overflow-hidden relative pt-16 pb-8">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
+            <div className="relative z-10 h-full">
+              {renderView()}
+            </div>
+          </main>
+          
+          <Footer />
+        </>
+      )}
 
 // Default stats before loading real data
 const INITIAL_STATS: UserStats = {
@@ -49,6 +74,8 @@ const App: React.FC = () => {
   const [userStats, setUserStats] = useState<UserStats>(INITIAL_STATS);
   const [showRestoreNotification, setShowRestoreNotification] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [dataLoadError, setDataLoadError] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string>('');
 
   // Check for existing Supabase session on mount & Listen for changes
   useEffect(() => {
@@ -80,17 +107,20 @@ const App: React.FC = () => {
             );
 
             const userDataPromise = fetchUserData(session.user.id);
-            const { stats, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+            const { stats, profile, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
 
             if (stats) setUserStats(stats);
+            if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
+
             if (restored) {
               setShowRestoreNotification(true);
               setTimeout(() => setShowRestoreNotification(false), 5000);
             }
             if (isOnboardingNeeded) setShowOnboarding(true);
-          } catch (userDataError) {
+            setDataLoadError(null); // Clear any previous errors
+          } catch (userDataError: any) {
             console.error('Error loading user data:', userDataError);
-            // Continue anyway - let user see the app with default stats
+            setDataLoadError(userDataError.message || 'Chyba načítání dat');
           }
         }
       } catch (error) {
@@ -115,17 +145,20 @@ const App: React.FC = () => {
           );
 
           const userDataPromise = fetchUserData(session.user.id);
-          const { stats, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+          const { stats, profile, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
 
           if (stats) setUserStats(stats);
+          if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
+
           if (restored) {
             setShowRestoreNotification(true);
             setTimeout(() => setShowRestoreNotification(false), 5000);
           }
           if (isOnboardingNeeded) setShowOnboarding(true);
-        } catch (error) {
+          setDataLoadError(null);
+        } catch (error: any) {
           console.error('Error loading user data in auth listener:', error);
-          // Continue anyway - let user see the app
+          setDataLoadError(error.message || 'Chyba načítání dat');
         }
       }
     });
@@ -229,7 +262,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-fuchsia-500 selection:text-white">
       {/* GLOBAL OVERLAYS (Panic, Cookies, Wizard, Notifications) */}
-      <CamoMode isActive={isPanicMode} onDeactivate={deactivatePanic} />
       <CookieConsent />
       <ReloadPrompt />
       <NotificationManager userId={session?.user?.id || null} />
@@ -257,7 +289,29 @@ const App: React.FC = () => {
             </div>
           )}
 
-          <main className="h-screen overflow-hidden relative">
+          {/* Error Toast for PWA Debugging */}
+          {dataLoadError && (
+            <div className="fixed top-20 left-4 right-4 z-50 bg-red-600/90 backdrop-blur text-white p-3 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3 border border-red-500">
+              <AlertTriangle size={20} className="shrink-0" />
+              <div className="flex-grow">
+                <div className="font-bold text-sm">Chyba připojení</div>
+                <div className="text-xs opacity-90">{dataLoadError}. Zkus to znovu.</div>
+              </div>
+              <button onClick={() => window.location.reload()} className="bg-white/20 px-2 py-1 rounded text-xs font-bold hover:bg-white/30">
+                Reload
+              </button>
+            </div>
+          )}
+
+          <Header
+            userStats={userStats}
+            avatarUrl={userAvatar}
+            onOpenStore={openStore}
+            onOpenPremium={openPremium}
+            onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
+          />
+
+          <main className="h-screen overflow-hidden relative pt-16">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
             <div className="relative z-10 h-full">
               {renderView()}
