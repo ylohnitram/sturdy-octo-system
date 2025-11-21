@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './services/supabaseClient';
 import { fetchUserData } from './services/userService';
 import { Navigation } from './components/Navigation';
@@ -54,6 +54,9 @@ const App: React.FC = () => {
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>('');
 
+  // Flag to prevent duplicate data loading
+  const dataLoadedRef = useRef(false);
+
   // Check for existing Supabase session on mount & Listen for changes
   useEffect(() => {
     // 0. Check and clear cache if version changed
@@ -94,14 +97,18 @@ const App: React.FC = () => {
       setHasValidInvite(true);
     }
 
-    // Helper function to load user data with retry
-    const loadUserDataWithRetry = async (userId: string, retries = 3): Promise<any> => {
-      for (let attempt = 0; attempt <= retries; attempt++) {
+    // Helper function to load user data with retry logic
+    const loadUserDataWithRetry = async (userId: string, maxRetries = 1): Promise<any> => {
+      const totalAttempts = maxRetries + 1; // 1 initial + retries
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          console.log(`[Data Load] Attempt ${attempt + 1}/${retries + 1} for user ${userId.substring(0, 8)}...`);
-          const timeout = 30000; // 30 seconds per attempt
+          console.log(`[Data Load] Attempt ${attempt + 1}/${totalAttempts} for user ${userId.substring(0, 8)}...`);
+
+          // Reduced timeout: 10 seconds per attempt (was 30s)
+          const timeout = 10000;
           const dataTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout po 30s')), timeout)
+            setTimeout(() => reject(new Error('Timeout po 10s')), timeout)
           );
 
           const userDataPromise = fetchUserData(userId);
@@ -112,8 +119,10 @@ const App: React.FC = () => {
           return result; // Success
         } catch (error: any) {
           console.error(`[Data Load] Attempt ${attempt + 1} failed:`, error.message);
-          if (attempt < retries) {
-            const waitTime = (attempt + 1) * 2000; // Progressive backoff: 2s, 4s, 6s
+
+          if (attempt < maxRetries) {
+            // Progressive backoff: 1s, 2s
+            const waitTime = (attempt + 1) * 1000;
             console.log(`[Data Load] Waiting ${waitTime}ms before retry...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
           } else {
@@ -124,22 +133,16 @@ const App: React.FC = () => {
       }
     };
 
-    // 2. Check Session
+    // 2. Check Session and Load Data
     const initSession = async () => {
       try {
-        // Safety timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session check timeout')), 10000)
-        );
-
-        const sessionPromise = supabase.auth.getSession();
-
-        // Race between session check and timeout
-        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        // No timeout - let Supabase handle it naturally
+        const { data: { session } } = await supabase.auth.getSession();
 
         setSession(session);
-        if (session) {
-          // Load real data with retry logic
+        if (session && !dataLoadedRef.current) {
+          // Load real data with retry logic (only once)
+          dataLoadedRef.current = true; // Mark as loading/loaded
           try {
             const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
 
@@ -154,7 +157,8 @@ const App: React.FC = () => {
             setDataLoadError(null); // Clear any previous errors
           } catch (userDataError: any) {
             console.error('Error loading user data after retries:', userDataError);
-            setDataLoadError(`Nepodařilo se načíst data (4 pokusy po 30s). Zkontroluj připojení`);
+            setDataLoadError(`Nepodařilo se načíst data. Zkus to znovu.`);
+            dataLoadedRef.current = false; // Allow retry
           }
         }
       } catch (error) {
@@ -177,8 +181,9 @@ const App: React.FC = () => {
       // Handle sign in, initial session, and token refresh
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
         try {
-          // Only reload data on sign in and initial session, not on token refresh
-          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          // Only reload data on sign in (not INITIAL_SESSION - that's handled by initSession)
+          if (event === 'SIGNED_IN' && !dataLoadedRef.current) {
+            dataLoadedRef.current = true; // Mark as loading/loaded
             const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
 
             if (stats) {
@@ -192,6 +197,8 @@ const App: React.FC = () => {
               setTimeout(() => setShowRestoreNotification(false), 5000);
             }
             if (isOnboardingNeeded) setShowOnboarding(true);
+          } else if (event === 'INITIAL_SESSION') {
+            console.log('[Auth] Initial session - data already loaded by initSession');
           } else if (event === 'TOKEN_REFRESHED') {
             console.log('[Auth] Token refreshed successfully - connection maintained');
             // Don't reload data on token refresh - just maintain existing state
@@ -209,6 +216,7 @@ const App: React.FC = () => {
             // Only show error if we have no data at all
             setDataLoadError(`Nepodařilo se načíst data. Zkus to znovu.`);
           }
+          dataLoadedRef.current = false; // Allow retry
         }
       }
 

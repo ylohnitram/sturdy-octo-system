@@ -61,27 +61,25 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
     try {
         let restored = false;
 
-        let { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
+        // PARALLEL QUERIES - Load both profile and stats at the same time
+        const [profileResult, statsResult] = await Promise.all([
+            supabase.from('profiles').select('*').eq('id', userId).single(),
+            supabase.from('user_stats').select('*').eq('user_id', userId).single()
+        ]);
 
-        if (profileData && profileData.deletion_scheduled_at) {
-            await supabase.from('profiles').update({ deletion_scheduled_at: null }).eq('id', userId);
-            restored = true;
-            profileData.deletion_scheduled_at = null;
-        }
-
-        let { data: statsData, error: statsError } = await supabase
-            .from('user_stats')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
+        const { data: profileData, error: profileError } = profileResult;
+        const { data: statsData, error: statsError } = statsResult;
 
         if (profileError || statsError) {
             console.error('Error fetching user data:', profileError, statsError);
             return { profile: null, stats: null };
+        }
+
+        // Check for account restoration
+        if (profileData && profileData.deletion_scheduled_at) {
+            await supabase.from('profiles').update({ deletion_scheduled_at: null }).eq('id', userId);
+            restored = true;
+            profileData.deletion_scheduled_at = null;
         }
 
         // Calculate Age Dynamically
