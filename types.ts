@@ -22,6 +22,8 @@ export interface UserStats {
   invitesAvailable: number;
   rank?: number;
   heat?: number;
+  tier?: UserTier;
+  isOnline?: boolean;
 }
 
 export interface UserProfile {

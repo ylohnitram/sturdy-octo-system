@@ -121,7 +121,9 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             inviteCode: statsData.invite_code,
             invitesAvailable: statsData.invites_left,
             rank: userRank,
-            heat: heat
+            heat: heat,
+            tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+            isOnline: true
         };
 
         const userProfile: UserProfile = {
