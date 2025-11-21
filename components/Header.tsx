@@ -37,12 +37,12 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="flex flex-col">
                     <div className="flex items-center gap-1">
                         <span className="text-sm font-bold text-white leading-none">{userStats.username || 'Lovce'}</span>
-                        {userStats.tier === 'premium' && (
+                        {userStats.tier === 'PREMIUM' && (
                             <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-1 rounded font-bold">GOLD</span>
                         )}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
-                        <span>{userStats.tier === 'premium' ? 'Premium Member' : 'Free Plan'}</span>
+                        <span>{userStats.tier === 'PREMIUM' ? 'Premium Member' : 'Free Plan'}</span>
                         {notificationsEnabled && <Bell size={10} className="text-slate-500" />}
                     </div>
                 </div>
