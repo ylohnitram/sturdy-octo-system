@@ -1,12 +1,11 @@
 import React from 'react';
 import { UserStats } from '../types';
-import { Coins, Sparkles, Plus, Bell, Award } from 'lucide-react';
+import { Coins, Plus, Bell } from 'lucide-react';
 
 interface HeaderProps {
     userStats: UserStats;
     avatarUrl?: string;
     onOpenStore: () => void;
-    onOpenPremium: () => void;
     onNavigateProfile: () => void;
     notificationsEnabled?: boolean;
 }
@@ -15,7 +14,6 @@ export const Header: React.FC<HeaderProps> = ({
     userStats,
     avatarUrl,
     onOpenStore,
-    onOpenPremium,
     onNavigateProfile,
     notificationsEnabled
 }) => {
@@ -50,34 +48,17 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
             </div>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-2">
-                {/* Badge Indicator (Mocked for now) */}
-                <button className="p-2 relative text-slate-400 hover:text-white transition-colors">
-                    <Award size={18} />
-                    {/* <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> */}
-                </button>
-
-                {/* AI Promo Button */}
-                <button
-                    onClick={onOpenPremium}
-                    className="p-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-400 hover:text-white hover:border-indigo-400 transition-all"
-                >
-                    <Sparkles size={18} />
-                </button>
-
-                {/* Coins Display */}
-                <button
-                    onClick={onOpenStore}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
-                >
-                    <Coins size={14} className="text-yellow-500" />
-                    <span className="text-xs font-bold text-white">{userStats.coins}</span>
-                    <div className="bg-slate-700 rounded-full p-0.5">
-                        <Plus size={10} className="text-slate-400" />
-                    </div>
-                </button>
-            </div>
+            {/* Right: Coins Display */}
+            <button
+                onClick={onOpenStore}
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
+            >
+                <Coins size={14} className="text-yellow-500" />
+                <span className="text-xs font-bold text-white">{userStats.coins}</span>
+                <div className="bg-slate-700 rounded-full p-0.5">
+                    <Plus size={10} className="text-slate-400" />
+                </div>
+            </button>
         </div>
     );
 };

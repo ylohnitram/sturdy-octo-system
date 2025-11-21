@@ -18,7 +18,6 @@ import { CookieConsent } from './components/CookieConsent';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { NotificationManager } from './components/NotificationManager';
 import { Header } from './components/Header';
-import { Footer } from './components/Footer';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -285,7 +284,6 @@ const App: React.FC = () => {
             userStats={userStats}
             avatarUrl={userAvatar}
             onOpenStore={openStore}
-            onOpenPremium={openPremium}
             onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
             notificationsEnabled={true}
           />
@@ -301,7 +299,6 @@ const App: React.FC = () => {
 
           <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
           <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
-          <Footer />
         </>
       )}
     </div>

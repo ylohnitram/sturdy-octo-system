@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Settings, Edit, Shield, Star, Share2, LogOut, Plus, Lock, Award, EyeOff, Wand2, Coins, Copy, Camera, Ticket, KeyRound, Trash2, AlertTriangle, Cookie, Footprints, Info, X, Users, Bell } from 'lucide-react';
+import { Settings, Edit, Shield, Star, Share2, LogOut, Plus, Lock, Award, EyeOff, Wand2, Coins, Copy, Camera, Ticket, KeyRound, Trash2, AlertTriangle, Cookie, Footprints, Info, X, Users, Bell, Sparkles } from 'lucide-react';
 import { Button } from './Button';
 import { UserStats, TargetGender } from '../types';
 import { generateUserBio } from '../services/geminiService';
@@ -201,14 +201,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
             <div className="flex justify-end mb-4">
-                <div
-                    onClick={onOpenStore}
-                    className="px-3 py-1 bg-slate-800 rounded-full border border-slate-700 flex items-center gap-2 cursor-pointer hover:bg-slate-700"
+                <button
+                    onClick={onOpenPremium}
+                    className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full border border-indigo-400/50 flex items-center gap-2 cursor-pointer hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] animate-pulse"
                 >
-                    <Coins size={14} className="text-yellow-500" />
-                    <span className="text-xs font-bold text-white">{userStats.coins}</span>
-                    <Plus size={12} className="text-slate-400" />
-                </div>
+                    <Sparkles size={14} className="text-white" />
+                    <span className="text-xs font-bold text-white">AI Analýza</span>
+                </button>
             </div>
 
             {/* Header */}
@@ -586,9 +585,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
             </div>
 
-            <div className="text-center mt-6 text-xs text-slate-600">
-                Notch App v{import.meta.env.PACKAGE_VERSION} • Vytvořeno v Praze.
-            </div>
+
         </div>
     );
 };
