@@ -194,12 +194,21 @@ const App: React.FC = () => {
             if (isOnboardingNeeded) setShowOnboarding(true);
           } else if (event === 'TOKEN_REFRESHED') {
             console.log('[Auth] Token refreshed successfully - connection maintained');
+            // Don't reload data on token refresh - just maintain existing state
           }
 
           setDataLoadError(null);
         } catch (error: any) {
           console.error('Error loading user data in auth listener:', error);
-          setDataLoadError(`Nepodařilo se načíst data (4 pokusy po 30s). Zkontroluj připojení`);
+
+          // FALLBACK: If we already have user stats (from previous load), keep using them
+          if (userStats.username && userStats.username !== 'Lovce') {
+            console.warn('[App] Data load failed but using cached userStats');
+            setDataLoadError(null); // Don't show error if we have cached data
+          } else {
+            // Only show error if we have no data at all
+            setDataLoadError(`Nepodařilo se načíst data. Zkus to znovu.`);
+          }
         }
       }
 
