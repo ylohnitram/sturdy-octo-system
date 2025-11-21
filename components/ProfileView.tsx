@@ -587,7 +587,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             <div className="text-center mt-6 text-xs text-slate-600">
-                Notch App v1.0 • Vytvořeno v Praze.
+                Notch App v{import.meta.env.PACKAGE_VERSION} • Vytvořeno v Praze.
             </div>
         </div>
     );
