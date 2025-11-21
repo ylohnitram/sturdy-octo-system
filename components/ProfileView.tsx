@@ -209,7 +209,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
             <div className="flex justify-end mb-4">
                 <button
-                    onClick={onOpenPremium}
+                    onClick={handleAiBio}
                     className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full border border-indigo-400/50 flex items-center gap-2 cursor-pointer hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] animate-pulse"
                 >
                     <Sparkles size={14} className="text-white" />
