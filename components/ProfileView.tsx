@@ -79,7 +79,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         const shareData = {
             title: 'Pozvánka do Notch',
             text: `Čau, mám volný vstup do Notch (ta nová appka). Použij můj VIP kód: ${userStats.inviteCode}. Platí to jen chvíli. 🤫`,
-            url: 'https://notch.cz'
+            url: `https://notch.cz?invite=${userStats.inviteCode}`
         };
 
         if (navigator.share) {

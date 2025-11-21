@@ -29,7 +29,7 @@ export const validateInviteCode = async (code: string): Promise<boolean> => {
     const { data: userData } = await supabase
       .from('user_stats')
       .select('user_id, invites_left')
-      .eq('invite_code', normalizedCode)
+      .ilike('invite_code', normalizedCode)
       .gt('invites_left', 0)
       .single();
 
@@ -47,7 +47,7 @@ export const validateInviteCode = async (code: string): Promise<boolean> => {
 
 export const joinWaitlist = async (email: string): Promise<boolean> => {
   console.log(`Odesílám ${email} na waitlist...`);
-  
+
   try {
     const response = await fetch('https://notch-waitlist.mholy1983.workers.dev/', {
       method: 'POST',
