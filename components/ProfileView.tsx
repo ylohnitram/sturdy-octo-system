@@ -195,7 +195,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     };
 
     const handleLogout = async () => {
-        localStorage.removeItem('notch_current_view');
         localStorage.removeItem('notch_verified');
         await supabase.auth.signOut();
     };
