@@ -242,10 +242,12 @@ const App: React.FC = () => {
   const deactivatePanic = () => setIsPanicMode(false);
 
   const consumeAiCredit = (): boolean => {
+    alert(`TIER: ${userStats.tier}, CREDITS: ${userStats.aiCredits}`);
     console.log('[consumeAiCredit] Checking tier:', userStats.tier, 'Credits:', userStats.aiCredits);
     // GOLD users have unlimited AI credits
     if (userStats.tier === 'PREMIUM') {
       console.log('[consumeAiCredit] PREMIUM user - allowing unlimited AI');
+      alert('PREMIUM USER - ALLOWING!');
       return true;
     }
 
@@ -258,6 +260,7 @@ const App: React.FC = () => {
 
     // No credits and not premium - show upgrade modal
     console.log('[consumeAiCredit] No credits and not premium - showing modal');
+    alert('NO PREMIUM - SHOWING MODAL');
     openPremium();
     return false;
   };
