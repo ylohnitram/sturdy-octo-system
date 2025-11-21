@@ -22,29 +22,7 @@ import { Footer } from './components/Footer';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
-// ... (rest of imports)
 
-// ... (inside App component return)
-
-          <Header 
-            userStats={userStats} 
-            avatarUrl={userAvatar}
-            onOpenStore={openStore}
-            onOpenPremium={openPremium}
-            onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
-            notificationsEnabled={true} // TODO: Load from user profile
-          />
-
-          <main className="h-screen overflow-hidden relative pt-16 pb-8">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
-            <div className="relative z-10 h-full">
-              {renderView()}
-            </div>
-          </main>
-          
-          <Footer />
-        </>
-      )}
 
 // Default stats before loading real data
 const INITIAL_STATS: UserStats = {
@@ -309,9 +287,10 @@ const App: React.FC = () => {
             onOpenStore={openStore}
             onOpenPremium={openPremium}
             onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
+            notificationsEnabled={true}
           />
 
-          <main className="h-screen overflow-hidden relative pt-16">
+          <main className="h-screen overflow-hidden relative pt-16 pb-8">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
             <div className="relative z-10 h-full">
               {renderView()}
@@ -322,6 +301,7 @@ const App: React.FC = () => {
 
           <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
           <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
+          <Footer />
         </>
       )}
     </div>
