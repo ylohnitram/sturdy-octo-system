@@ -56,6 +56,38 @@ const App: React.FC = () => {
 
   // Check for existing Supabase session on mount & Listen for changes
   useEffect(() => {
+    // 0. Check and clear cache if version changed
+    const checkCacheVersion = async () => {
+      const currentVersion = import.meta.env.PACKAGE_VERSION;
+      const storedVersion = localStorage.getItem('notch_app_version');
+
+      if (storedVersion && storedVersion !== currentVersion) {
+        console.log(`[Cache] Version changed from ${storedVersion} to ${currentVersion}. Clearing cache...`);
+
+        // Clear all caches
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('[Cache] All caches cleared');
+        }
+
+        // Clear localStorage except auth
+        const authKeys = ['sb-', 'supabase.auth.token'];
+        Object.keys(localStorage).forEach(key => {
+          if (!authKeys.some(authKey => key.startsWith(authKey))) {
+            localStorage.removeItem(key);
+          }
+        });
+
+        console.log('[Cache] localStorage cleaned');
+      }
+
+      // Store current version
+      localStorage.setItem('notch_app_version', currentVersion);
+    };
+
+    checkCacheVersion();
+
     // 1. Check Invite Persistence
     const verified = localStorage.getItem('notch_verified');
     if (verified === 'true') {
@@ -172,10 +204,18 @@ const App: React.FC = () => {
   const deactivatePanic = () => setIsPanicMode(false);
 
   const consumeAiCredit = (): boolean => {
+    // GOLD users have unlimited AI credits
+    if (userStats.tier === 'PREMIUM') {
+      return true;
+    }
+
+    // Free users need to have credits
     if (userStats.aiCredits > 0) {
       setUserStats(prev => ({ ...prev, aiCredits: prev.aiCredits - 1 }));
       return true;
     }
+
+    // No credits and not premium - show upgrade modal
     openPremium();
     return false;
   };
@@ -232,7 +272,7 @@ const App: React.FC = () => {
       case AppView.GALLERY:
         return <GalleryView />;
       case AppView.ANALYTICS:
-        return <StatsView onOpenPremium={openPremium} />;
+        return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}
