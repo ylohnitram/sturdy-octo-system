@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
           type: 'module'
         },
         manifest: {
+          version: process.env.npm_package_version,
           name: 'Notch',
           short_name: 'Notch',
           description: 'Notch - Moderní dating aplikace pro odvážné lovce',
