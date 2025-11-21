@@ -43,7 +43,10 @@ const App: React.FC = () => {
   const [hasValidInvite, setHasValidInvite] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [landingMessage, setLandingMessage] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>(AppView.DISCOVERY);
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    const savedView = localStorage.getItem('notch_current_view');
+    return savedView ? (savedView as AppView) : AppView.DISCOVERY;
+  });
 
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
@@ -155,6 +158,13 @@ const App: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Save current view to localStorage whenever it changes
+  useEffect(() => {
+    if (session) {
+      localStorage.setItem('notch_current_view', currentView);
+    }
+  }, [currentView, session]);
 
   // Monetization & Features Logic
   const openPremium = () => setIsPremiumModalOpen(true);
