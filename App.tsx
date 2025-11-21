@@ -62,12 +62,35 @@ const App: React.FC = () => {
       setHasValidInvite(true);
     }
 
+    // Helper function to load user data with retry
+    const loadUserDataWithRetry = async (userId: string, retries = 2): Promise<any> => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const timeout = 15000; // 15 seconds
+          const dataTimeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout')), timeout)
+          );
+
+          const userDataPromise = fetchUserData(userId);
+          const result = await Promise.race([userDataPromise, dataTimeout]);
+          return result; // Success
+        } catch (error: any) {
+          if (attempt < retries) {
+            console.log(`Retry ${attempt + 1}/${retries} loading user data...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+          } else {
+            throw error; // Final attempt failed
+          }
+        }
+      }
+    };
+
     // 2. Check Session
     const initSession = async () => {
       try {
         // Safety timeout to prevent infinite loading
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+          setTimeout(() => reject(new Error('Session check timeout')), 10000)
         );
 
         const sessionPromise = supabase.auth.getSession();
@@ -77,14 +100,9 @@ const App: React.FC = () => {
 
         setSession(session);
         if (session) {
-          // Load real data immediately if logged in with timeout protection
+          // Load real data with retry logic
           try {
-            const dataTimeout = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('User data fetch timeout')), 5000)
-            );
-
-            const userDataPromise = fetchUserData(session.user.id);
-            const { stats, profile, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+            const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
 
             if (stats) setUserStats(stats);
             if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
@@ -96,8 +114,8 @@ const App: React.FC = () => {
             if (isOnboardingNeeded) setShowOnboarding(true);
             setDataLoadError(null); // Clear any previous errors
           } catch (userDataError: any) {
-            console.error('Error loading user data:', userDataError);
-            setDataLoadError(userDataError.message || 'Chyba načítání dat');
+            console.error('Error loading user data after retries:', userDataError);
+            setDataLoadError('Problém s připojením k databázi');
           }
         }
       } catch (error) {
@@ -117,12 +135,7 @@ const App: React.FC = () => {
       setSession(session);
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         try {
-          const dataTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('User data fetch timeout in auth listener')), 5000)
-          );
-
-          const userDataPromise = fetchUserData(session.user.id);
-          const { stats, profile, restored, isOnboardingNeeded } = await Promise.race([userDataPromise, dataTimeout]) as any;
+          const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
 
           if (stats) setUserStats(stats);
           if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
@@ -135,7 +148,7 @@ const App: React.FC = () => {
           setDataLoadError(null);
         } catch (error: any) {
           console.error('Error loading user data in auth listener:', error);
-          setDataLoadError(error.message || 'Chyba načítání dat');
+          setDataLoadError('Problém s připojením k databázi');
         }
       }
     });
