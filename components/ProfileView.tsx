@@ -95,7 +95,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     };
 
     const handleAiBio = async () => {
-        if (!onConsumeAi()) return;
+        console.log('[ProfileView] handleAiBio called, userStats:', userStats);
+        const result = onConsumeAi();
+        console.log('[ProfileView] onConsumeAi returned:', result);
+        if (!result) {
+            console.log('[ProfileView] AI credit check failed - opening premium modal');
+            return;
+        }
 
         setGeneratingBio(true);
         const newBio = await generateUserBio('Drzý', ['Party', 'Fitness', 'Cestování']);
