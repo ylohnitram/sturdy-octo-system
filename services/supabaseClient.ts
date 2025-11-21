@@ -33,6 +33,18 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true
+    },
+    global: {
+      headers: {
+        'x-client-info': 'notch-pwa'
+      }
+    },
+    db: {
+      schema: 'public'
+    },
+    // Increase timeout to 60 seconds for slow connections
+    realtime: {
+      timeout: 60000
     }
   }
 );

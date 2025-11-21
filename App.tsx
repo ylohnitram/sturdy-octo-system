@@ -105,8 +105,10 @@ const App: React.FC = () => {
           );
 
           const userDataPromise = fetchUserData(userId);
-          const result = await Promise.race([userDataPromise, dataTimeout]);
+          const result = await Promise.race([userDataPromise, dataTimeout]) as any;
           console.log('[Data Load] Success!', result);
+          console.log('[Data Load] Stats tier:', result?.stats?.tier);
+          console.log('[Data Load] Profile tier:', result?.profile?.tier);
           return result; // Success
         } catch (error: any) {
           console.error(`[Data Load] Attempt ${attempt + 1} failed:`, error.message);
@@ -169,24 +171,43 @@ const App: React.FC = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Auth] Event:', event, 'Session:', !!session);
       setSession(session);
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+
+      // Handle sign in, initial session, and token refresh
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
         try {
-          const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
+          // Only reload data on sign in and initial session, not on token refresh
+          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
 
-          if (stats) setUserStats(stats);
-          if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
+            if (stats) {
+              console.log('[App] Setting userStats with tier:', stats.tier);
+              setUserStats(stats);
+            }
+            if (profile?.avatarUrl) setUserAvatar(profile.avatarUrl);
 
-          if (restored) {
-            setShowRestoreNotification(true);
-            setTimeout(() => setShowRestoreNotification(false), 5000);
+            if (restored) {
+              setShowRestoreNotification(true);
+              setTimeout(() => setShowRestoreNotification(false), 5000);
+            }
+            if (isOnboardingNeeded) setShowOnboarding(true);
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('[Auth] Token refreshed successfully - connection maintained');
           }
-          if (isOnboardingNeeded) setShowOnboarding(true);
+
           setDataLoadError(null);
         } catch (error: any) {
           console.error('Error loading user data in auth listener:', error);
           setDataLoadError(`Nepodařilo se načíst data (4 pokusy po 30s). Zkontroluj připojení`);
         }
+      }
+
+      // Handle sign out
+      if (event === 'SIGNED_OUT') {
+        console.log('[Auth] User signed out - clearing data');
+        setUserStats(INITIAL_STATS);
+        setUserAvatar('');
       }
     });
 
@@ -204,18 +225,22 @@ const App: React.FC = () => {
   const deactivatePanic = () => setIsPanicMode(false);
 
   const consumeAiCredit = (): boolean => {
+    console.log('[consumeAiCredit] Checking tier:', userStats.tier, 'Credits:', userStats.aiCredits);
     // GOLD users have unlimited AI credits
     if (userStats.tier === 'PREMIUM') {
+      console.log('[consumeAiCredit] PREMIUM user - allowing unlimited AI');
       return true;
     }
 
     // Free users need to have credits
     if (userStats.aiCredits > 0) {
+      console.log('[consumeAiCredit] Free user with credits - consuming 1');
       setUserStats(prev => ({ ...prev, aiCredits: prev.aiCredits - 1 }));
       return true;
     }
 
     // No credits and not premium - show upgrade modal
+    console.log('[consumeAiCredit] No credits and not premium - showing modal');
     openPremium();
     return false;
   };
