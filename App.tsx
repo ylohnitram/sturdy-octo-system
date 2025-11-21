@@ -98,17 +98,17 @@ const App: React.FC = () => {
     }
 
     // Helper function to load user data with retry logic
-    const loadUserDataWithRetry = async (userId: string, maxRetries = 1): Promise<any> => {
-      const totalAttempts = maxRetries + 1; // 1 initial + retries
+    const loadUserDataWithRetry = async (userId: string, maxRetries = 3): Promise<any> => {
+      const totalAttempts = maxRetries + 1; // 1 initial + 3 retries = 4 total
 
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           console.log(`[Data Load] Attempt ${attempt + 1}/${totalAttempts} for user ${userId.substring(0, 8)}...`);
 
-          // Increased timeout: 15 seconds per attempt (was 10s) to handle Supabase cold starts
-          const timeout = 15000;
+          // Timeout: 5 seconds per attempt - if Supabase is slower, it's a cold start issue
+          const timeout = 5000;
           const dataTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout po 15s')), timeout)
+            setTimeout(() => reject(new Error('Timeout po 5s')), timeout)
           );
 
           const userDataPromise = fetchUserData(userId);
