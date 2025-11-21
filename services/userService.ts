@@ -59,13 +59,18 @@ export const checkUsernameAvailability = async (username: string): Promise<boole
 
 export const fetchUserData = async (userId: string): Promise<{ profile: UserProfile | null, stats: UserStats | null, restored?: boolean, isOnboardingNeeded?: boolean }> => {
     try {
+        const startTime = performance.now();
         let restored = false;
 
         // PARALLEL QUERIES - Load both profile and stats at the same time
+        console.log('[fetchUserData] Starting parallel queries...');
+        const queryStart = performance.now();
         const [profileResult, statsResult] = await Promise.all([
             supabase.from('profiles').select('*').eq('id', userId).single(),
             supabase.from('user_stats').select('*').eq('user_id', userId).single()
         ]);
+        const queryTime = performance.now() - queryStart;
+        console.log(`[fetchUserData] Queries completed in ${queryTime.toFixed(0)}ms`);
 
         const { data: profileData, error: profileError } = profileResult;
         const { data: statsData, error: statsError } = statsResult;
