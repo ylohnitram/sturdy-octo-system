@@ -12,6 +12,7 @@ import { GalleryView } from './components/GalleryView';
 import { PremiumModal } from './components/PremiumModal';
 import { StoreModal } from './components/StoreModal';
 import { CamoMode } from './components/CamoMode';
+import { ReloadPrompt } from './components/ReloadPrompt';
 import { LandingPage } from './components/LandingPage';
 import { AuthView } from './components/AuthView';
 import { CookieConsent } from './components/CookieConsent';
@@ -230,6 +231,7 @@ const App: React.FC = () => {
       {/* GLOBAL OVERLAYS (Panic, Cookies, Wizard, Notifications) */}
       <CamoMode isActive={isPanicMode} onDeactivate={deactivatePanic} />
       <CookieConsent />
+      <ReloadPrompt />
       <NotificationManager userId={session?.user?.id || null} />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}
 
