@@ -63,22 +63,27 @@ const App: React.FC = () => {
     }
 
     // Helper function to load user data with retry
-    const loadUserDataWithRetry = async (userId: string, retries = 2): Promise<any> => {
+    const loadUserDataWithRetry = async (userId: string, retries = 3): Promise<any> => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const timeout = 15000; // 15 seconds
+          console.log(`[Data Load] Attempt ${attempt + 1}/${retries + 1} for user ${userId.substring(0, 8)}...`);
+          const timeout = 30000; // 30 seconds per attempt
           const dataTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), timeout)
+            setTimeout(() => reject(new Error('Timeout po 30s')), timeout)
           );
 
           const userDataPromise = fetchUserData(userId);
           const result = await Promise.race([userDataPromise, dataTimeout]);
+          console.log('[Data Load] Success!', result);
           return result; // Success
         } catch (error: any) {
+          console.error(`[Data Load] Attempt ${attempt + 1} failed:`, error.message);
           if (attempt < retries) {
-            console.log(`Retry ${attempt + 1}/${retries} loading user data...`);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+            const waitTime = (attempt + 1) * 2000; // Progressive backoff: 2s, 4s, 6s
+            console.log(`[Data Load] Waiting ${waitTime}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
           } else {
+            console.error('[Data Load] All attempts failed!');
             throw error; // Final attempt failed
           }
         }
@@ -115,7 +120,7 @@ const App: React.FC = () => {
             setDataLoadError(null); // Clear any previous errors
           } catch (userDataError: any) {
             console.error('Error loading user data after retries:', userDataError);
-            setDataLoadError('Problém s připojením k databázi');
+            setDataLoadError(`Nepodařilo se načíst data (4 pokusy po 30s). Zkontroluj připojení`);
           }
         }
       } catch (error) {
@@ -148,7 +153,7 @@ const App: React.FC = () => {
           setDataLoadError(null);
         } catch (error: any) {
           console.error('Error loading user data in auth listener:', error);
-          setDataLoadError('Problém s připojením k databázi');
+          setDataLoadError(`Nepodařilo se načíst data (4 pokusy po 30s). Zkontroluj připojení`);
         }
       }
     });
