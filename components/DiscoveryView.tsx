@@ -3,16 +3,18 @@ import { Heart, X, MapPin, Zap, Target, Map, Users, Rocket, RefreshCw, Radar } f
 import { UserProfile, UserTier, UserStats, Hotspot } from '../types';
 import { Button } from './Button';
 import { generateIcebreaker } from '../services/geminiService';
-import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots } from '../services/userService';
+import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
+import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 
 interface DiscoveryViewProps {
     userStats: UserStats;
     onConsumeAi: () => boolean;
     onConsumeCoins: (amount: number) => boolean;
+    onOpenPremium: () => void;
 }
 
-export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsumeAi, onConsumeCoins }) => {
+export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsumeAi, onConsumeCoins, onOpenPremium }) => {
     const [viewMode, setViewMode] = useState<'swipe' | 'radar'>('swipe');
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
     const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -22,6 +24,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
     const [isBoostActive, setIsBoostActive] = useState(false);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
     const [userLocation, setUserLocation] = useState<{ lat: number, long: number } | null>(null);
+    const [dailyLikes, setDailyLikes] = useState(0);
 
     // Radius State
     const [radius, setRadius] = useState(10);
@@ -36,6 +39,10 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
             // Update radius from profile
             const { profile } = await fetchUserData(user.id);
             if (profile && profile.radarRadius) setRadius(profile.radarRadius);
+
+            // Load daily likes count
+            const likesCount = await getDailyLikeCount(user.id);
+            setDailyLikes(likesCount);
 
             // Trigger Proximity Check Simulation (Simulates finding users near you)
             if (candidates.length > 0) {

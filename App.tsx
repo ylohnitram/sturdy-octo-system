@@ -288,6 +288,7 @@ const App: React.FC = () => {
           userStats={userStats}
           onConsumeAi={consumeAiCredit}
           onConsumeCoins={consumeCoins}
+          onOpenPremium={openPremium}
         />;
       case AppView.LEADERBOARD:
         return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;

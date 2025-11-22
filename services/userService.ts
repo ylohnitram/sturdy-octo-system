@@ -584,3 +584,20 @@ export const unlockGalleryImage = async (imageId: string): Promise<boolean> => {
         return false;
     }
 };
+export const getDailyLikeCount = async (userId: string): Promise<number> => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { count, error } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('from_user_id', userId)
+        .gte('created_at', today.toISOString());
+
+    if (error) {
+        console.error('Error counting daily likes:', error);
+        return 0;
+    }
+
+    return count || 0;
+};
