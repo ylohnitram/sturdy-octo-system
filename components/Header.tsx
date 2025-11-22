@@ -48,27 +48,41 @@ export const Header: React.FC<HeaderProps> = ({
                         {userStats.tier === 'PREMIUM' ? 'Premium Member' : 'Free Plan'}
                     </div>
                 </div>
-                    />
-                {/* Notification Badge - Only show if > 0 */}
-                {hasNotifications && (
-                    <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-                        <span className="text-[8px] font-bold text-white">{userStats.notificationCount}</span>
-                    </div>
-                )}
-            </button>
+            </div>
 
-            {/* Coins Display */}
-            <button
-                onClick={onOpenStore}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
-            >
-                <Coins size={14} className="text-yellow-500" />
-                <span className="text-xs font-bold text-white">{userStats.coins}</span>
-                <div className="bg-slate-700 rounded-full p-0.5">
-                    <Plus size={10} className="text-slate-400" />
-                </div>
-            </button>
+            {/* Right: Notifications & Coins */}
+            <div className="flex items-center gap-2">
+                {/* Notifications Bell - Dim when no notifications, bright when there are */}
+                <button
+                    onClick={onOpenNotifications}
+                    className="relative p-2 hover:bg-slate-800 rounded-full transition-colors"
+                >
+                    <Bell
+                        size={20}
+                        className={`transition-colors ${hasNotifications
+                                ? 'text-yellow-500'
+                                : 'text-slate-600'
+                            }`}
+                    />
+                    {hasNotifications && (
+                        <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                            <span className="text-[8px] font-bold text-white">{userStats.notificationCount}</span>
+                        </div>
+                    )}
+                </button>
+
+                {/* Coins Display */}
+                <button
+                    onClick={onOpenStore}
+                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
+                >
+                    <Coins size={14} className="text-yellow-500" />
+                    <span className="text-xs font-bold text-white">{userStats.coins}</span>
+                    <div className="bg-slate-700 rounded-full p-0.5">
+                        <Plus size={10} className="text-slate-400" />
+                    </div>
+                </button>
+            </div>
         </div>
-        </div >
     );
 };
