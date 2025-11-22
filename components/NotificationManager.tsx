@@ -60,10 +60,10 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
     useEffect(() => {
         const handleProximityEvent = () => {
             if (settings.proximity) {
-                 // 1 in 3 chance to show "Target Nearby" when triggered
-                 if (Math.random() > 0.6) {
-                     showToast('proximity', 'V okolí se objevila lovná zvěř! 🎯');
-                 }
+                // 1 in 3 chance to show "Target Nearby" when triggered
+                if (Math.random() > 0.6) {
+                    showToast('proximity', 'V okolí se objevila kořist! 🎯');
+                }
             }
         };
 
@@ -84,10 +84,9 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
     return (
         <div className="fixed top-4 left-4 right-4 z-[1000] animate-in slide-in-from-top duration-300">
             <div className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    notification.type === 'like' ? 'bg-red-600' : 'bg-yellow-500'
-                }`}>
-                    {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white"/> : <MapPin size={20} className="text-black" />}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' : 'bg-yellow-500'
+                    }`}>
+                    {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white" /> : <MapPin size={20} className="text-black" />}
                 </div>
                 <div className="flex-grow">
                     <div className="font-bold text-white text-sm">

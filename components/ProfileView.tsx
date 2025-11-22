@@ -467,7 +467,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     {showNotifs && (
                         <div className="p-4 bg-slate-900/50 border-t border-slate-700 space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm text-slate-300">Upozornit na lovnou zvěř (Radar)</span>
+                                <span className="text-sm text-slate-300">Upozornit na kořist (Radar)</span>
                                 <div
                                     onClick={() => toggleNotification('proximity')}
                                     className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${notifyProximity ? 'bg-red-600' : 'bg-slate-700'}`}

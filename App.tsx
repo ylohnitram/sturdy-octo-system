@@ -53,6 +53,7 @@ const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>('');
+  const [notificationCount, setNotificationCount] = useState(0);
 
   // Flag to prevent duplicate data loading
   const dataLoadedRef = useRef(false);

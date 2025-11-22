@@ -43,7 +43,15 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
                         <span>{userStats.tier === 'PREMIUM' ? 'Premium Member' : 'Free Plan'}</span>
-                        {notificationsEnabled && <Bell size={10} className="text-slate-500" />}
+                        {notificationsEnabled && (
+                            <div className="relative">
+                                <Bell size={10} className="text-slate-500" />
+                                {/* Notification Badge */}
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                                    <span className="text-[6px] font-bold text-white">3</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
