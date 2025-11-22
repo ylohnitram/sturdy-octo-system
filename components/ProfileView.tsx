@@ -207,16 +207,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
-            <div className="flex justify-end mb-4">
-                <button
-                    onClick={handleAiBio}
-                    className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full border border-indigo-400/50 flex items-center gap-2 cursor-pointer hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] animate-pulse"
-                >
-                    <Sparkles size={14} className="text-white" />
-                    <span className="text-xs font-bold text-white">AI Analýza</span>
-                </button>
-            </div>
-
             {/* Header */}
             <div className="flex flex-col items-center mb-6">
                 {loading ? (
@@ -421,7 +411,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     </div>
                     <div className="flex-grow">
                         <div className="font-bold text-white">Notch Gold</div>
-                        <div className="text-xs text-slate-400">Získej neomezené swipy a insighty</div>
+                        <div className="text-xs text-slate-400">Získej neomezené swipy a přehledy</div>
                     </div>
                 </div>
 
