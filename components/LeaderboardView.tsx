@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import { Trophy, Users, Globe, TrendingUp, Shield, Lock, Search, UserPlus, Check, X as XIcon } from 'lucide-react';
-import { UserStats, LeaderboardEntry, UserTier, RivalRequest } from '../types';
+import { Trophy, UserPlus, Check, X as XIcon } from 'lucide-react';
+import { UserStats, LeaderboardEntry, RivalRequest } from '../types';
 import { fetchLeaderboard, fetchRivalsLeaderboard, sendRivalRequest, fetchPendingRivalRequests, respondToRivalRequest } from '../services/userService';
 
 interface LeaderboardViewProps {
@@ -21,113 +20,144 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
   const [requestMessage, setRequestMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
   const loadData = async () => {
-
-    {/* Tabs */ }
-    <div className="bg-slate-800 p-1 rounded-xl flex mb-6">
-      {(['global', 'weekly', 'friends'] as const).map((t) => (
-        <button
-          key={t}
-          onClick={() => setFilter(t)}
-          className={`flex - 1 py - 2 rounded - lg text - sm font - bold transition - all ${filter === t
-              ? 'bg-slate-700 text-white shadow-lg'
-              : 'text-slate-500 hover:text-slate-300'
-            } `}
-        >
-          {t === 'global' ? 'Globální' : t === 'weekly' ? 'Týdenní' : 'Přátelé'}
-        </button>
-      ))}
-    </div>
-
-    {/* Top 3 Podium */ }
-    {
-      topThree.length > 0 ? (
-        <div className="flex items-end justify-center gap-4 mb-8 px-4">
-          {/* 2nd Place */}
-          {topThree[1] && (
-            <div className="flex flex-col items-center w-1/3">
-              <div className="relative w-16 h-16 rounded-full border-4 border-slate-600 overflow-hidden mb-2 shadow-lg">
-                <img src={topThree[1].user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                <div className="absolute bottom-0 right-0 bg-slate-600 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">2</div>
-              </div>
-              <div className="text-sm font-bold text-slate-300 truncate w-full text-center">{topThree[1].user.name}</div>
-              <div className="text-xs font-black text-red-500">{topThree[1].score}</div>
-              <div className="h-16 w-full bg-slate-800 rounded-t-lg mt-2 opacity-80"></div>
-            </div>
-          )}
-
-          {/* 1st Place */}
-          {topThree[0] && (
-            <div className="flex flex-col items-center w-1/3 z-10 -mt-4">
-              <Crown className="text-yellow-500 mb-1 animate-bounce" size={24} fill="currentColor" />
-              <div className="relative w-20 h-20 rounded-full border-4 border-yellow-500 overflow-hidden mb-2 shadow-xl shadow-yellow-500/20">
-                <img src={topThree[0].user.avatarUrl} alt="" className="w-full h-full object-cover" />
-              </div>
-              <div className="text-base font-bold text-white truncate w-full text-center">{topThree[0].user.name}</div>
-              <div className="text-sm font-black text-yellow-500">{topThree[0].score}</div>
-              <div className="h-24 w-full bg-gradient-to-b from-slate-700 to-slate-800 rounded-t-lg mt-2 relative overflow-hidden">
-                <div className="absolute inset-0 bg-yellow-500/10"></div>
-              </div>
-            </div>
-          )}
-
-          {/* 3rd Place */}
-          {topThree[2] && (
-            <div className="flex flex-col items-center w-1/3">
-              <div className="relative w-16 h-16 rounded-full border-4 border-orange-700 overflow-hidden mb-2 shadow-lg">
-                <img src={topThree[2].user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                <div className="absolute bottom-0 right-0 bg-orange-700 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full">3</div>
-              </div>
-              <div className="text-sm font-bold text-slate-300 truncate w-full text-center">{topThree[2].user.name}</div>
-              <div className="text-xs font-black text-red-500">{topThree[2].score}</div>
-              <div className="h-12 w-full bg-slate-800 rounded-t-lg mt-2 opacity-80"></div>
-            </div>
-          )}
-        </div>
-      ) : (
-      <div className="text-center text-slate-500 py-10">Zatím žádná data.</div>
-    )
+    setLoading(true);
+    if (filter === 'rivals') {
+      const data = await fetchRivalsLeaderboard();
+      setLeaderboardData(data);
+      const requests = await fetchPendingRivalRequests();
+      setRivalRequests(requests);
+    } else {
+      const data = await fetchLeaderboard();
+      setLeaderboardData(data);
     }
+    setLoading(false);
+  };
 
-    {/* List */ }
-    <div className="flex-grow overflow-y-auto no-scrollbar space-y-2">
-      {rest.map((entry) => (
-        <div key={entry.rank} className="flex items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-          <div className="w-8 text-center font-bold text-slate-500">{entry.rank}</div>
-          <img src={entry.user.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover mx-3" />
-          <div className="flex-grow">
-            <div className="font-bold text-slate-200">{entry.user.name}</div>
-            <div className="text-xs text-slate-500">{entry.user.age} let • {entry.user.distanceKm}km</div>
-          </div>
-          <div className="flex flex-col items-end">
-            <div className="text-lg font-black text-red-500">{entry.score}</div>
-            <div className="flex items-center text-[10px] text-slate-400">
-              {entry.trend === 'up' && <TrendingUp size={12} className="text-green-500 mr-1" />}
-              {entry.trend === 'down' && <TrendingDown size={12} className="text-red-500 mr-1" />}
-              {entry.trend === 'same' && <Minus size={12} className="text-slate-500 mr-1" />}
-            </div>
-          </div>
+  useEffect(() => {
+    loadData();
+  }, [filter]);
+
+  const handleSendRequest = async () => {
+    if (!rivalUsername.trim()) return;
+    const result = await sendRivalRequest(rivalUsername);
+    setRequestMessage({ text: result.message, type: result.success ? 'success' : 'error' });
+    if (result.success) setRivalUsername('');
+    setTimeout(() => setRequestMessage(null), 3000);
+  };
+
+  const handleRespond = async (id: string, accept: boolean) => {
+    await respondToRivalRequest(id, accept);
+    loadData();
+  };
+
+  return (
+    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-white uppercase tracking-tighter italic">
+            Žebříček <span className="text-yellow-500">Lovců</span>
+          </h1>
+          <p className="text-xs text-slate-400 font-medium">Porovnej své skóre s ostatními</p>
         </div>
-      ))}
+        <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
+          <Trophy className="text-yellow-500" size={24} />
+        </div>
+      </div>
 
-      {/* Locked Content Teaser - Only show for free users */}
-      {userStats.tier !== 'PREMIUM' && (
-        <div
-          onClick={onOpenPremium}
-          className="mt-4 p-4 rounded-xl bg-gradient-to-r from-red-900/20 to-orange-900/20 border border-red-500/20 flex items-center justify-between cursor-pointer hover:bg-red-900/30 transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-900 rounded-full">
-              <Lock size={20} className="text-yellow-500" />
+      <div className="flex bg-slate-800/50 p-1 rounded-xl mb-6 backdrop-blur-sm border border-slate-700/50">
+        {(['global', 'weekly', 'rivals'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setFilter(t)}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${filter === t
+              ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-900/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              }`}
+          >
+            {t === 'global' && 'Globální'}
+            {t === 'weekly' && 'Tento Týden'}
+            {t === 'rivals' && 'Rivalové'}
+          </button>
+        ))}
+      </div>
+
+      {filter === 'rivals' && (
+        <div className="mb-6">
+          <button
+            onClick={() => setShowAddRival(!showAddRival)}
+            className="w-full py-3 bg-slate-800 rounded-xl border border-slate-700 text-slate-300 font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors mb-4"
+          >
+            <UserPlus size={18} /> {showAddRival ? 'Zavřít' : 'Vyzvat Rivala'}
+          </button>
+
+          {showAddRival && (
+            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-4">
+              <h3 className="text-white font-bold mb-2 text-sm">Najít Rivala</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Zadej username..."
+                  value={rivalUsername}
+                  onChange={(e) => setRivalUsername(e.target.value)}
+                  className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500"
+                />
+                <button
+                  onClick={handleSendRequest}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700"
+                >
+                  Vyzvat
+                </button>
+              </div>
+              {requestMessage && (
+                <p className={`text-xs mt-2 ${requestMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                  {requestMessage.text}
+                </p>
+              )}
             </div>
-            <div>
-              <div className="font-bold text-sm text-slate-200">Odemkni TOP 100 regionu</div>
-              <div className="text-xs text-slate-400">Získej přístup k celému žebříčku</div>
+          )}
+
+          {rivalRequests.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Čekající výzvy</h3>
+              <div className="space-y-2">
+                {rivalRequests.map(req => (
+                  <div key={req.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <img src={req.requester.avatarUrl || 'https://picsum.photos/200'} className="w-8 h-8 rounded-full object-cover" />
+                      <span className="text-white font-bold text-sm">{req.requester.username}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleRespond(req.id, true)} className="p-1.5 bg-green-500/20 text-green-500 rounded-lg hover:bg-green-500/30"><Check size={16} /></button>
+                      <button onClick={() => handleRespond(req.id, false)} className="p-1.5 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30"><XIcon size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          <ChevronRight size={20} className="text-slate-500" />
+          )}
         </div>
       )}
+
+      <div className="space-y-2">
+        {loading ? (
+          <div className="text-center text-slate-500 py-10">Načítání...</div>
+        ) : leaderboardData.length === 0 ? (
+          <div className="text-center text-slate-500 py-10">
+            {filter === 'rivals' ? 'Zatím nemáš žádné rivaly. Vyzvi někoho!' : 'Zatím žádná data.'}
+          </div>
+        ) : (
+          leaderboardData.map((entry, index) => (
+            <div key={entry.id} className="flex items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+              <div className="w-8 text-center font-bold text-slate-500">#{index + 1}</div>
+              <img src={entry.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover mx-3" />
+              <div className="flex-grow">
+                <div className="font-bold text-slate-200">{entry.name}</div>
+              </div>
+              <div className="text-lg font-black text-red-500">{entry.score}</div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
-    </div >
   );
 };

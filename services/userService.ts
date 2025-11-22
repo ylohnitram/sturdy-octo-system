@@ -601,3 +601,112 @@ export const getDailyLikeCount = async (userId: string): Promise<number> => {
 
     return count || 0;
 };
+
+// --- RIVALS FUNCTIONS ---
+
+export const sendRivalRequest = async (targetUsername: string): Promise<{ success: boolean, message: string }> => {
+    try {
+        const { data: users, error: searchError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('username', targetUsername)
+            .single();
+
+        if (searchError || !users) return { success: false, message: 'Uživatel nenalezen.' };
+
+        const targetUserId = users.id;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { success: false, message: 'Nejste přihlášen.' };
+        if (user.id === targetUserId) return { success: false, message: 'Nemůžete vyzvat sami sebe.' };
+
+        const { error: insertError } = await supabase
+            .from('rivals')
+            .insert({ requester_id: user.id, recipient_id: targetUserId });
+
+        if (insertError) {
+            if (insertError.code === '23505') return { success: false, message: 'Výzva již byla odeslána.' };
+            throw insertError;
+        }
+
+        return { success: true, message: 'Výzva odeslána!' };
+    } catch (e) {
+        console.error('Error sending rival request:', e);
+        return { success: false, message: 'Chyba při odesílání.' };
+    }
+};
+
+export const fetchPendingRivalRequests = async (): Promise<RivalRequest[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+        .from('rivals')
+        .select(`
+            id,
+            status,
+            created_at,
+            requester:profiles!requester_id (id, username, avatar_url)
+        `)
+        .eq('recipient_id', user.id)
+        .eq('status', 'pending');
+
+    if (error) {
+        console.error('Error fetching rival requests:', error);
+        return [];
+    }
+
+    return data.map((r: any) => ({
+        id: r.id,
+        requester: {
+            id: r.requester.id,
+            username: r.requester.username,
+            avatarUrl: r.requester.avatar_url
+        },
+        status: r.status,
+        createdAt: r.created_at
+    }));
+};
+
+export const respondToRivalRequest = async (requestId: string, accept: boolean): Promise<boolean> => {
+    if (accept) {
+        const { error } = await supabase
+            .from('rivals')
+            .update({ status: 'accepted' })
+            .eq('id', requestId);
+        return !error;
+    } else {
+        const { error } = await supabase
+            .from('rivals')
+            .delete()
+            .eq('id', requestId);
+        return !error;
+    }
+};
+
+export const fetchRivalsLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase.rpc('get_rivals_leaderboard', { user_id: user.id });
+
+    if (error) {
+        console.error('Error fetching rivals leaderboard:', error);
+        return [];
+    }
+
+    return (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.username || 'Neznámý',
+        score: item.body_count,
+        avatarUrl: item.avatar_url,
+        change: 0,
+        stats: {
+            bodyCount: item.body_count,
+            weeklyScore: item.weekly_score || 0,
+            matches: 0, avgPartnerAge: 0, preferredType: '', streakDays: 0, aiCredits: 0, coins: 0, inviteCode: '', invitesAvailable: 0
+        },
+        tier: item.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+        isOnline: false,
+        distanceKm: 0
+    })).sort((a: any, b: any) => b.score - a.score);
+};
