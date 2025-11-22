@@ -18,6 +18,7 @@ import { CookieConsent } from './components/CookieConsent';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { NotificationManager } from './components/NotificationManager';
 import { Header } from './components/Header';
+import { NotificationsPanel } from './components/NotificationsPanel';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -54,6 +55,7 @@ const App: React.FC = () => {
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>('');
   const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Flag to prevent duplicate data loading
   const dataLoadedRef = useRef(false);
@@ -327,6 +329,15 @@ const App: React.FC = () => {
       <ReloadPrompt />
       <NotificationManager userId={session?.user?.id || null} />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}
+
+      {/* Notifications Panel */}
+      {session && showNotifications && (
+        <NotificationsPanel
+          userId={session.user.id}
+          onClose={() => setShowNotifications(false)}
+          onNotificationCountChange={(count) => setUserStats(prev => ({ ...prev, notificationCount: count }))}
+        />
+      )}
 
       {/* 2. Not Logged In Flow */}
       {!session ? (
