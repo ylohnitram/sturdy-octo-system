@@ -16,8 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
     avatarUrl,
     onOpenStore,
     onNavigateProfile,
-    onOpenNotifications,
-    notificationsEnabled
+    onOpenNotifications
 }) => {
     return (
         <div className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 h-16 flex items-center justify-between max-w-md mx-auto">
@@ -51,32 +50,13 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Right: Notifications & Coins */}
             <div className="flex items-center gap-2">
-                {/* Notifications Bell */}
-                {notificationsEnabled && onOpenNotifications && (
-                    <button
-                        onClick={onOpenNotifications}
-                        className="relative p-2 hover:bg-slate-800 rounded-full transition-colors"
-                    >
-                        <Bell size={20} className="text-slate-400" />
-                        {/* Notification Badge */}
-                        <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-[8px] font-bold text-white">3</span>
-                        </div>
-                    </button>
-                )}
-
-                {/* Coins Display */}
-                <button
-                    onClick={onOpenStore}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
-                >
-                    <Coins size={14} className="text-yellow-500" />
-                    <span className="text-xs font-bold text-white">{userStats.coins}</span>
-                    <div className="bg-slate-700 rounded-full p-0.5">
-                        <Plus size={10} className="text-slate-400" />
-                    </div>
-                </button>
-            </div>
+                <Coins size={14} className="text-yellow-500" />
+                <span className="text-xs font-bold text-white">{userStats.coins}</span>
+                <div className="bg-slate-700 rounded-full p-0.5">
+                    <Plus size={10} className="text-slate-400" />
+                </div>
+            </button>
         </div>
+        </div >
     );
 };

@@ -710,3 +710,20 @@ export const fetchRivalsLeaderboard = async (): Promise<LeaderboardEntry[]> => {
         distanceKm: 0
     })).sort((a: any, b: any) => b.score - a.score);
 };
+
+// --- NOTIFICATIONS FUNCTIONS ---
+
+export const getUnreadNotificationsCount = async (userId: string): Promise<number> => {
+    const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .is('read_at', null);
+
+    if (error) {
+        console.error('Error counting unread notifications:', error);
+        return 0;
+    }
+
+    return count || 0;
+};

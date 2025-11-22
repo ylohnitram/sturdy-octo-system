@@ -44,6 +44,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     // Notification Settings
     const [notifyProximity, setNotifyProximity] = useState(true);
     const [notifyLikes, setNotifyLikes] = useState(true);
+    const [notifyRivals, setNotifyRivals] = useState(true);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -170,7 +171,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         }
     };
 
-    const toggleNotification = async (type: 'proximity' | 'likes') => {
+    const toggleNotification = async (type: 'proximity' | 'likes' | 'rivals') => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
@@ -178,10 +179,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             const newVal = !notifyProximity;
             setNotifyProximity(newVal);
             await updateNotificationSettings(user.id, { notifyProximity: newVal });
-        } else {
+        } else if (type === 'likes') {
             const newVal = !notifyLikes;
             setNotifyLikes(newVal);
             await updateNotificationSettings(user.id, { notifyLikes: newVal });
+        } else if (type === 'rivals') {
+            const newVal = !notifyRivals;
+            setNotifyRivals(newVal);
+            await updateNotificationSettings(user.id, { notifyRivals: newVal });
         }
     };
 
@@ -482,6 +487,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                                     className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${notifyLikes ? 'bg-red-600' : 'bg-slate-700'}`}
                                 >
                                     <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${notifyLikes ? 'left-6' : 'left-1'}`}></div>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-slate-300">Upozornit na výzvy rivalů</span>
+                                <div
+                                    onClick={() => toggleNotification('rivals')}
+                                    className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${notifyRivals ? 'bg-red-600' : 'bg-slate-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${notifyRivals ? 'left-6' : 'left-1'}`}></div>
                                 </div>
                             </div>
                         </div>
