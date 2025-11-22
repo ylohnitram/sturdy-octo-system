@@ -1,70 +1,26 @@
-
+```typescript
 import React, { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Lock, Share2, Coins, Loader2, ChevronRight } from 'lucide-react';
-import { LeaderboardEntry, UserTier, UserStats } from '../types';
-import { fetchLeaderboard } from '../services/userService';
+import { Trophy, Users, Globe, TrendingUp, Shield, Lock, Search, UserPlus, Check, X as XIcon } from 'lucide-react';
+import { UserStats, LeaderboardEntry, UserTier, RivalRequest } from '../types';
+import { fetchLeaderboard, fetchRivalsLeaderboard, sendRivalRequest, fetchPendingRivalRequests, respondToRivalRequest } from '../services/userService';
 
 interface LeaderboardViewProps {
-  userStats: UserStats;
-  onOpenPremium: () => void;
+    userStats: UserStats;
+    onOpenPremium: () => void;
 }
 
 export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onOpenPremium }) => {
-  const [filter, setFilter] = useState<'global' | 'weekly' | 'friends'>('global');
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<'global' | 'weekly' | 'rivals'>('global');
+    const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    // Rivals State
+    const [showAddRival, setShowAddRival] = useState(false);
+    const [rivalUsername, setRivalUsername] = useState('');
+    const [rivalRequests, setRivalRequests] = useState<RivalRequest[]>([]);
+    const [requestMessage, setRequestMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      const data = await fetchLeaderboard();
-      setLeaderboardData(data);
-      setLoading(false);
-    };
-    loadData();
-  }, []);
-
-  const handleShareLeaderboard = async () => {
-    const shareData = {
-      title: 'Notch Leaderboard',
-      text: 'Podívej se na největší lovce ve městě na aplikaci Notch! 🏆',
-      url: window.location.href
-    };
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (e) { }
-    } else {
-      alert('Odkaz zkopírován!');
-    }
-  };
-
-  const topThree = leaderboardData.slice(0, 3);
-  const rest = leaderboardData.slice(3);
-
-  if (loading) {
-    return <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-red-500" /></div>;
-  }
-
-  return (
-    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto">
-      <div className="mb-6 flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 uppercase tracking-tighter">
-            Top Lovci
-          </h1>
-          <p className="text-slate-400 text-sm">Notch Žebříček</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1 bg-slate-800 rounded-full text-yellow-500 font-bold text-xs flex items-center gap-1 border border-slate-700">
-            <Coins size={12} /> {userStats.coins}
-          </div>
-          <button
-            onClick={handleShareLeaderboard}
-            className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-          >
-            <Share2 size={20} />
-          </button>
-        </div>
-      </div>
 
       {/* Tabs */}
       <div className="bg-slate-800 p-1 rounded-xl flex mb-6">
@@ -72,10 +28,11 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
           <button
             key={t}
             onClick={() => setFilter(t)}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${filter === t
-              ? 'bg-slate-700 text-white shadow-lg'
-              : 'text-slate-500 hover:text-slate-300'
-              }`}
+            className={`flex - 1 py - 2 rounded - lg text - sm font - bold transition - all ${
+  filter === t
+  ? 'bg-slate-700 text-white shadow-lg'
+  : 'text-slate-500 hover:text-slate-300'
+} `}
           >
             {t === 'global' ? 'Globální' : t === 'weekly' ? 'Týdenní' : 'Přátelé'}
           </button>

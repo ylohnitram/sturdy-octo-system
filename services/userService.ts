@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender, Hotspot } from '../types';
+import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender, Hotspot, RivalRequest } from '../types';
 
 const RESTRICTED_KEYWORDS = [
     'admin',

@@ -5,6 +5,17 @@ export enum UserTier {
   VIP = 'VIP'
 }
 
+export interface RivalRequest {
+  id: string;
+  requester: {
+    id: string;
+    username: string;
+    avatarUrl: string;
+  };
+  status: 'pending' | 'accepted';
+  createdAt: string;
+}
+
 export type Gender = 'male' | 'female';
 export type TargetGender = 'men' | 'women' | 'both';
 
