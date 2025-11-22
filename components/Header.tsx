@@ -7,6 +7,7 @@ interface HeaderProps {
     avatarUrl?: string;
     onOpenStore: () => void;
     onNavigateProfile: () => void;
+    onOpenNotifications?: () => void;
     notificationsEnabled?: boolean;
 }
 
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
     avatarUrl,
     onOpenStore,
     onNavigateProfile,
+    onOpenNotifications,
     notificationsEnabled
 }) => {
     return (
@@ -41,32 +43,40 @@ export const Header: React.FC<HeaderProps> = ({
                             <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-1 rounded font-bold">GOLD</span>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
-                        <span>{userStats.tier === 'PREMIUM' ? 'Premium Member' : 'Free Plan'}</span>
-                        {notificationsEnabled && (
-                            <div className="relative">
-                                <Bell size={10} className="text-slate-500" />
-                                {/* Notification Badge */}
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                                    <span className="text-[6px] font-bold text-white">3</span>
-                                </div>
-                            </div>
-                        )}
+                    <div className="text-[10px] text-slate-400 font-medium">
+                        {userStats.tier === 'PREMIUM' ? 'Premium Member' : 'Free Plan'}
                     </div>
                 </div>
             </div>
 
-            {/* Right: Coins Display */}
-            <button
-                onClick={onOpenStore}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
-            >
-                <Coins size={14} className="text-yellow-500" />
-                <span className="text-xs font-bold text-white">{userStats.coins}</span>
-                <div className="bg-slate-700 rounded-full p-0.5">
-                    <Plus size={10} className="text-slate-400" />
-                </div>
-            </button>
+            {/* Right: Notifications & Coins */}
+            <div className="flex items-center gap-2">
+                {/* Notifications Bell */}
+                {notificationsEnabled && onOpenNotifications && (
+                    <button
+                        onClick={onOpenNotifications}
+                        className="relative p-2 hover:bg-slate-800 rounded-full transition-colors"
+                    >
+                        <Bell size={20} className="text-slate-400" />
+                        {/* Notification Badge */}
+                        <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-[8px] font-bold text-white">3</span>
+                        </div>
+                    </button>
+                )}
+
+                {/* Coins Display */}
+                <button
+                    onClick={onOpenStore}
+                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
+                >
+                    <Coins size={14} className="text-yellow-500" />
+                    <span className="text-xs font-bold text-white">{userStats.coins}</span>
+                    <div className="bg-slate-700 rounded-full p-0.5">
+                        <Plus size={10} className="text-slate-400" />
+                    </div>
+                </button>
+            </div>
         </div>
     );
 };
