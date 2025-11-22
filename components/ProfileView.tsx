@@ -206,7 +206,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
+        <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
             {/* Header */}
             <div className="flex flex-col items-center mb-6">
                 {loading ? (
@@ -548,39 +548,44 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
                 {/* Danger Zone */}
                 <div className="pt-8 pb-4">
-                    {!showDeleteConfirm ? (
-                        <button
-                            onClick={() => setShowDeleteConfirm(true)}
-                            className="w-full text-xs text-red-900 hover:text-red-500 transition-colors flex items-center justify-center gap-1 font-bold"
-                        >
-                            <Trash2 size={12} /> Smazat účet
-                        </button>
-                    ) : (
-                        <div className="bg-red-900/10 border border-red-900/30 rounded-xl p-4 text-center animate-in zoom-in">
-                            <div className="flex justify-center mb-2 text-red-500">
-                                <AlertTriangle size={24} />
-                            </div>
-                            <h4 className="text-red-500 font-bold mb-2">Opravdu odejít?</h4>
-                            <p className="text-xs text-red-400/70 mb-4 leading-relaxed">
-                                Tvůj účet bude deaktivován a skryt. Definitivně se smaže po <strong>14 dnech</strong> neaktivity. Pokud se během té doby přihlásíš, smazání se zruší.
-                            </p>
-                            <div className="flex gap-2">
-                                <Button variant="secondary" size="sm" fullWidth onClick={() => setShowDeleteConfirm(false)}>
-                                    Zrušit
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    fullWidth
-                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                    onClick={handleDeleteAccount}
-                                >
-                                    Potvrdit smazání
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="w-full text-xs text-red-900 hover:text-red-500 transition-colors flex items-center justify-center gap-1 font-bold"
+                    >
+                        <Trash2 size={12} /> Smazat účet
+                    </button>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal - Fixed Overlay */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-slate-900 w-full max-w-sm rounded-2xl border border-red-900/30 shadow-2xl animate-in zoom-in-95">
+                        <div className="bg-red-900/10 p-6 text-center">
+                            <div className="flex justify-center mb-3 text-red-500">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <h4 className="text-red-500 font-bold text-lg mb-2">Opravdu odejít?</h4>
+                            <p className="text-xs text-red-400/70 leading-relaxed">
+                                Tvůj účet bude deaktivován a skryt. Definitivně se smaže po <strong>14 dnech</strong> neaktivity. Pokud se během té doby přihlásíš, smazání se zruší.
+                            </p>
+                        </div>
+                        <div className="p-4 flex gap-2">
+                            <Button variant="secondary" size="sm" fullWidth onClick={() => setShowDeleteConfirm(false)}>
+                                Zrušit
+                            </Button>
+                            <Button
+                                size="sm"
+                                fullWidth
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                                onClick={handleDeleteAccount}
+                            >
+                                Potvrdit smazání
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
 
         </div>

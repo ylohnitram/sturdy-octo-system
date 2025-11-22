@@ -60,7 +60,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ userStats, onOpenPremium }
   const avgAge = statsData?.avgAge || '0';
 
   return (
-    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
+    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Tvoje Statistiky</h1>
         <p className="text-slate-400 text-sm">Analýza tvého lovu (z Deníku)</p>

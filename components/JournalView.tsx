@@ -86,11 +86,11 @@ export const JournalView: React.FC = () => {
     const handleSaveEntry = async () => {
         if (!newName) return;
         setSaving(true);
-        
+
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             const tagsArray = newTags.split(',').map(t => t.trim()).filter(t => t.length > 0);
-            
+
             const { error } = await supabase.from('journal_entries').insert({
                 user_id: user.id,
                 name: newName,
@@ -124,25 +124,25 @@ export const JournalView: React.FC = () => {
 
     // Stats Calculation
     const totalEntries = entries.length;
-    const avgRating = totalEntries > 0 
-        ? (entries.reduce((acc, curr) => acc + curr.rating, 0) / totalEntries).toFixed(1) 
+    const avgRating = totalEntries > 0
+        ? (entries.reduce((acc, curr) => acc + curr.rating, 0) / totalEntries).toFixed(1)
         : '-';
-    
-    const daysSinceLast = entries.length > 0 
+
+    const daysSinceLast = entries.length > 0
         ? Math.floor((new Date().getTime() - new Date(entries[0].date).getTime()) / (1000 * 3600 * 24)) + 'd'
         : '-';
 
     return (
-        <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
+        <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                        Černá Kniha <Lock size={16} className="text-slate-500"/>
+                        Černá Kniha <Lock size={16} className="text-slate-500" />
                     </h1>
                     <p className="text-slate-400 text-sm">Tvůj soukromý seznam úlovků</p>
                 </div>
-                <Button 
-                    size="sm" 
+                <Button
+                    size="sm"
                     onClick={() => setIsAddModalOpen(true)}
                     className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full w-10 h-10 !p-0 flex items-center justify-center shadow-lg shadow-red-900/20"
                 >
@@ -153,8 +153,8 @@ export const JournalView: React.FC = () => {
             {/* Search */}
             <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     placeholder="Hledat podle jména nebo tagu..."
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500"
                     value={searchTerm}
@@ -181,8 +181,8 @@ export const JournalView: React.FC = () => {
             {/* Loading State */}
             {loading && (
                 <div className="text-center py-10">
-                     <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                     <p className="text-slate-500 text-sm">Načítám deník...</p>
+                    <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-500 text-sm">Načítám deník...</p>
                 </div>
             )}
 
@@ -199,7 +199,7 @@ export const JournalView: React.FC = () => {
             <div className="space-y-4 pb-20">
                 {entries.filter(e => e.name.toLowerCase().includes(searchTerm.toLowerCase()) || e.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))).map((entry) => (
                     <div key={entry.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 relative group hover:border-red-500/50 transition-colors">
-                        
+
                         <div className="flex items-start gap-4">
                             <div className="relative">
                                 <img src={entry.avatarUrl} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 bg-slate-700" />
@@ -212,18 +212,18 @@ export const JournalView: React.FC = () => {
                             <div className="flex-grow">
                                 <div className="flex justify-between items-start pr-2">
                                     <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                                        {entry.name} 
+                                        {entry.name}
                                     </h3>
                                     <span className="text-xs text-slate-500 font-mono">{entry.date}</span>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1 mb-2">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star 
-                                            key={i} 
-                                            size={14} 
+                                        <Star
+                                            key={i}
+                                            size={14}
                                             fill={i < entry.rating ? 'currentColor' : 'none'}
-                                            className={`${i < entry.rating ? 'text-yellow-500' : 'text-slate-600'}`} 
+                                            className={`${i < entry.rating ? 'text-yellow-500' : 'text-slate-600'}`}
                                         />
                                     ))}
                                     {entry.partnerAge && <span className="text-xs text-slate-500 ml-2">• {entry.partnerAge} let</span>}
@@ -258,9 +258,9 @@ export const JournalView: React.FC = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-                            
+
                             {/* NAME INPUT WITH LINKING */}
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1 flex justify-between">
@@ -279,25 +279,25 @@ export const JournalView: React.FC = () => {
                                 {showLinkSearch && !linkedProfile ? (
                                     <div className="mb-2 animate-in fade-in slide-in-from-top-2">
                                         <div className="relative">
-                                            <input 
+                                            <input
                                                 autoFocus
-                                                type="text" 
+                                                type="text"
                                                 className="w-full bg-slate-800 border border-red-500/50 rounded-xl p-2 pl-9 text-sm text-white focus:outline-none"
                                                 placeholder="Hledat uživatele Notch..."
                                                 value={linkQuery}
                                                 onChange={e => setLinkQuery(e.target.value)}
                                             />
-                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                         </div>
                                         {linkResults.length > 0 && (
                                             <div className="mt-1 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden max-h-32 overflow-y-auto">
                                                 {linkResults.map(user => (
-                                                    <div 
-                                                        key={user.id} 
+                                                    <div
+                                                        key={user.id}
                                                         className="flex items-center gap-2 p-2 hover:bg-slate-700 cursor-pointer"
                                                         onClick={() => handleSelectProfile(user)}
                                                     >
-                                                        <img src={user.avatarUrl} className="w-6 h-6 rounded-full" alt=""/>
+                                                        <img src={user.avatarUrl} className="w-6 h-6 rounded-full" alt="" />
                                                         <span className="text-sm text-white">{user.name}</span>
                                                     </div>
                                                 ))}
@@ -307,8 +307,8 @@ export const JournalView: React.FC = () => {
                                 ) : null}
 
                                 <div className="relative">
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         className={`w-full bg-slate-950 border rounded-xl p-3 text-white focus:outline-none ${linkedProfile ? 'border-blue-500 pl-10' : 'border-slate-700 focus:border-red-500'}`}
                                         value={newName}
                                         onChange={e => setNewName(e.target.value)}
@@ -324,8 +324,8 @@ export const JournalView: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Datum</label>
-                                    <input 
-                                        type="date" 
+                                    <input
+                                        type="date"
                                         className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
                                         value={newDate}
                                         onChange={e => setNewDate(e.target.value)}
@@ -333,8 +333,8 @@ export const JournalView: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Věk (volitelné)</label>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
                                         value={newAge}
                                         onChange={e => setNewAge(e.target.value)}
@@ -347,7 +347,7 @@ export const JournalView: React.FC = () => {
                                 <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Hodnocení</label>
                                 <div className="flex gap-2 justify-center bg-slate-950 p-3 rounded-xl border border-slate-700">
                                     {[1, 2, 3, 4, 5].map(r => (
-                                        <button 
+                                        <button
                                             key={r}
                                             onClick={() => setNewRating(r)}
                                             className={`p-2 rounded-full transition-all ${r <= newRating ? 'text-yellow-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
@@ -360,8 +360,8 @@ export const JournalView: React.FC = () => {
 
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tagy (odděl čárkou)</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
                                     value={newTags}
                                     onChange={e => setNewTags(e.target.value)}
@@ -371,7 +371,7 @@ export const JournalView: React.FC = () => {
 
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Poznámky</label>
-                                <textarea 
+                                <textarea
                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none h-24 resize-none"
                                     value={newNotes}
                                     onChange={e => setNewNotes(e.target.value)}

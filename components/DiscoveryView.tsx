@@ -133,7 +133,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
     };
 
     return (
-        <div className="h-full flex flex-col max-w-md mx-auto pt-4 pb-20 px-4">
+        <div className="h-full flex flex-col max-w-md mx-auto pt-4 pb-20 px-4 overflow-hidden">
             {/* Top Toggle */}
             <div className="flex justify-between items-center mb-4">
                 <div className="bg-slate-800 p-1 rounded-xl flex">

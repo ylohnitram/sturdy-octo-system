@@ -51,7 +51,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
   };
 
   return (
-    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar">
+    <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-black text-white uppercase tracking-tighter italic">
