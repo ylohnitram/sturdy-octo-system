@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
     const showSkeleton = isLoading || !userStats.username;
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 flex items-center justify-between max-w-md mx-auto pt-safe py-3">
+        <div className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 flex items-center justify-between max-w-md mx-auto pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3">
             {/* Left: Profile */}
             <div
                 onClick={showSkeleton ? undefined : onNavigateProfile}

@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.10 (2025-11-23)
+- **[FIX] iOS UI:** Opraveno překrývání hlavičky systémovými prvky (čas, baterie) a zvednuto tlačítko pro potvrzení v Deníku, aby nebylo schované pod ovládacími prvky.
+
 ### 2.13.9 (2025-11-23)
 - **[FIX] PWA Standards:** Přidán standardní meta tag `mobile-web-app-capable` pro lepší kompatibilitu s moderními prohlížeči a odstranění varování v konzoli.
 
