@@ -4,6 +4,12 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.8 (2025-11-23)
+- **[PERF] Startup Speed:** Další optimalizace startu aplikace. Odstraněny konflikty mezi čištěním cache a načítáním dat, což zajišťuje bleskové načtení profilu bez zbytečného čekání.
+
+### 2.13.7 (2025-11-23)
+- **[PERF] Data Loading Optimization:** Vylepšena logika načítání dat při startu aplikace. Odstraněny zbytečné pokusy o stažení dat, které způsobovaly timeouty na pomalejších připojeních. Aplikace nyní inteligentně čeká na správný signál od databáze.
+
 ### 2.13.6 (2025-11-23)
 - **[UX] Profile Skeleton:** Pokud se profilová data ještě načítají, zobrazuje se v profilu skeleton místo fallback textu "Lovce", což sjednocuje vzhled s hlavičkou.
 

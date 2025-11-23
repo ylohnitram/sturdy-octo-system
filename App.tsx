@@ -64,11 +64,14 @@ const App: React.FC = () => {
 
   // Flag to prevent duplicate data loading
   const dataLoadedRef = useRef(false);
+  const signedInTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for existing Supabase session on mount & Listen for changes
   useEffect(() => {
-    // 0. Check and clear cache if version changed
-    const checkCacheVersion = async () => {
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    const initApp = async () => {
+      // 0. Check and clear cache if version changed
       const currentVersion = import.meta.env.PACKAGE_VERSION;
       const storedVersion = localStorage.getItem('notch_app_version');
 
@@ -77,13 +80,17 @@ const App: React.FC = () => {
 
         // Clear all caches
         if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('[Cache] All caches cleared');
+          try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+            console.log('[Cache] All caches cleared');
+          } catch (e) {
+            console.error('[Cache] Error clearing cache:', e);
+          }
         }
 
         // Clear localStorage except auth
-        const authKeys = ['sb-', 'supabase.auth.token'];
+        const authKeys = ['sb-', 'supabase.auth.token', 'notch_verified']; // Keep verified status too!
         Object.keys(localStorage).forEach(key => {
           if (!authKeys.some(authKey => key.startsWith(authKey))) {
             localStorage.removeItem(key);
@@ -95,83 +102,24 @@ const App: React.FC = () => {
 
       // Store current version
       localStorage.setItem('notch_app_version', currentVersion);
-    };
 
-    checkCacheVersion();
-
-    // 1. Check Invite Persistence
-    const verified = localStorage.getItem('notch_verified');
-    if (verified === 'true') {
-      setHasValidInvite(true);
-    }
-
-    // Helper function to load user data with retry logic
-    const loadUserDataWithRetry = async (userId: string, maxRetries = 3): Promise<any> => {
-      const totalAttempts = maxRetries + 1; // 1 initial + 3 retries = 4 total
-
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          console.log(`[Data Load] Attempt ${attempt + 1}/${totalAttempts} for user ${userId.substring(0, 8)}...`);
-
-          // Timeout: 5 seconds per attempt - if Supabase is slower, it's a cold start issue
-          const timeout = 5000;
-          const dataTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout po 5s')), timeout)
-          );
-
-          const userDataPromise = fetchUserData(userId);
-          const result = await Promise.race([userDataPromise, dataTimeout]) as any;
-          console.log('[Data Load] Success!', result);
-          console.log('[Data Load] Stats tier:', result?.stats?.tier);
-          console.log('[Data Load] Profile tier:', result?.profile?.tier);
-          return result; // Success
-        } catch (error: any) {
-          console.error(`[Data Load] Attempt ${attempt + 1} failed:`, error.message);
-
-          if (attempt < maxRetries) {
-            // Progressive backoff: 1s, 2s
-            const waitTime = (attempt + 1) * 1000;
-            console.log(`[Data Load] Waiting ${waitTime}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-          } else {
-            console.error('[Data Load] All attempts failed!');
-            throw error; // Final attempt failed
-          }
-        }
+      // 1. Check Invite Persistence
+      const verified = localStorage.getItem('notch_verified');
+      if (verified === 'true') {
+        setHasValidInvite(true);
       }
-    };
 
-    // 2. Check Session (data loading handled by onAuthStateChange)
-    const initSession = async () => {
-      try {
-        // Just check session, don't load data (onAuthStateChange will handle that)
-        const { data: { session } } = await supabase.auth.getSession();
+      // 2. Initialize Auth Listener (AFTER cache check)
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('[Auth] Event:', event, 'Session:', !!session);
         setSession(session);
-        console.log('[initSession] Session checked, data loading will be handled by onAuthStateChange');
-      } catch (error) {
-        console.error('Session initialization error:', error);
-        setSession(null);
-      } finally {
-        setLoadingSession(false);
-      }
-    };
 
-    initSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[Auth] Event:', event, 'Session:', !!session);
-      setSession(session);
-
-      // Handle sign in, initial session, and token refresh
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
-        try {
-          // Load data on INITIAL_SESSION or SIGNED_IN (if not loaded yet)
-          if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && !dataLoadedRef.current) {
-            dataLoadedRef.current = true; // Mark as loading/loaded
-            console.log(`[Auth] Loading data for event: ${event}`);
-            const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
+        // Shared data loading function
+        const performDataLoad = async (uid: string) => {
+          try {
+            dataLoadedRef.current = true;
+            console.log(`[Auth] Starting data load...`);
+            const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(uid);
 
             if (stats) {
               console.log('[App] Setting userStats with tier:', stats.tier);
@@ -184,37 +132,117 @@ const App: React.FC = () => {
               setTimeout(() => setShowRestoreNotification(false), 5000);
             }
             if (isOnboardingNeeded) setShowOnboarding(true);
+            setDataLoadError(null);
+          } catch (error: any) {
+            console.error('Error loading user data:', error);
+            if (userStats.username && userStats.username !== 'Lovce') {
+              console.warn('[App] Data load failed but using cached userStats');
+              setDataLoadError(null);
+            } else {
+              setDataLoadError(`Nepodařilo se načíst data. Zkus to znovu.`);
+            }
+            dataLoadedRef.current = false;
+          }
+        };
+
+        // Handle sign in, initial session, and token refresh
+        if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+
+          if (event === 'INITIAL_SESSION') {
+            // Priority 1: INITIAL_SESSION
+            if (signedInTimeoutRef.current) {
+              clearTimeout(signedInTimeoutRef.current);
+              signedInTimeoutRef.current = null;
+            }
+
+            if (!dataLoadedRef.current) {
+              console.log('[Auth] INITIAL_SESSION triggered data load.');
+              await performDataLoad(session.user.id);
+            }
+
+          } else if (event === 'SIGNED_IN') {
+            // Priority 2: SIGNED_IN (Short delay to prefer INITIAL_SESSION)
+            if (!dataLoadedRef.current) {
+              console.log('[Auth] SIGNED_IN detected. Waiting 500ms for potential INITIAL_SESSION...');
+
+              if (signedInTimeoutRef.current) clearTimeout(signedInTimeoutRef.current);
+
+              signedInTimeoutRef.current = setTimeout(async () => {
+                if (!dataLoadedRef.current) {
+                  console.log('[Auth] No INITIAL_SESSION arrived. Executing SIGNED_IN fallback load.');
+                  await performDataLoad(session.user.id);
+                }
+              }, 500); // Short 500ms delay is enough
+            }
+
           } else if (event === 'TOKEN_REFRESHED') {
-            console.log('[Auth] Token refreshed successfully - connection maintained');
-            // Don't reload data on token refresh - just maintain existing state
+            console.log('[Auth] Token refreshed successfully');
           }
+        }
 
-          setDataLoadError(null);
+        // Handle sign out
+        if (event === 'SIGNED_OUT') {
+          console.log('[Auth] User signed out - clearing data');
+          setUserStats(INITIAL_STATS);
+          setUserAvatar('');
+          dataLoadedRef.current = false;
+          if (signedInTimeoutRef.current) {
+            clearTimeout(signedInTimeoutRef.current);
+            signedInTimeoutRef.current = null;
+          }
+        }
+      });
+
+      subscription = data.subscription;
+
+      // 3. Check Session (initial check)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (error) {
+        console.error('Session initialization error:', error);
+        setSession(null);
+      } finally {
+        setLoadingSession(false);
+      }
+    };
+
+    // Helper function to load user data with retry logic
+    const loadUserDataWithRetry = async (userId: string, maxRetries = 2): Promise<any> => { // Reduced retries
+      const totalAttempts = maxRetries + 1;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`[Data Load] Attempt ${attempt + 1}/${totalAttempts}...`);
+
+          // Timeout: 5 seconds (Standard)
+          const timeout = 5000;
+          const dataTimeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout po 5s')), timeout)
+          );
+
+          const userDataPromise = fetchUserData(userId);
+          const result = await Promise.race([userDataPromise, dataTimeout]) as any;
+          console.log('[Data Load] Success!');
+          return result;
         } catch (error: any) {
-          console.error('Error loading user data in auth listener:', error);
+          console.error(`[Data Load] Attempt ${attempt + 1} failed:`, error.message);
 
-          // FALLBACK: If we already have user stats (from previous load), keep using them
-          if (userStats.username && userStats.username !== 'Lovce') {
-            console.warn('[App] Data load failed but using cached userStats');
-            setDataLoadError(null); // Don't show error if we have cached data
+          if (attempt < maxRetries) {
+            const waitTime = 500; // Faster retry (500ms)
+            await new Promise(resolve => setTimeout(resolve, waitTime));
           } else {
-            // Only show error if we have no data at all
-            setDataLoadError(`Nepodařilo se načíst data. Zkus to znovu.`);
+            throw error;
           }
-          dataLoadedRef.current = false; // Allow retry
         }
       }
+    };
 
-      // Handle sign out
-      if (event === 'SIGNED_OUT') {
-        console.log('[Auth] User signed out - clearing data');
-        setUserStats(INITIAL_STATS);
-        setUserAvatar('');
-        dataLoadedRef.current = false; // Reset load flag
-      }
-    });
+    initApp();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
   }, []);
 
   // Monetization & Features Logic
