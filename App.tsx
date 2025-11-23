@@ -329,6 +329,7 @@ const App: React.FC = () => {
       <CookieConsent />
       <ReloadPrompt />
       <NotificationManager userId={session?.user?.id || null} />
+      <PWAInstallPrompt />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}
 
       {/* Notifications Panel */}
