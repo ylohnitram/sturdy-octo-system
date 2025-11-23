@@ -371,6 +371,7 @@ const App: React.FC = () => {
             targetUserId={selectedUserId}
             onBack={() => setCurrentView(AppView.DISCOVERY)}
             onConsumeCoins={consumeCoins}
+            userStats={userStats}
           />
         ) : <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
       default:

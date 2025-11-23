@@ -565,21 +565,54 @@ export const fetchUserGallery = async (userId: string): Promise<GalleryImage[]> 
 
 export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryImage[]> => {
     try {
-        const { data, error } = await supabase
+        const { data: { user } } = await supabase.auth.getUser();
+        const viewerId = user?.id;
+
+        // Fetch all gallery images
+        const { data: images, error: imagesError } = await supabase
             .from('gallery_images')
             .select('*')
             .eq('user_id', targetUserId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: true }); // ASC for proper indexing
 
-        if (error) throw error;
+        if (imagesError) throw imagesError;
 
-        // TODO: Fetch unlocks from a table if it exists
-        // For now, private images are locked by default for non-owners
-        return data.map((img: any) => ({
+        // If not logged in, show all as locked
+        if (!viewerId) {
+            return images.map((img: any) => ({
+                id: img.id,
+                imageUrl: img.image_url,
+                isPrivate: img.is_private,
+                isUnlocked: !img.is_private,
+                createdAt: img.created_at
+            }));
+        }
+
+        // Fetch user's unlocked images (image-level)
+        const { data: unlocks, error: unlocksError } = await supabase
+            .from('gallery_image_unlocks')
+            .select('image_id, unlock_type, expires_at')
+            .eq('viewer_id', viewerId);
+
+        if (unlocksError) throw unlocksError;
+
+        // Create map of unlocked image IDs
+        const unlockedMap = new Map<string, boolean>();
+        (unlocks || []).forEach((unlock: any) => {
+            // Check if still valid
+            if (unlock.unlock_type === 'permanent') {
+                unlockedMap.set(unlock.image_id, true);
+            } else if (unlock.expires_at && new Date(unlock.expires_at) > new Date()) {
+                unlockedMap.set(unlock.image_id, true);
+            }
+        });
+
+        // Map images with unlock status
+        return images.map((img: any) => ({
             id: img.id,
             imageUrl: img.image_url,
             isPrivate: img.is_private,
-            isUnlocked: !img.is_private, // Public are unlocked, Private are locked
+            isUnlocked: !img.is_private || unlockedMap.has(img.id),
             createdAt: img.created_at
         }));
     } catch (e) {

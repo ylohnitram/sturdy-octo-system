@@ -4,6 +4,27 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.21 (2025-11-24)
+- **[MONETIZATION] Image-Level Unlocks:** Odemykání konkrétních fotek podle ID.
+- **[FEATURE] Locked by ID:** Pokud vlastník smaže fotku, uživatel ji ztratí (motivace k renewal).
+- **[FEATURE] Permanent Top 5:** Prvních 5 fotek je permanent, zbytek subscription.
+- **[BACKEND] gallery_image_unlocks:** Nová tabulka pro granulární tracking.
+- **[REVENUE] Optimalizováno pro max získ:** Každá změna galerie = důvod k renewal.
+
+### 2.13.20 (2025-11-24)
+- **[FEATURE] Gallery Subscription:** Galerie s 6+ privátními fotkami vyžadují předplatné (30 dní).
+- **[FEATURE] Permanent Unlock:** Galerie s 1-5 privátními fotkami = permanent unlock.
+- **[FEATURE] Subscription Renewal:** Obnovení předplatného za 5 kreditů (50% sleva).
+- **[UX] Smart Unlock Dialog:** Dialog automaticky rozpozná typ unlocku a zobrazí správné info.
+- **[BACKEND] Expiration System:** Tracking expirace předplatných v databázi.
+
+### 2.13.19 (2025-11-24)
+- **[FEATURE] Gallery Unlock System:** Platí se za celou galerii (10 kreditů), ne po fotce.
+- **[FEATURE] Revenue Share:** 30% kreditů jde vlastníkovi galerie.
+- **[FEATURE] Premium Benefits:** Premium uživatelé vidí všechny privátní galerie zdarma.
+- **[UX] Gallery Teaser:** Privátní fotky se zobrazují rozmazané jako lákadlo.
+- **[DOCS] Credit System:** Kompletní dokumentace kreditového systému v `.agent/CREDIT_SYSTEM.md`.
+
 ### 2.13.18 (2025-11-23)
 - **[FEATURE] Gallery in PublicProfileView:** Přidána možnost prohlížet galerii i z detailu uživatele (z Leaderboardu, Notifikací).
 - **[UX] Gallery Modal:** Vylepšen UX pro odemykání fotek - místo window.confirm() se používá elegantní overlay přímo v modálu.

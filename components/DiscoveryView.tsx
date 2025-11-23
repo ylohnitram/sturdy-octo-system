@@ -340,6 +340,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
                     targetUserName={currentProfile.name}
                     onClose={() => setShowGallery(false)}
                     onConsumeCoins={onConsumeCoins}
+                    userIsPremium={userStats.tier === UserTier.PREMIUM}
                 />
             )}
         </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Heart, MapPin, Zap, ArrowLeft, Loader2, Image as ImageIcon } from 'lucide-react';
-import { UserProfile, UserTier } from '../types';
+import { UserProfile, UserTier, UserStats } from '../types';
 import { fetchUserData, sendLike } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
@@ -9,9 +9,10 @@ interface PublicProfileViewProps {
     targetUserId: string;
     onBack: () => void;
     onConsumeCoins: (amount: number) => boolean;
+    userStats: UserStats;
 }
 
-export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack, onConsumeCoins }) => {
+export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack, onConsumeCoins, userStats }) => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [sendingLike, setSendingLike] = useState(false);
@@ -167,6 +168,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
                     targetUserName={profile.name}
                     onClose={() => setShowGallery(false)}
                     onConsumeCoins={onConsumeCoins}
+                    userIsPremium={userStats.tier === UserTier.PREMIUM}
                 />
             )}
         </div>
