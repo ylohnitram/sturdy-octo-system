@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.11.0 (2025-11-23)
+- **[NEW] Modern Notification UX:** Nepřečtené notifikace mají glassmorphism efekt, modrý glow, větší avatary a animovaný indikátor. Přečtené notifikace jsou ztlumené a průhledné.
+- **[FIX] Database:** Přidán sloupec `read_at` do tabulky notifikací.
+
 ### 2.10.2 (2025-11-23)
 - **[FIX] Realtime Badge:** Badge se nyní aktualizuje v reálném čase když přijde nová notifikace.
 - **[FIX] Match UX:** Nahrazen alert() za toast notifikaci při matchi.

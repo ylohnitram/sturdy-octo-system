@@ -42,14 +42,22 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
     };
 
     const markAsRead = async (notificationId: string) => {
-        await supabase
+        console.log('[NotificationsPanel] Marking as read:', notificationId);
+        const { error } = await supabase
             .from('notifications')
             .update({ read_at: new Date().toISOString() })
             .eq('id', notificationId);
 
+        if (error) {
+            console.error('[NotificationsPanel] Error marking as read:', error);
+            return;
+        }
+
+        console.log('[NotificationsPanel] Successfully marked as read');
         setNotifications(prev => {
             const updated = prev.map(n => n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n);
             const unreadCount = updated.filter(n => !n.read_at).length;
+            console.log('[NotificationsPanel] New unread count:', unreadCount);
             onNotificationCountChange(unreadCount);
             return updated;
         });
@@ -141,11 +149,16 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                             <div
                                 key={notif.id}
                                 onClick={() => handleNotificationClick(notif)}
-                                className={`p-3 rounded-xl border cursor-pointer transition-all ${notif.read_at
-                                    ? 'bg-slate-800/50 border-slate-700'
-                                    : 'bg-slate-800 border-slate-600 hover:bg-slate-750'
+                                className={`group relative p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${notif.read_at
+                                        ? 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-800/40'
+                                        : 'bg-gradient-to-r from-slate-800 to-slate-800/80 border-blue-500/30 hover:border-blue-400/50 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20'
                                     }`}
                             >
+                                {/* Glow effect for unread */}
+                                {!notif.read_at && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl blur-sm -z-10"></div>
+                                )}
+
                                 <div className="flex items-center gap-3">
                                     {/* Avatar or Icon */}
                                     {notif.related_user ? (
@@ -153,33 +166,55 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                             <img
                                                 src={notif.related_user.avatar_url || 'https://picsum.photos/50'}
                                                 alt={notif.related_user.username}
-                                                className="w-10 h-10 rounded-full object-cover border border-slate-600"
+                                                className={`w-12 h-12 rounded-full object-cover transition-all ${notif.read_at
+                                                        ? 'border-2 border-slate-600 opacity-70'
+                                                        : 'border-2 border-blue-400/50 shadow-lg shadow-blue-500/20'
+                                                    }`}
                                             />
-                                            <div className="absolute -bottom-1 -right-1 bg-slate-900 rounded-full p-0.5">
+                                            <div className={`absolute -bottom-1 -right-1 rounded-full p-1 ${notif.read_at ? 'bg-slate-800' : 'bg-slate-900 ring-2 ring-blue-400/30'
+                                                }`}>
                                                 {getIcon(notif.type)}
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${notif.read_at
+                                                ? 'bg-slate-800 border-2 border-slate-700'
+                                                : 'bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-blue-400/30'
+                                            }`}>
                                             {getIcon(notif.type)}
                                         </div>
                                     )}
 
                                     <div className="flex-grow min-w-0">
-                                        <p className={`text-sm truncate ${notif.read_at ? 'text-slate-400' : 'text-white font-medium'}`}>
+                                        <p className={`text-sm truncate transition-all ${notif.read_at
+                                                ? 'text-slate-400 font-normal'
+                                                : 'text-white font-semibold tracking-tight'
+                                            }`}>
                                             {notif.related_user ? (
-                                                <span className="font-bold text-slate-200">{notif.related_user.username} </span>
+                                                <span className={notif.read_at ? 'text-slate-500' : 'text-blue-300 font-bold'}>
+                                                    {notif.related_user.username}{' '}
+                                                </span>
                                             ) : null}
                                             {notif.content}
                                         </p>
-                                        <p className="text-xs text-slate-500 mt-1">{formatTime(notif.created_at)}</p>
+                                        <p className={`text-xs mt-1 ${notif.read_at ? 'text-slate-600' : 'text-slate-400'}`}>
+                                            {formatTime(notif.created_at)}
+                                        </p>
                                     </div>
 
                                     {!notif.read_at && (
-                                        <div className="w-2 h-2 bg-red-500 rounded-full shrink-0"></div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-lg shadow-blue-500/50"></div>
+                                        </div>
                                     )}
                                     {notif.related_user_id && (
-                                        <ChevronRight size={16} className="text-slate-600" />
+                                        <ChevronRight
+                                            size={18}
+                                            className={`transition-all ${notif.read_at
+                                                    ? 'text-slate-700'
+                                                    : 'text-blue-400 group-hover:translate-x-1'
+                                                }`}
+                                        />
                                     )}
                                 </div>
                             </div>
