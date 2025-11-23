@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.3 (2025-11-23)
+- **[UX] Header Skeleton:** Při načítání profilu se v hlavičce zobrazuje pulzující skeleton (místo placeholder textu "Lovce"), dokud nejsou data k dispozici.
+
 ### 2.13.2 (2025-11-23)
 - **[FIX] UI Glitch:** Odstraněn nechtěný znak `\n` z patičky navigace.
 
