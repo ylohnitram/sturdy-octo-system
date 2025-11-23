@@ -78,8 +78,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
         onNotificationCountChange(0);
     };
 
-    const handleNotificationClick = (notif: any) => {
-        if (!notif.read_at) markAsRead(notif.id);
+    const handleNotificationClick = async (notif: any) => {
+        if (!notif.read_at) await markAsRead(notif.id);
 
         if (notif.related_user_id) {
             onViewProfile(notif.related_user_id);
@@ -150,8 +150,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                 key={notif.id}
                                 onClick={() => handleNotificationClick(notif)}
                                 className={`group relative p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${notif.read_at
-                                        ? 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-800/40'
-                                        : 'bg-gradient-to-r from-slate-800 to-slate-800/80 border-blue-500/30 hover:border-blue-400/50 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20'
+                                    ? 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-800/40'
+                                    : 'bg-gradient-to-r from-slate-800 to-slate-800/80 border-blue-500/30 hover:border-blue-400/50 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20'
                                     }`}
                             >
                                 {/* Glow effect for unread */}
@@ -167,8 +167,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                                 src={notif.related_user.avatar_url || 'https://picsum.photos/50'}
                                                 alt={notif.related_user.username}
                                                 className={`w-12 h-12 rounded-full object-cover transition-all ${notif.read_at
-                                                        ? 'border-2 border-slate-600 opacity-70'
-                                                        : 'border-2 border-blue-400/50 shadow-lg shadow-blue-500/20'
+                                                    ? 'border-2 border-slate-600 opacity-70'
+                                                    : 'border-2 border-blue-400/50 shadow-lg shadow-blue-500/20'
                                                     }`}
                                             />
                                             <div className={`absolute -bottom-1 -right-1 rounded-full p-1 ${notif.read_at ? 'bg-slate-800' : 'bg-slate-900 ring-2 ring-blue-400/30'
@@ -178,8 +178,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                         </div>
                                     ) : (
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${notif.read_at
-                                                ? 'bg-slate-800 border-2 border-slate-700'
-                                                : 'bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-blue-400/30'
+                                            ? 'bg-slate-800 border-2 border-slate-700'
+                                            : 'bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-blue-400/30'
                                             }`}>
                                             {getIcon(notif.type)}
                                         </div>
@@ -187,8 +187,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
 
                                     <div className="flex-grow min-w-0">
                                         <p className={`text-sm truncate transition-all ${notif.read_at
-                                                ? 'text-slate-400 font-normal'
-                                                : 'text-white font-semibold tracking-tight'
+                                            ? 'text-slate-400 font-normal'
+                                            : 'text-white font-semibold tracking-tight'
                                             }`}>
                                             {notif.related_user ? (
                                                 <span className={notif.read_at ? 'text-slate-500' : 'text-blue-300 font-bold'}>
@@ -211,8 +211,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                         <ChevronRight
                                             size={18}
                                             className={`transition-all ${notif.read_at
-                                                    ? 'text-slate-700'
-                                                    : 'text-blue-400 group-hover:translate-x-1'
+                                                ? 'text-slate-700'
+                                                : 'text-blue-400 group-hover:translate-x-1'
                                                 }`}
                                         />
                                     )}
