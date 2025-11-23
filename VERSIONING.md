@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.2 (2025-11-23)
+- **[FIX] UI Glitch:** Odstraněn nechtěný znak `\n` z patičky navigace.
+
 ### 2.13.1 (2025-11-23)
 - **[FIX] iOS Safe Areas:** Opraveno podtékání obsahu pod ovládací prvky na iPhonech (notch, home indicator). Aplikace nyní respektuje safe areas v hlavičce, navigaci i modálních oknech.
 
