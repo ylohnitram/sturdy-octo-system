@@ -21,6 +21,7 @@ import { NotificationManager } from './components/NotificationManager';
 import { Header } from './components/Header';
 import { NotificationsPanel } from './components/NotificationsPanel';
 import { PublicProfileView } from './components/PublicProfileView';
+import { LoadingScreen } from './components/LoadingScreen';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -47,7 +48,7 @@ const App: React.FC = () => {
   const [hasValidInvite, setHasValidInvite] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [landingMessage, setLandingMessage] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>(AppView.DISCOVERY);
+  const [currentView, setCurrentView] = useState<AppView>(AppView.PROFILE);
 
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
@@ -334,9 +335,7 @@ const App: React.FC = () => {
 
   // 1. Loading State
   if (loadingSession) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-    </div>;
+    return <LoadingScreen />;
   }
 
   return (
