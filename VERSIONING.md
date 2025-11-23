@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.4 (2025-11-23)
+- **[UX] Full Header Skeleton:** Skeleton loading nyní pokrývá i pravou část hlavičky (notifikace a kredity), takže se nezobrazují nuly (0) před načtením dat.
+
 ### 2.13.3 (2025-11-23)
 - **[UX] Header Skeleton:** Při načítání profilu se v hlavičce zobrazuje pulzující skeleton (místo placeholder textu "Lovce"), dokud nejsou data k dispozici.
 
