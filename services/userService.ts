@@ -237,11 +237,13 @@ export const sendLike = async (fromUserId: string, toUserId: string): Promise<{ 
                         user_id: fromUserId,
                         type: 'match',
                         content: 'Máte nový Match! ❤️‍🔥',
+                        related_user_id: toUserId
                     },
                     {
                         user_id: toUserId,
                         type: 'match',
                         content: 'Máte nový Match! ❤️‍🔥',
+                        related_user_id: fromUserId
                     }
                 ]);
                 return { success: true, isMatch: true };
@@ -255,6 +257,7 @@ export const sendLike = async (fromUserId: string, toUserId: string): Promise<{ 
                 user_id: toUserId,
                 type: 'like',
                 content: 'Někdo ti dal srdíčko! ❤️',
+                related_user_id: fromUserId
             });
 
         return { success: true, isMatch: false };

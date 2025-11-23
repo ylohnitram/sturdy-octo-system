@@ -76,11 +76,14 @@ export interface JournalEntry {
 
 export interface Notification {
   id: string;
-  userId: string;
-  type: 'like' | 'proximity' | 'system';
+  user_id: string;
+  type: 'like' | 'proximity' | 'system' | 'match' | 'rival';
   content: string;
-  isRead: boolean;
-  createdAt: string;
+  is_read?: boolean;
+  created_at: string;
+  read_at?: string | null;
+  related_user_id?: string;
+  metadata?: any;
 }
 
 export interface Like {
@@ -91,12 +94,13 @@ export interface Like {
 }
 
 export enum AppView {
-  DISCOVERY = 'DISCOVERY',
-  LEADERBOARD = 'LEADERBOARD',
-  JOURNAL = 'JOURNAL',
-  GALLERY = 'GALLERY',
-  ANALYTICS = 'ANALYTICS',
-  PROFILE = 'PROFILE',
+  DISCOVERY = 'discovery',
+  LEADERBOARD = 'leaderboard',
+  JOURNAL = 'journal',
+  GALLERY = 'gallery',
+  ANALYTICS = 'analytics',
+  PROFILE = 'profile',
+  USER_PROFILE = 'user_profile'
 }
 
 export interface Hotspot {

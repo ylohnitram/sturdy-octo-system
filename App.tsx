@@ -20,6 +20,7 @@ import { OnboardingWizard } from './components/OnboardingWizard';
 import { NotificationManager } from './components/NotificationManager';
 import { Header } from './components/Header';
 import { NotificationsPanel } from './components/NotificationsPanel';
+import { PublicProfileView } from './components/PublicProfileView';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -57,6 +58,7 @@ const App: React.FC = () => {
   const [userAvatar, setUserAvatar] = useState<string>('');
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   // Flag to prevent duplicate data loading
   const dataLoadedRef = useRef(false);
@@ -285,6 +287,12 @@ const App: React.FC = () => {
     }
   };
 
+  const handleViewProfile = (userId: string) => {
+    setSelectedUserId(userId);
+    setCurrentView(AppView.USER_PROFILE);
+    setShowNotifications(false);
+  };
+
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
@@ -311,6 +319,13 @@ const App: React.FC = () => {
           onConsumeAi={consumeAiCredit}
           onConsumeCoins={consumeCoins}
         />;
+      case AppView.USER_PROFILE:
+        return selectedUserId ? (
+          <PublicProfileView
+            targetUserId={selectedUserId}
+            onBack={() => setCurrentView(AppView.DISCOVERY)}
+          />
+        ) : <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
       default:
         return <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
     }
@@ -338,6 +353,7 @@ const App: React.FC = () => {
           userId={session.user.id}
           onClose={() => setShowNotifications(false)}
           onNotificationCountChange={(count) => setUserStats(prev => ({ ...prev, notificationCount: count }))}
+          onViewProfile={handleViewProfile}
         />
       )}
 

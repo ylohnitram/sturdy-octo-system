@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { X, Heart, MapPin, Users, Check } from 'lucide-react';
+import { X, Heart, MapPin, Users, Check, ChevronRight } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-
-interface Notification {
-    id: string;
-    type: string;
-    content: string;
-    created_at: string;
-    read_at: string | null;
-}
+import { Notification } from '../types';
 
 interface NotificationsPanelProps {
     userId: string;
     onClose: () => void;
     onNotificationCountChange: (count: number) => void;
+    onViewProfile: (userId: string) => void;
 }
 
-export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, onClose, onNotificationCountChange }) => {
+export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, onClose, onNotificationCountChange, onViewProfile }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,14 +22,20 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
         setLoading(true);
         const { data, error } = await supabase
             .from('notifications')
-            .select('*')
+            .select(`
+                *,
+                related_user:related_user_id (
+                    username,
+                    avatar_url
+                )
+            `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(20);
 
         if (!error && data) {
             setNotifications(data);
-            const unreadCount = data.filter(n => !n.read_at).length;
+            const unreadCount = data.filter((n: any) => !n.read_at).length;
             onNotificationCountChange(unreadCount);
         }
         setLoading(false);
@@ -68,6 +68,15 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
             prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
         );
         onNotificationCountChange(0);
+    };
+
+    const handleNotificationClick = (notif: any) => {
+        if (!notif.read_at) markAsRead(notif.id);
+
+        if (notif.related_user_id) {
+            onViewProfile(notif.related_user_id);
+            onClose();
+        }
     };
 
     const getIcon = (type: string) => {
@@ -128,25 +137,49 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                             <p>Žádné notifikace</p>
                         </div>
                     ) : (
-                        notifications.map(notif => (
+                        notifications.map((notif: any) => (
                             <div
                                 key={notif.id}
-                                onClick={() => !notif.read_at && markAsRead(notif.id)}
+                                onClick={() => handleNotificationClick(notif)}
                                 className={`p-3 rounded-xl border cursor-pointer transition-all ${notif.read_at
                                     ? 'bg-slate-800/50 border-slate-700'
                                     : 'bg-slate-800 border-slate-600 hover:bg-slate-750'
                                     }`}
                             >
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-1">{getIcon(notif.type)}</div>
-                                    <div className="flex-grow">
-                                        <p className={`text-sm ${notif.read_at ? 'text-slate-400' : 'text-white font-medium'}`}>
+                                <div className="flex items-center gap-3">
+                                    {/* Avatar or Icon */}
+                                    {notif.related_user ? (
+                                        <div className="relative">
+                                            <img
+                                                src={notif.related_user.avatar_url || 'https://picsum.photos/50'}
+                                                alt={notif.related_user.username}
+                                                className="w-10 h-10 rounded-full object-cover border border-slate-600"
+                                            />
+                                            <div className="absolute -bottom-1 -right-1 bg-slate-900 rounded-full p-0.5">
+                                                {getIcon(notif.type)}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                            {getIcon(notif.type)}
+                                        </div>
+                                    )}
+
+                                    <div className="flex-grow min-w-0">
+                                        <p className={`text-sm truncate ${notif.read_at ? 'text-slate-400' : 'text-white font-medium'}`}>
+                                            {notif.related_user ? (
+                                                <span className="font-bold text-slate-200">{notif.related_user.username} </span>
+                                            ) : null}
                                             {notif.content}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-1">{formatTime(notif.created_at)}</p>
                                     </div>
+
                                     {!notif.read_at && (
-                                        <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                                        <div className="w-2 h-2 bg-red-500 rounded-full shrink-0"></div>
+                                    )}
+                                    {notif.related_user_id && (
+                                        <ChevronRight size={16} className="text-slate-600" />
                                     )}
                                 </div>
                             </div>

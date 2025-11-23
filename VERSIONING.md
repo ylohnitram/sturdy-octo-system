@@ -2,6 +2,13 @@
 
 Tento dokument popisuje standardy pro verzování aplikace Notch.
 
+## Changelog
+
+### 2.9.0 (2025-11-23)
+- **[NEW] Rich Notifications:** Notifikace o lajcích a matchích nyní zobrazují avatara a jméno uživatele.
+- **[NEW] Public Profiles:** Po kliknutí na notifikaci se otevře profil uživatele, kde je možné oplatit like.
+- **[FIX] Database:** Přidán `related_user_id` do tabulky notifikací pro správné párování.
+
 ## 1. Standard
 Používáme **Semantic Versioning 2.0.0** (Major.Minor.Patch).
 
