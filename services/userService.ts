@@ -577,6 +577,11 @@ export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryI
 
         if (imagesError) throw imagesError;
 
+        // If no images, return empty
+        if (!images || images.length === 0) {
+            return [];
+        }
+
         // If not logged in, show all as locked
         if (!viewerId) {
             return images.map((img: any) => ({
@@ -588,13 +593,24 @@ export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryI
             }));
         }
 
-        // Fetch user's unlocked images (image-level)
+        // Try to fetch user's unlocked images (image-level)
         const { data: unlocks, error: unlocksError } = await supabase
             .from('gallery_image_unlocks')
             .select('image_id, unlock_type, expires_at')
             .eq('viewer_id', viewerId);
 
-        if (unlocksError) throw unlocksError;
+        // If unlock query fails (table doesn't exist, permissions, etc.)
+        // -> Just show all private images as locked
+        if (unlocksError) {
+            console.warn('gallery_image_unlocks query failed, showing all as locked:', unlocksError);
+            return images.map((img: any) => ({
+                id: img.id,
+                imageUrl: img.image_url,
+                isPrivate: img.is_private,
+                isUnlocked: !img.is_private, // Only public are unlocked
+                createdAt: img.created_at
+            }));
+        }
 
         // Create map of unlocked image IDs
         const unlockedMap = new Map<string, boolean>();

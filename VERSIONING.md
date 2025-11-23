@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.22 (2025-11-24)
+- **[BUGFIX] Gallery Display:** Opraveno zobrazování galerií - i při selhání unlock query se nyní zobrazí fotky (jako locked).
+- **[BUGFIX] Error Handling:** Vylepšené graceful degradation při DB issues.
+
 ### 2.13.21 (2025-11-24)
 - **[MONETIZATION] Image-Level Unlocks:** Odemykání konkrétních fotek podle ID.
 - **[FEATURE] Locked by ID:** Pokud vlastník smaže fotku, uživatel ji ztratí (motivace k renewal).
