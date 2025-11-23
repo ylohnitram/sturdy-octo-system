@@ -48,7 +48,7 @@ describe('NotificationsPanel Component', () => {
         } as any);
     });
 
-    it('renders notification panel with title', () => {
+    it('renders notification panel with title', async () => {
         render(
             <NotificationsPanel
                 userId={mockUserId}
@@ -58,9 +58,12 @@ describe('NotificationsPanel Component', () => {
         );
 
         expect(screen.getByText('Notifikace')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockOnNotificationCountChange).toHaveBeenCalledWith(1);
+        });
     });
 
-    it('displays loading state initially', () => {
+    it('displays loading state initially', async () => {
         render(
             <NotificationsPanel
                 userId={mockUserId}
@@ -70,6 +73,9 @@ describe('NotificationsPanel Component', () => {
         );
 
         expect(screen.getByText('Načítání...')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockOnNotificationCountChange).toHaveBeenCalledWith(1);
+        });
     });
 
     it('loads and displays notifications', async () => {
