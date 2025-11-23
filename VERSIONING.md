@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.14 (2025-11-23)
+- **[FIX] iOS Autofill:** Opraveno chybné vyplňování hesla do pole pro email na iOS zařízeních. Přidány explicitní atributy pro správce hesel (iCloud Keychain).
+
 ### 2.13.13 (2025-11-23)
 - **[UX] View Persistence:** Aplikace si nyní pamatuje poslední otevřenou obrazovku i po obnovení stránky (refresh). Při odhlášení se tento stav resetuje.
 - **[UI] Journal Polish:** Zaobleny rohy patičky v modálním okně Deníku pro čistší vzhled.

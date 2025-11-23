@@ -391,6 +391,9 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
               <input
                 type="text"
+                name="username"
+                id="username"
+                autoComplete="off"
                 placeholder="Přezdívka"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -420,6 +423,9 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
             <input
               type="email"
+              name="email"
+              id="email"
+              autoComplete="username"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -434,6 +440,9 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
                 <input
                   type="password"
+                  name="password"
+                  id="password"
+                  autoComplete={viewState === 'signup' ? 'new-password' : 'current-password'}
                   placeholder="Heslo (min. 6 znaků)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -446,6 +455,9 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
                   <input
                     type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    autoComplete="new-password"
                     placeholder="Potvrzení hesla"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
