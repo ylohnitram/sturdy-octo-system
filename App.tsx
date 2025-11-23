@@ -11,6 +11,7 @@ import { JournalView } from './components/JournalView';
 import { GalleryView } from './components/GalleryView';
 import { PremiumModal } from './components/PremiumModal';
 import { StoreModal } from './components/StoreModal';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { ReloadPrompt } from './components/ReloadPrompt';
 import { LandingPage } from './components/LandingPage';
 import { AuthView } from './components/AuthView';
