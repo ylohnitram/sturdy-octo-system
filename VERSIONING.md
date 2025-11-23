@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.10.2 (2025-11-23)
+- **[FIX] Realtime Badge:** Badge se nyní aktualizuje v reálném čase když přijde nová notifikace.
+- **[FIX] Match UX:** Nahrazen alert() za toast notifikaci při matchi.
+
 ### 2.10.1 (2025-11-23)
 - **[FIX] Notifications:** Badge se nyní správně aktualizuje po přečtení notifikace.
 - **[FIX] Public Profile:** Tlačítko "Odesláno" se již nezobrazuje na všech profilech po odeslání jednoho like.

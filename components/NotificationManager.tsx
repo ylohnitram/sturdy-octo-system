@@ -7,9 +7,10 @@ import { fetchUserData } from '../services/userService';
 interface NotificationManagerProps {
     userId: string | null;
     onProximityCheck?: () => void;
+    onNewNotification?: () => void;
 }
 
-export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck }) => {
+export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification }) => {
     const [notification, setNotification] = useState<{ type: string, text: string } | null>(null);
     const [settings, setSettings] = useState({ proximity: true, likes: true });
 
@@ -47,6 +48,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
                     } else if (newNotif.type === 'match') {
                         showToast('match', 'Máte nový Match! ❤️‍🔥');
                     }
+                    // Increment badge count
+                    if (onNewNotification) onNewNotification();
                 }
             )
             .subscribe();
@@ -54,7 +57,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [userId, settings.likes]);
+    }, [userId, settings.likes, onNewNotification]);
 
     // 3. Expose Proximity Simulation via Event or Interval
     // The actual proximity check is triggered by DiscoveryView logic, 
@@ -98,8 +101,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
         <div className="fixed top-4 left-4 right-4 z-[1000] animate-in slide-in-from-top duration-300">
             <div className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' :
-                        notification.type === 'match' ? 'bg-gradient-to-r from-pink-500 to-purple-500' :
-                            'bg-yellow-500'
+                    notification.type === 'match' ? 'bg-gradient-to-r from-pink-500 to-purple-500' :
+                        'bg-yellow-500'
                     }`}>
                     {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white" /> :
                         notification.type === 'match' ? <Heart size={20} fill="white" className="text-white animate-pulse" /> :

@@ -36,7 +36,10 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
             if (result.success) {
                 setHasLiked(true);
                 if (result.isMatch) {
-                    alert("It's a Match! ❤️‍🔥");
+                    // Dispatch match event for NotificationManager to show toast
+                    window.dispatchEvent(new CustomEvent('notch_match_found', {
+                        detail: { name: profile.name }
+                    }));
                 }
             }
         }

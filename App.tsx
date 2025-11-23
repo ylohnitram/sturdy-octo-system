@@ -344,7 +344,10 @@ const App: React.FC = () => {
       {/* GLOBAL OVERLAYS (Panic, Cookies, Wizard, Notifications) */}
       <CookieConsent />
       <ReloadPrompt />
-      <NotificationManager userId={session?.user?.id || null} />
+      <NotificationManager
+        userId={session?.user?.id || null}
+        onNewNotification={() => setUserStats(prev => ({ ...prev, notificationCount: (prev.notificationCount || 0) + 1 }))}
+      />
       <PWAInstallPrompt />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}
 
