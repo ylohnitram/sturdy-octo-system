@@ -175,7 +175,24 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
           throw new Error(`Přezdívka "${username}" je už zabraná. Zkus jinou.`);
         }
 
-        // 3. Registrace
+        // 3. Kontrola existence emailu
+        const { data: existingUser, error: checkError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .single();
+
+        if (existingUser && !checkError) {
+          // Email už existuje
+          setError(
+            `Email ${email} už je zaregistrovaný. Chceš se místo toho přihlásit nebo resetovat heslo?`
+          );
+          setLoading(false);
+          // Zobrazíme tlačítka jako actionable suggestions
+          return;
+        }
+
+        // 4. Registrace
         // DŮLEŽITÉ: emailRedirectTo zajišťuje, že se uživatel vrátí SEM, ne na localhost
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -183,7 +200,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
           options: {
             data: {
               username: username,
-              invite_code: inviteCode // Kód putuje do metadat, kde ho zachytí trigger
+              invite_code: inviteCode // Kód putuj e do metadat, kde ho zachytí trigger
             },
             emailRedirectTo: window.location.origin
           },
@@ -328,9 +345,37 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
 
         <form onSubmit={handleAuth} className="space-y-4 bg-slate-900/80 p-6 sm:p-8 rounded-3xl border border-slate-800 backdrop-blur-sm shadow-2xl">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-xl text-sm flex items-start gap-2 animate-pulse">
-              <AlertCircle size={16} className="mt-0.5 min-w-[16px]" />
-              <span>{error}</span>
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-xl text-sm flex flex-col gap-3">
+              <div className="flex items-start gap-2">
+                <AlertCircle size={16} className="mt-0.5 min-w-[16px]" />
+                <span>{error}</span>
+              </div>
+
+              {/* Quick action buttons if email exists */}
+              {error.includes('už je zaregistrovaný') && (
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewState('login');
+                      setError(null);
+                    }}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+                  >
+                    Přihlásit se
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewState('forgot_password');
+                      setError(null);
+                    }}
+                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+                  >
+                    Reset hesla
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -350,8 +395,8 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className={`w-full bg-slate-950 border rounded-xl py-3.5 pl-12 pr-10 text-white placeholder-slate-600 focus:outline-none transition-colors ${usernameStatus === 'available' ? 'border-green-500/50 focus:border-green-500' :
-                    usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500' :
-                      'border-slate-700 focus:border-red-500'
+                  usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500' :
+                    'border-slate-700 focus:border-red-500'
                   }`}
                 required
               />
