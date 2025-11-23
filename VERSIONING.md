@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.23 (2025-11-24)
+- **[DEBUG] Gallery Logging:** Přidán debug logging do fetchPublicGallery pro diagnostiku prázdných galerií.
+
 ### 2.13.22 (2025-11-24)
 - **[BUGFIX] Gallery Display:** Opraveno zobrazování galerií - i při selhání unlock query se nyní zobrazí fotky (jako locked).
 - **[BUGFIX] Error Handling:** Vylepšené graceful degradation při DB issues.

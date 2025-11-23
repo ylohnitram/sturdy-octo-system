@@ -575,6 +575,13 @@ export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryI
             .eq('user_id', targetUserId)
             .order('created_at', { ascending: true }); // ASC for proper indexing
 
+        console.log('📸 fetchPublicGallery DEBUG:', {
+            targetUserId,
+            imagesCount: images?.length || 0,
+            images,
+            error: imagesError
+        });
+
         if (imagesError) throw imagesError;
 
         // If no images, return empty
