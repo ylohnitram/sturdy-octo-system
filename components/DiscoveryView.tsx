@@ -4,7 +4,6 @@ import { UserProfile, UserTier, UserStats, Hotspot } from '../types';
 import { Button } from './Button';
 import { generateIcebreaker } from '../services/geminiService';
 import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
-import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 
 interface DiscoveryViewProps {
@@ -100,7 +99,15 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
             // Send Like DB Logic
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                await sendLike(user.id, currentProfile.id);
+                const result = await sendLike(user.id, currentProfile.id);
+                if (result.isMatch) {
+                    // Trigger Match Event (Visual Feedback)
+                    // For now, we can use a simple alert or a custom event that NotificationManager picks up
+                    // Ideally, we should have a nice overlay, but let's start with the NotificationManager toast
+                    // The backend already sends a notification, so the realtime listener should pick it up!
+                    // But for immediate feedback (since realtime might have a slight delay), let's trigger a local event
+                    window.dispatchEvent(new CustomEvent('notch_match_found', { detail: { name: currentProfile.name } }));
+                }
             }
         }
 

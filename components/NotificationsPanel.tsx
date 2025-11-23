@@ -75,6 +75,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
             case 'like': return <Heart size={20} className="text-red-500" />;
             case 'proximity': return <MapPin size={20} className="text-yellow-500" />;
             case 'rival': return <Users size={20} className="text-blue-500" />;
+            case 'match': return <Heart size={20} className="text-purple-500" fill="currentColor" />;
             default: return <Heart size={20} className="text-slate-500" />;
         }
     };
@@ -132,8 +133,8 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
                                 key={notif.id}
                                 onClick={() => !notif.read_at && markAsRead(notif.id)}
                                 className={`p-3 rounded-xl border cursor-pointer transition-all ${notif.read_at
-                                        ? 'bg-slate-800/50 border-slate-700'
-                                        : 'bg-slate-800 border-slate-600 hover:bg-slate-750'
+                                    ? 'bg-slate-800/50 border-slate-700'
+                                    : 'bg-slate-800 border-slate-600 hover:bg-slate-750'
                                     }`}
                             >
                                 <div className="flex items-start gap-3">

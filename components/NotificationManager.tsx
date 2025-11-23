@@ -44,6 +44,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
                     const newNotif = payload.new;
                     if (newNotif.type === 'like') {
                         showToast('like', 'Někdo ti dal srdíčko! ❤️');
+                    } else if (newNotif.type === 'match') {
+                        showToast('match', 'Máte nový Match! ❤️‍🔥');
                     }
                 }
             )
@@ -71,6 +73,17 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
         return () => window.removeEventListener('notch_proximity_check', handleProximityEvent);
     }, [settings.proximity]);
 
+    // 4. Listen for Local Match Event (Immediate Feedback)
+    useEffect(() => {
+        const handleMatchEvent = (e: any) => {
+            const name = e.detail?.name || 'Někdo';
+            showToast('match', `Je to Match s ${name}! ❤️‍🔥`);
+        };
+
+        window.addEventListener('notch_match_found', handleMatchEvent);
+        return () => window.removeEventListener('notch_match_found', handleMatchEvent);
+    }, []);
+
     const showToast = (type: string, text: string) => {
         setNotification({ type, text });
         // Auto hide after 4s
@@ -84,13 +97,19 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
     return (
         <div className="fixed top-4 left-4 right-4 z-[1000] animate-in slide-in-from-top duration-300">
             <div className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' : 'bg-yellow-500'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' :
+                        notification.type === 'match' ? 'bg-gradient-to-r from-pink-500 to-purple-500' :
+                            'bg-yellow-500'
                     }`}>
-                    {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white" /> : <MapPin size={20} className="text-black" />}
+                    {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white" /> :
+                        notification.type === 'match' ? <Heart size={20} fill="white" className="text-white animate-pulse" /> :
+                            <MapPin size={20} className="text-black" />}
                 </div>
                 <div className="flex-grow">
                     <div className="font-bold text-white text-sm">
-                        {notification.type === 'like' ? 'Nový obdivovatel' : 'Radar Aktivita'}
+                        {notification.type === 'like' ? 'Nový obdivovatel' :
+                            notification.type === 'match' ? 'It\'s a Match!' :
+                                'Radar Aktivita'}
                     </div>
                     <div className="text-xs text-slate-300">{notification.text}</div>
                 </div>

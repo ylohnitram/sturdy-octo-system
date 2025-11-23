@@ -30,11 +30,14 @@
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/ui": "^4.0.13",
     "husky": "^9.1.7",
-    "jsdom": "^27.2.0",
+    "jsdom": "^22.1.0",
     "lint-staged": "^16.2.7",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.1.0",
     "vitest": "^4.0.13"
+  },
+  "overrides": {
+    "parse5": "6.0.1"
   }
 }
