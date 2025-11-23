@@ -250,7 +250,7 @@ export const JournalView: React.FC = () => {
 
             {/* ADD ENTRY MODAL */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
+                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-4">
                     <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center">
                             <h3 className="font-bold text-white">Nový Zářez</h3>
@@ -259,7 +259,7 @@ export const JournalView: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4 overflow-y-auto flex-grow min-h-0">
+                        <div className="p-6 space-y-4 overflow-y-auto flex-grow min-h-0 overscroll-contain">
 
                             {/* NAME INPUT WITH LINKING */}
                             <div>

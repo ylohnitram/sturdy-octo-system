@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.12 (2025-11-23)
+- **[FIX] Android Gestures:** Opraveno nechtěné obnovování stránky při skrolování v modálním okně (overscroll-contain).
+- **[FIX] UI Layering:** Zvýšena priorita zobrazení modálního okna (z-index), aby překrývalo spodní navigaci a tlačítka byla vždy přístupná.
+
 ### 2.13.11 (2025-11-23)
 - **[FIX] Android UI:** Tlačítko pro uložení záznamu v Deníku je nyní ukotveno ve spodní části okna (sticky footer), takže je vždy viditelné a dostupné i při otevřené klávesnici nebo dlouhém formuláři.
 
