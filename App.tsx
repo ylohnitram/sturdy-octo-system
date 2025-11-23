@@ -398,6 +398,7 @@ const App: React.FC = () => {
             avatarUrl={userAvatar}
             onOpenStore={openStore}
             onNavigateProfile={() => setCurrentView(AppView.PROFILE)}
+            onOpenNotifications={() => setShowNotifications(true)}
             notificationsEnabled={true}
           />
 
