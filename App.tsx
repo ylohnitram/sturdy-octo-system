@@ -48,7 +48,6 @@ const App: React.FC = () => {
   const [hasValidInvite, setHasValidInvite] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [landingMessage, setLandingMessage] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>(AppView.PROFILE);
 
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
@@ -61,6 +60,21 @@ const App: React.FC = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  // State for current view - Initialize from localStorage or default to PROFILE
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    const savedView = localStorage.getItem('notch_last_view');
+    // Simple validation to ensure the saved string is actually a valid view
+    if (savedView && Object.values(AppView).includes(savedView as AppView)) {
+      return savedView as AppView;
+    }
+    return AppView.PROFILE;
+  });
+
+  // Persist current view on change
+  useEffect(() => {
+    localStorage.setItem('notch_last_view', currentView);
+  }, [currentView]);
 
   // Flag to prevent duplicate data loading
   const dataLoadedRef = useRef(false);
@@ -89,8 +103,8 @@ const App: React.FC = () => {
           }
         }
 
-        // Clear localStorage except auth
-        const authKeys = ['sb-', 'supabase.auth.token', 'notch_verified']; // Keep verified status too!
+        // Clear localStorage except auth and view state
+        const authKeys = ['sb-', 'supabase.auth.token', 'notch_verified', 'notch_last_view']; // Keep verified status and last view!
         Object.keys(localStorage).forEach(key => {
           if (!authKeys.some(authKey => key.startsWith(authKey))) {
             localStorage.removeItem(key);
@@ -190,6 +204,9 @@ const App: React.FC = () => {
             clearTimeout(signedInTimeoutRef.current);
             signedInTimeoutRef.current = null;
           }
+          // Clear saved view on logout so next login starts fresh
+          localStorage.removeItem('notch_last_view');
+          setCurrentView(AppView.PROFILE);
         }
       });
 

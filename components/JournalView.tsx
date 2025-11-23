@@ -381,7 +381,7 @@ export const JournalView: React.FC = () => {
                         </div>
 
                         {/* FIXED FOOTER */}
-                        <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none">
+                        <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none rounded-b-3xl">
                             <Button fullWidth onClick={handleSaveEntry} disabled={!newName || saving}>
                                 {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> Uložit do deníku</>}
                             </Button>
