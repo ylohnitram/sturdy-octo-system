@@ -167,8 +167,8 @@ const App: React.FC = () => {
       // Handle sign in, initial session, and token refresh
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
         try {
-          // ONLY load data on INITIAL_SESSION - SIGNED_IN fires too early before Supabase is ready!
-          if (event === 'INITIAL_SESSION' && !dataLoadedRef.current) {
+          // Load data on INITIAL_SESSION or SIGNED_IN (if not loaded yet)
+          if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && !dataLoadedRef.current) {
             dataLoadedRef.current = true; // Mark as loading/loaded
             console.log(`[Auth] Loading data for event: ${event}`);
             const { stats, profile, restored, isOnboardingNeeded } = await loadUserDataWithRetry(session.user.id);
@@ -184,8 +184,6 @@ const App: React.FC = () => {
               setTimeout(() => setShowRestoreNotification(false), 5000);
             }
             if (isOnboardingNeeded) setShowOnboarding(true);
-          } else if (event === 'SIGNED_IN') {
-            console.log('[Auth] SIGNED_IN event - skipping (will load on INITIAL_SESSION)');
           } else if (event === 'TOKEN_REFRESHED') {
             console.log('[Auth] Token refreshed successfully - connection maintained');
             // Don't reload data on token refresh - just maintain existing state
@@ -212,6 +210,7 @@ const App: React.FC = () => {
         console.log('[Auth] User signed out - clearing data');
         setUserStats(INITIAL_STATS);
         setUserAvatar('');
+        dataLoadedRef.current = false; // Reset load flag
       }
     });
 

@@ -4,6 +4,12 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.6 (2025-11-23)
+- **[UX] Profile Skeleton:** Pokud se profilová data ještě načítají, zobrazuje se v profilu skeleton místo fallback textu "Lovce", což sjednocuje vzhled s hlavičkou.
+
+### 2.13.5 (2025-11-23)
+- **[FIX] PWA Data Loading:** Opravena chyba, kdy se po instalaci PWA nebo opětovném přihlášení nenačetl profil a bylo nutné aplikaci obnovit.
+
 ### 2.13.4 (2025-11-23)
 - **[UX] Full Header Skeleton:** Skeleton loading nyní pokrývá i pravou část hlavičky (notifikace a kredity), takže se nezobrazují nuly (0) před načtením dat.
 
