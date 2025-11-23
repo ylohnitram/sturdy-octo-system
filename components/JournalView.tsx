@@ -251,7 +251,7 @@ export const JournalView: React.FC = () => {
             {/* ADD ENTRY MODAL */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
-                    <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden">
+                    <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center">
                             <h3 className="font-bold text-white">Nový Zářez</h3>
                             <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white">
@@ -259,7 +259,7 @@ export const JournalView: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                        <div className="p-6 space-y-4 overflow-y-auto flex-grow min-h-0">
 
                             {/* NAME INPUT WITH LINKING */}
                             <div>
@@ -378,7 +378,10 @@ export const JournalView: React.FC = () => {
                                     placeholder="Detaily, co si chceš pamatovat..."
                                 />
                             </div>
+                        </div>
 
+                        {/* FIXED FOOTER */}
+                        <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none">
                             <Button fullWidth onClick={handleSaveEntry} disabled={!newName || saving}>
                                 {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> Uložit do deníku</>}
                             </Button>

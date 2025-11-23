@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.11 (2025-11-23)
+- **[FIX] Android UI:** Tlačítko pro uložení záznamu v Deníku je nyní ukotveno ve spodní části okna (sticky footer), takže je vždy viditelné a dostupné i při otevřené klávesnici nebo dlouhém formuláři.
+
 ### 2.13.10 (2025-11-23)
 - **[FIX] iOS UI:** Opraveno překrývání hlavičky systémovými prvky (čas, baterie) a zvednuto tlačítko pro potvrzení v Deníku, aby nebylo schované pod ovládacími prvky.
 
