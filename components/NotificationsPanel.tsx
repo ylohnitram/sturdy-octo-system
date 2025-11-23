@@ -47,12 +47,12 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
             .update({ read_at: new Date().toISOString() })
             .eq('id', notificationId);
 
-        setNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n)
-        );
-
-        const unreadCount = notifications.filter(n => !n.read_at && n.id !== notificationId).length;
-        onNotificationCountChange(unreadCount);
+        setNotifications(prev => {
+            const updated = prev.map(n => n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n);
+            const unreadCount = updated.filter(n => !n.read_at).length;
+            onNotificationCountChange(unreadCount);
+            return updated;
+        });
     };
 
     const markAllAsRead = async () => {

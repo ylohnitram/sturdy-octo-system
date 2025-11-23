@@ -18,6 +18,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
     useEffect(() => {
         const loadProfile = async () => {
             setLoading(true);
+            setHasLiked(false); // Reset like state for new profile
             const { profile } = await fetchUserData(targetUserId);
             setProfile(profile);
             setLoading(false);
@@ -125,8 +126,8 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
                             onClick={handleLike}
                             disabled={sendingLike || hasLiked}
                             className={`col-span-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${hasLiked
-                                    ? 'bg-green-600 text-white cursor-default'
-                                    : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
+                                ? 'bg-green-600 text-white cursor-default'
+                                : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
                                 }`}
                         >
                             {sendingLike ? (

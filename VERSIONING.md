@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.10.1 (2025-11-23)
+- **[FIX] Notifications:** Badge se nyní správně aktualizuje po přečtení notifikace.
+- **[FIX] Public Profile:** Tlačítko "Odesláno" se již nezobrazuje na všech profilech po odeslání jednoho like.
+
 ### 2.10.0 (2025-11-23)
 - **[NEW] Notification Badge:** Zvoneček nyní zobrazuje počet nepřečtených notifikací (červený badge) a mění barvu na žlutou.
 
