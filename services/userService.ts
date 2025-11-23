@@ -65,9 +65,10 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
         // PARALLEL QUERIES - Load both profile and stats at the same time
         console.log('[fetchUserData] Starting parallel queries...');
         const queryStart = performance.now();
-        const [profileResult, statsResult] = await Promise.all([
+        const [profileResult, statsResult, notificationCount] = await Promise.all([
             supabase.from('profiles').select('*').eq('id', userId).single(),
-            supabase.from('user_stats').select('*').eq('user_id', userId).single()
+            supabase.from('user_stats').select('*').eq('user_id', userId).single(),
+            getUnreadNotificationsCount(userId)
         ]);
         const queryTime = performance.now() - queryStart;
         console.log(`[fetchUserData] Queries completed in ${queryTime.toFixed(0)}ms`);
@@ -116,7 +117,8 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             rank: undefined, // Fetched separately in LeaderboardView
             heat: heat,
             tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
-            isOnline: true
+            isOnline: true,
+            notificationCount: notificationCount
         };
 
         const userProfile: UserProfile = {

@@ -35,6 +35,7 @@ export interface UserStats {
   heat?: number;
   tier?: UserTier;
   isOnline?: boolean;
+  notificationCount?: number;
 }
 
 export interface UserProfile {

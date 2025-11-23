@@ -37,7 +37,8 @@ const INITIAL_STATS: UserStats = {
   aiCredits: 3,
   coins: 50,
   inviteCode: 'LOADING...',
-  invitesAvailable: 0
+  invitesAvailable: 0,
+  notificationCount: 0
 };
 
 const App: React.FC = () => {
