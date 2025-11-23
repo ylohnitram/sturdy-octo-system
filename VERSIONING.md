@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.16 (2025-11-23)
+- **[FIX] iOS Autofill:** Další vylepšení pro správce hesel na iOS. Přidány unikátní klíče pro inputy a upraveny atributy `autoComplete` pro lepší rozlišení mezi přihlášením a registrací.
+
 ### 2.13.15 (2025-11-23)
 - **[FIX] iOS Safe Areas:** Opraveno překrývání notifikačního panelu a chybových hlášek systémovým řádkem (status bar) na iPhonech. Všechny overlay prvky nyní respektují bezpečné zóny displeje.
 

@@ -390,10 +390,11 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
             <div className="relative group">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
               <input
+                key="username-input"
                 type="text"
                 name="username"
                 id="username"
-                autoComplete="off"
+                autoComplete="nickname"
                 placeholder="Přezdívka"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -409,7 +410,6 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
                 {usernameStatus === 'available' && <CheckCircle className="text-green-500" size={18} />}
                 {usernameStatus === 'taken' && <XCircle className="text-red-500" size={18} />}
               </div>
-
               {/* Username Status Text - PRO LEPŠÍ UX */}
               <div className="absolute top-full left-0 mt-1 text-[10px] pl-4">
                 {usernameStatus === 'checking' && <span className="text-slate-500">Ověřuji dostupnost...</span>}
@@ -422,10 +422,11 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
           <div className="relative group">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
             <input
+              key="email-input"
               type="email"
               name="email"
               id="email"
-              autoComplete="username"
+              autoComplete={viewState === 'login' ? 'username' : 'email'}
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -439,6 +440,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
                 <input
+                  key="password-input"
                   type="password"
                   name="password"
                   id="password"
@@ -454,6 +456,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-red-500 transition-colors" size={20} />
                   <input
+                    key="confirm-password-input"
                     type="password"
                     name="confirmPassword"
                     id="confirmPassword"
