@@ -370,6 +370,7 @@ const App: React.FC = () => {
           <PublicProfileView
             targetUserId={selectedUserId}
             onBack={() => setCurrentView(AppView.DISCOVERY)}
+            onConsumeCoins={consumeCoins}
           />
         ) : <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
       default:

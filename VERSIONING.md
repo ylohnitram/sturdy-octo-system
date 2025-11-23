@@ -4,6 +4,15 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.18 (2025-11-23)
+- **[FEATURE] Gallery in PublicProfileView:** Přidána možnost prohlížet galerii i z detailu uživatele (z Leaderboardu, Notifikací).
+- **[UX] Gallery Modal:** Vylepšen UX pro odemykání fotek - místo window.confirm() se používá elegantní overlay přímo v modálu.
+
+### 2.13.17 (2025-11-23)
+- **[FEATURE] Public Gallery:** Přidána možnost prohlížet galerii ostatních uživatelů přímo z Discovery karty.
+- **[FEATURE] Private Photos:** Soukromé fotky v cizích galeriích jsou rozmazané a lze je odemknout za kredity.
+- **[UI] AI Wingman:** Tlačítko AI Wingman bylo nahrazeno tlačítkem Galerie (AI Wingman bude přesunut do chatu).
+
 ### 2.13.16 (2025-11-23)
 - **[FIX] iOS Autofill:** Další vylepšení pro správce hesel na iOS. Přidány unikátní klíče pro inputy a upraveny atributy `autoComplete` pro lepší rozlišení mezi přihlášením a registrací.
 

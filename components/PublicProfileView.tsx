@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { X, Heart, MapPin, Zap, ArrowLeft, Loader2 } from 'lucide-react';
+import { X, Heart, MapPin, Zap, ArrowLeft, Loader2, Image as ImageIcon } from 'lucide-react';
 import { UserProfile, UserTier } from '../types';
 import { fetchUserData, sendLike } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
+import { PublicGalleryModal } from './PublicGalleryModal';
 
 interface PublicProfileViewProps {
     targetUserId: string;
     onBack: () => void;
+    onConsumeCoins: (amount: number) => boolean;
 }
 
-export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack }) => {
+export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack, onConsumeCoins }) => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [sendingLike, setSendingLike] = useState(false);
     const [hasLiked, setHasLiked] = useState(false);
+    const [showGallery, setShowGallery] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -117,35 +120,55 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
                     </p>
 
                     {/* Actions */}
-                    <div className="grid grid-cols-2 gap-4 items-center mt-2">
+                    <div className="space-y-3 mt-2">
+                        {/* Gallery Button */}
                         <button
-                            onClick={onBack}
-                            className="col-span-1 h-14 rounded-2xl border-2 border-slate-600 text-slate-300 font-bold flex items-center justify-center hover:bg-slate-800 hover:text-white transition-all"
+                            onClick={() => setShowGallery(true)}
+                            className="w-full h-12 rounded-2xl bg-slate-800/80 backdrop-blur border border-slate-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all"
                         >
-                            <X size={24} className="mr-2" /> Ignorovat
+                            <ImageIcon size={20} />
+                            <span>Galerie</span>
                         </button>
 
-                        <button
-                            onClick={handleLike}
-                            disabled={sendingLike || hasLiked}
-                            className={`col-span-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${hasLiked
-                                ? 'bg-green-600 text-white cursor-default'
-                                : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
-                                }`}
-                        >
-                            {sendingLike ? (
-                                <Loader2 size={24} className="animate-spin" />
-                            ) : hasLiked ? (
-                                <>Odesláno</>
-                            ) : (
-                                <>
-                                    <Heart size={24} fill="currentColor" /> Like
-                                </>
-                            )}
-                        </button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={onBack}
+                                className="col-span-1 h-14 rounded-2xl border-2 border-slate-600 text-slate-300 font-bold flex items-center justify-center hover:bg-slate-800 hover:text-white transition-all"
+                            >
+                                <X size={24} className="mr-2" /> Ignorovat
+                            </button>
+
+                            <button
+                                onClick={handleLike}
+                                disabled={sendingLike || hasLiked}
+                                className={`col-span-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${hasLiked
+                                    ? 'bg-green-600 text-white cursor-default'
+                                    : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
+                                    }`}
+                            >
+                                {sendingLike ? (
+                                    <Loader2 size={24} className="animate-spin" />
+                                ) : hasLiked ? (
+                                    <>Odesláno</>
+                                ) : (
+                                    <>
+                                        <Heart size={24} fill="currentColor" /> Like
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {showGallery && profile && (
+                <PublicGalleryModal
+                    targetUserId={profile.id}
+                    targetUserName={profile.name}
+                    onClose={() => setShowGallery(false)}
+                    onConsumeCoins={onConsumeCoins}
+                />
+            )}
         </div>
     );
 };

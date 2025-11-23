@@ -563,6 +563,31 @@ export const fetchUserGallery = async (userId: string): Promise<GalleryImage[]> 
     }
 };
 
+export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryImage[]> => {
+    try {
+        const { data, error } = await supabase
+            .from('gallery_images')
+            .select('*')
+            .eq('user_id', targetUserId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // TODO: Fetch unlocks from a table if it exists
+        // For now, private images are locked by default for non-owners
+        return data.map((img: any) => ({
+            id: img.id,
+            imageUrl: img.image_url,
+            isPrivate: img.is_private,
+            isUnlocked: !img.is_private, // Public are unlocked, Private are locked
+            createdAt: img.created_at
+        }));
+    } catch (e) {
+        console.error('Error fetching public gallery:', e);
+        return [];
+    }
+};
+
 export const uploadGalleryImage = async (userId: string, file: File, isPrivate: boolean): Promise<GalleryImage | null> => {
     try {
         const fileExt = file.name.split('.').pop();
