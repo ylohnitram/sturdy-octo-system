@@ -405,7 +405,7 @@ const App: React.FC = () => {
             notificationsEnabled={true}
           />
 
-          <main className="h-screen overflow-hidden relative pt-16 pb-8">
+          <main className="h-screen overflow-hidden relative pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
             <div className="relative z-10 h-full">
               {renderView()}

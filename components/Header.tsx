@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
     const hasNotifications = (userStats.notificationCount || 0) > 0;
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 h-16 flex items-center justify-between max-w-md mx-auto">
+        <div className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 flex items-center justify-between max-w-md mx-auto pt-safe py-3">
             {/* Left: Profile */}
             <div
                 onClick={onNavigateProfile}
@@ -61,8 +61,8 @@ export const Header: React.FC<HeaderProps> = ({
                     <Bell
                         size={20}
                         className={`transition-colors ${hasNotifications
-                                ? 'text-yellow-500'
-                                : 'text-slate-600'
+                            ? 'text-yellow-500'
+                            : 'text-slate-600'
                             }`}
                     />
                     {hasNotifications && (
