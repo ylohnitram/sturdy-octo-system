@@ -417,7 +417,7 @@ const App: React.FC = () => {
         /* 3. Main App (Logged In) */
         <>
           {showRestoreNotification && (
-            <div className="fixed top-4 left-4 right-4 z-50 bg-green-600 text-white p-4 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3">
+            <div className="fixed top-[calc(env(safe-area-inset-top)+1rem)] left-4 right-4 z-[60] bg-green-600 text-white p-4 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3">
               <CheckCircle size={24} />
               <div>
                 <div className="font-bold">Vítej zpět!</div>
@@ -428,7 +428,7 @@ const App: React.FC = () => {
 
           {/* Error Toast for PWA Debugging */}
           {dataLoadError && (
-            <div className="fixed top-20 left-4 right-4 z-50 bg-red-600/90 backdrop-blur text-white p-3 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3 border border-red-500">
+            <div className="fixed top-[calc(env(safe-area-inset-top)+5rem)] left-4 right-4 z-[60] bg-red-600/90 backdrop-blur text-white p-3 rounded-xl shadow-2xl animate-in slide-in-from-top flex items-center gap-3 border border-red-500">
               <AlertTriangle size={20} className="shrink-0" />
               <div className="flex-grow">
                 <div className="font-bold text-sm">Chyba připojení</div>

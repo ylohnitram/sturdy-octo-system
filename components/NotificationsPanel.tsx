@@ -115,7 +115,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
     return (
         <div className="fixed inset-0 z-[500] bg-black/80 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
             <div
-                className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 shadow-2xl animate-in slide-in-from-right"
+                className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 shadow-2xl animate-in slide-in-from-right pt-[env(safe-area-inset-top)]"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
