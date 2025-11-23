@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from '../../components/Header';
@@ -23,6 +23,10 @@ describe('Header Component', () => {
         onNavigateProfile: vi.fn(),
         onOpenNotifications: vi.fn(),
     };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     it('renders user information correctly', () => {
         render(<Header {...mockProps} />);
@@ -73,24 +77,18 @@ describe('Header Component', () => {
 
     it('calls onOpenNotifications when bell is clicked', async () => {
         const user = userEvent.setup();
-        const { container } = render(<Header {...mockProps} />);
-        const bellButton = container.querySelector('button[class*="p-2"]');
-
-        if (bellButton) {
-            await user.click(bellButton);
-            expect(mockProps.onOpenNotifications).toHaveBeenCalledTimes(1);
-        }
+        render(<Header {...mockProps} />);
+        const bellButton = screen.getByRole('button', { name: /notifications/i });
+        await user.click(bellButton);
+        expect(mockProps.onOpenNotifications).toHaveBeenCalledTimes(1);
     });
 
     it('calls onOpenStore when coins button is clicked', async () => {
         const user = userEvent.setup();
-        const { container } = render(<Header {...mockProps} />);
-        const coinsButton = container.querySelector('button[class*="bg-slate-800"]');
-
-        if (coinsButton) {
-            await user.click(coinsButton);
-            expect(mockProps.onOpenStore).toHaveBeenCalledTimes(1);
-        }
+        render(<Header {...mockProps} />);
+        const coinsButton = screen.getByRole('button', { name: /store/i });
+        await user.click(coinsButton);
+        expect(mockProps.onOpenStore).toHaveBeenCalledTimes(1);
     });
 
     it('calls onNavigateProfile when profile area is clicked', async () => {

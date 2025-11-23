@@ -55,6 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* Notifications Bell - Dim when no notifications, bright when there are */}
                 <button
                     onClick={onOpenNotifications}
+                    aria-label="Open notifications"
                     className="relative p-2 hover:bg-slate-800 rounded-full transition-colors"
                 >
                     <Bell
@@ -74,6 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* Coins Display */}
                 <button
                     onClick={onOpenStore}
+                    aria-label="Open store"
                     className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-1 py-1 transition-colors"
                 >
                     <Coins size={14} className="text-yellow-500" />

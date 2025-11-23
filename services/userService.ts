@@ -198,7 +198,7 @@ export const fetchActiveHotspots = async (radius: number, lat: number, long: num
     return data || [];
 };
 
-export const sendLike = async (fromUserId: string, toUserId: string) => {
+export const sendLike = async (fromUserId: string, toUserId: string): Promise<{ success: boolean, isMatch: boolean }> => {
     try {
         // 1. Insert Like
         const { error: likeError } = await supabase
@@ -206,11 +206,49 @@ export const sendLike = async (fromUserId: string, toUserId: string) => {
             .insert({ from_user_id: fromUserId, to_user_id: toUserId });
 
         if (likeError) {
-            if (likeError.code === '23505') return; // Duplicate like (already liked)
+            if (likeError.code === '23505') return { success: false, isMatch: false }; // Duplicate like
             throw likeError;
         }
 
-        // 2. Create Notification for recipient
+        // 2. Check for Mutual Like (Match)
+        const { data: mutualLike } = await supabase
+            .from('likes')
+            .select('id')
+            .eq('from_user_id', toUserId)
+            .eq('to_user_id', fromUserId)
+            .single();
+
+        if (mutualLike) {
+            // IT'S A MATCH!
+
+            // A. Create Match Record
+            // Ensure consistent ordering of IDs to avoid duplicates if we didn't have unique constraint on (user1, user2)
+            // But our table has (user1, user2) unique. Let's just insert.
+            // We need to handle the case where user1 < user2 to ensure uniqueness if we enforced it that way, 
+            // but for now let's just insert.
+            const { error: matchError } = await supabase
+                .from('matches')
+                .insert({ user1_id: fromUserId, user2_id: toUserId });
+
+            if (!matchError) {
+                // B. Notify BOTH users
+                await supabase.from('notifications').insert([
+                    {
+                        user_id: fromUserId,
+                        type: 'match',
+                        content: 'Máte nový Match! ❤️‍🔥',
+                    },
+                    {
+                        user_id: toUserId,
+                        type: 'match',
+                        content: 'Máte nový Match! ❤️‍🔥',
+                    }
+                ]);
+                return { success: true, isMatch: true };
+            }
+        }
+
+        // 3. If not a match, just notify recipient about the like
         await supabase
             .from('notifications')
             .insert({
@@ -219,8 +257,11 @@ export const sendLike = async (fromUserId: string, toUserId: string) => {
                 content: 'Někdo ti dal srdíčko! ❤️',
             });
 
+        return { success: true, isMatch: false };
+
     } catch (e) {
         console.error('Error sending like:', e);
+        return { success: false, isMatch: false };
     }
 };
 
