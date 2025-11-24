@@ -25,7 +25,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
     const [galleryUnlocked, setGalleryUnlocked] = useState(userIsPremium);
     const [showUnlockPrompt, setShowUnlockPrompt] = useState(false);
     const [isSubscription, setIsSubscription] = useState(false);
-    const [unlockCost, setUnlockCost] = useState(10);
 
     useEffect(() => {
         loadGallery();
@@ -36,7 +35,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
         const data = await fetchPublicGallery(targetUserId);
         setImages(data);
 
-        // Determine unlock type based on private image count
         const privateCount = data.filter(img => img.isPrivate).length;
         setIsSubscription(privateCount > 5);
 
@@ -79,7 +77,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
 
                 if (!error && data) {
                     setGalleryUnlocked(true);
-                    // Reload gallery to get updated unlock status
                     await loadGallery();
                 }
             }
@@ -90,7 +87,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-md animate-in fade-in flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top)+1rem)] bg-slate-900/50 border-b border-slate-800">
                 <div>
                     <h2 className="text-xl font-bold text-white">Galerie</h2>
@@ -106,7 +102,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                 </button>
             </div>
 
-            {/* Content */}
             <div className="flex-grow overflow-y-auto p-4">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-64">
@@ -120,7 +115,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                     </div>
                 ) : (
                     <>
-                        {/* Unlock Gallery Banner */}
                         {hasPrivateImages && !galleryUnlocked && (
                             <div className="mb-4 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20 border border-red-500/30 rounded-xl">
                                 <div className="flex items-center justify-between">
@@ -129,9 +123,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                                             🔒 {privateImageCount} privátní {privateImageCount === 1 ? 'fotka' : privateImageCount < 5 ? 'fotky' : 'fotek'}
                                         </p>
                                         <p className="text-xs text-slate-300">
-                                            {userIsPremium
-                                                ? 'Klikni na fotku pro zobrazení'
-                                                : 'Odemkni celou galerii za 10 kreditů'}
+                                            {userIsPremium ? 'Klikni na fotku pro zobrazení' : 'Odemkni celou galerii za 10 kreditů'}
                                         </p>
                                     </div>
                                     {!userIsPremium && (
@@ -165,9 +157,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                                         <img
                                             src={img.imageUrl}
                                             alt="Gallery"
-                                            className={`w-full h-full object-cover transition-all duration-500 ${isLocked
-                                                ? 'blur-xl scale-110 opacity-50'
-                                                : 'group-hover:scale-105'
+                                            className={`w-full h-full object-cover transition-all duration-500 ${isLocked ? 'blur-xl scale-110 opacity-50' : 'group-hover:scale-105'
                                                 }`}
                                         />
 
@@ -193,7 +183,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                 )}
             </div>
 
-            {/* Unlock Prompt Modal */}
             {showUnlockPrompt && (
                 <div className="fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setShowUnlockPrompt(false)}>
                     <div className="bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-slate-700 animate-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
@@ -203,11 +192,13 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                         <p className="text-slate-300 text-sm mb-4">
                             {isSubscription ? (
                                 <>
-                                    Galerie má více než 5 privátních fotek. Předplatné na <span className="font-bold text-white">30 dní</span> zahrnuje všechny současné i budoucí fotky.
+                                    Odemkne se <span className="font-bold text-white">všech {privateImageCount} privátních {privateImageCount === 1 ? 'fotka' : privateImageCount < 5 ? 'fotky' : 'fotek'}</span> na <span className="font-bold text-white">30 dní</span>.
+                                    <br /><br />
+                                    Po expiraci zůstanou <span className="font-bold text-green-400">prvních 5 fotek navždy</span>, zbytek se zamkne.
                                 </>
                             ) : (
                                 <>
-                                    Zobrazí se všechny privátní fotky uživatele <span className="font-bold">{targetUserName}</span> navždy (max 5 fotek).
+                                    Odemkne se <span className="font-bold text-white">{privateImageCount === 1 ? '1 privátní fotka' : `všechny ${privateImageCount} privátní fotky`}</span> <span className="font-bold text-green-400">navždy</span> za jednorázovou platbu.
                                 </>
                             )}
                         </p>
@@ -223,7 +214,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                                 <p className="text-xs text-slate-300">
                                     • Platnost 30 dní<br />
                                     • Obnovení: 5 kreditů<br />
-                                    • Vidíš i nové fotky
+                                    • Prvních 5 zůstane navždy
                                 </p>
                             </div>
                         )}
@@ -263,7 +254,6 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                 </div>
             )}
 
-            {/* Lightbox */}
             {selectedImage && (
                 <div className="fixed inset-0 z-[1100] bg-black flex items-center justify-center p-4 animate-in zoom-in duration-200" onClick={() => setSelectedImage(null)}>
                     <button

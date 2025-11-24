@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.13.24 (2025-11-24)
+- **[UX] Better Gallery Dialog:** Dynamický a srozumitelný text v unlock dialogu podle počtu fotek.
+- **[BUGFIX] RLS Policy:** Přidána SELECT policy pro gallery_images - opraveno zobrazování galerií.
+
 ### 2.13.23 (2025-11-24)
 - **[DEBUG] Gallery Logging:** Přidán debug logging do fetchPublicGallery pro diagnostiku prázdných galerií.
 
