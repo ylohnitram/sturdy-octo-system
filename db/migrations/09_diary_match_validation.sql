@@ -41,25 +41,18 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Check if requester has sent at least 1 message
+    -- Check if there is at least one message in the conversation (from anyone)
+    -- We relaxed the rule from "both must send" to "at least one message exists" 
+    -- to avoid issues with data migration or edge cases where one user deleted their account but messages remain.
     SELECT EXISTS (
         SELECT 1
         FROM messages
         WHERE match_id = v_match_id
-          AND sender_id = p_requester_id
-    ) INTO v_requester_sent;
+    ) INTO v_requester_sent; -- Reusing variable name for simplicity, represents "conversation active"
 
-    -- Check if target has sent at least 1 message
-    SELECT EXISTS (
-        SELECT 1
-        FROM messages
-        WHERE match_id = v_match_id
-          AND sender_id = p_target_id
-    ) INTO v_target_sent;
-
-    -- If both haven't sent messages, return false
-    IF NOT v_requester_sent OR NOT v_target_sent THEN
-        RETURN QUERY SELECT FALSE, v_match_id, v_match_created_at, NULL::INT, 'Museli jste si oba poslat aspoň 1 zprávu.'::TEXT;
+    -- If no messages, return false
+    IF NOT v_requester_sent THEN
+        RETURN QUERY SELECT FALSE, v_match_id, v_match_created_at, NULL::INT, 'Musíte si vyměnit alespoň jednu zprávu.'::TEXT;
         RETURN;
     END IF;
 

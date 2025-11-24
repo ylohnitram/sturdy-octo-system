@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.19.1 (2025-11-24)
+- **[FIX] Diary Validation:** Oprava logiky pro zobrazování kontaktů v Černé Knize (stačí 1 zpráva).
+- **[DB] Messages:** Fix chybějící tabulky messages a RLS policies.
+
 ### 2.19.0 (2025-11-24)
 - **[UX] Jednotný Název:** "Deník" přejmenován na "Černá Kniha" napříč celou aplikací pro konzistenci.
 - **[UX] Pouze Výběr:** Odebrána možnost volného textu - uživatelé vybírají pouze ze seznamu matchů s výměnou zpráv, seřazeno od nejnovějších.

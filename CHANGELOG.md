@@ -5,6 +5,12 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.1] - 2025-11-24
+
+### Fixed
+- **[DB] Diary Validation Fix:** Uvolněna pravidla pro přidání do Černé Knihy. Nyní stačí **jakákoliv** zpráva v konverzaci (místo striktní oboustranné výměny), což řeší problém s nezobrazováním kontaktů.
+- **[DB] Messages Table:** Zajištěna existence tabulky `messages` a `blocked_users` s korektními RLS policies (migrace `10_create_messages_table.sql`).
+
 ## [2.19.0] - 2025-11-24
 
 ### Changed
