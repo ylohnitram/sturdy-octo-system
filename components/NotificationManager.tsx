@@ -9,9 +9,10 @@ interface NotificationManagerProps {
     onProximityCheck?: () => void;
     onNewNotification?: (notification: any) => void;
     currentView?: string;
+    onOpenNotifications?: () => void;
 }
 
-export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification, currentView }) => {
+export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification, currentView, onOpenNotifications }) => {
     const [notification, setNotification] = useState<{ type: string, text: string } | null>(null);
     const [settings, setSettings] = useState({ proximity: true, likes: true });
 
@@ -101,12 +102,22 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
         // new Audio('/ping.mp3').play().catch(() => {});
     };
 
+    const handleToastClick = () => {
+        setNotification(null);
+        if (onOpenNotifications) {
+            onOpenNotifications();
+        }
+    };
+
     if (!notification) return null;
 
     return (
-        <div className="fixed top-4 left-4 right-4 z-[1000] animate-in slide-in-from-top duration-300">
-            <div className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' :
+        <div className="fixed top-[calc(env(safe-area-inset-top)+5rem)] left-4 right-4 z-[1000] animate-in slide-in-from-top duration-300">
+            <div
+                onClick={handleToastClick}
+                className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4 cursor-pointer hover:bg-slate-800/95 active:scale-[0.98] transition-all"
+            >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notification.type === 'like' ? 'bg-red-600' :
                     notification.type === 'match' ? 'bg-gradient-to-r from-pink-500 to-purple-500' :
                         notification.type === 'message' ? 'bg-green-500' :
                             'bg-yellow-500'
@@ -124,8 +135,15 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
                                     'Radar Aktivita'}
                     </div>
                     <div className="text-xs text-slate-300">{notification.text}</div>
+                    <div className="text-xs text-slate-400 mt-1 italic">Klikni pro zobrazení všech</div>
                 </div>
-                <button onClick={() => setNotification(null)} className="text-slate-500 hover:text-white">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setNotification(null);
+                    }}
+                    className="text-slate-500 hover:text-white shrink-0"
+                >
                     <X size={18} />
                 </button>
             </div>

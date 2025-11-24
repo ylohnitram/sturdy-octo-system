@@ -4,6 +4,11 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.7 (2025-11-24)
+- **[UX] Notification Toast Position:** Notifikační toasty přesunuty níže (pod hlavičku), aby byly snadno dosažitelné při držení telefonu jednou rukou.
+- **[FEATURE] Clickable Notifications:** Celý notifikační toast je nyní klikatelný a otevře panel se všemi notifikacemi.
+- **[UI] Toast Feedback:** Přidány vizuální efekty při interakci (hover, active scale) a hint text "Klikni pro zobrazení všech".
+
 ### 2.16.6 (2025-11-24)
 - **[UX] Chat Profile:** Kliknutí na hlavičku chatu (avatar nebo jméno) nyní otevře profil uživatele (s možností zobrazit galerii).
 - **[DEV] Chat Props:** Přidán `onViewProfile` callback do `ChatView`.

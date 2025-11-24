@@ -474,6 +474,7 @@ const App: React.FC = () => {
         userId={session?.user?.id || null}
         onNewNotification={handleNewNotification}
         currentView={currentView}
+        onOpenNotifications={() => setShowNotifications(true)}
       />
       <PWAInstallPrompt />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}
