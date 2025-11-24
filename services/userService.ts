@@ -491,84 +491,6 @@ export const searchMatchedUsers = async (query: string, currentUserId: string): 
     }
 };
 
-// Check if a user is eligible to be added to diary
-export const checkDiaryEligibility = async (requesterId: string, targetId: string, isGhostedByMe: boolean = false): Promise<{
-    canAdd: boolean;
-    matchId?: string;
-    matchCreatedAt?: string;
-    ageAtMatch?: number;
-    reason?: string;
-}> => {
-    try {
-        // 1. Find Match
-        const { data: match, error: matchError } = await supabase
-            .from('matches')
-            .select('id, created_at')
-            .or(`and(user1_id.eq.${requesterId},user2_id.eq.${targetId}),and(user1_id.eq.${targetId},user2_id.eq.${requesterId})`)
-            .maybeSingle();
-
-        if (matchError || !match) {
-            return { canAdd: false, reason: 'Nemáte spolu match.' };
-        }
-
-        // 2. Check messages (SKIP if ghosted by me - we want to be able to journal ghosted users)
-        if (!isGhostedByMe) {
-            // Check for ANY messages using the SAME method as Chat
-            // We use the RPC function that drives the Chat view to guarantee consistency.
-            const { data: messages, error: msgError } = await supabase.rpc('get_conversation_messages', {
-                p_user_id: requesterId,
-                p_partner_id: targetId
-            });
-
-            if (msgError) {
-                console.error('Error checking messages via RPC:', msgError);
-                return { canAdd: false, reason: 'Chyba při načítání zpráv.' };
-            }
-
-            // If no messages returned from the chat function
-            if (!messages || messages.length === 0) {
-                return { canAdd: false, reason: 'Musíte si vyměnit alespoň jednu zprávu.' };
-            }
-        }
-
-        // 3. Calculate Age at Match Time
-        let ageAtMatch: number | undefined;
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('birth_date')
-            .eq('id', targetId)
-            .single();
-
-        if (profile?.birth_date) {
-            const birthDate = new Date(profile.birth_date);
-            const matchDate = new Date(match.created_at);
-
-            let age = matchDate.getFullYear() - birthDate.getFullYear();
-            const m = matchDate.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && matchDate.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            ageAtMatch = age;
-        }
-
-        return {
-            canAdd: true,
-            matchId: match.id,
-            matchCreatedAt: match.created_at,
-            ageAtMatch: ageAtMatch,
-            reason: 'OK'
-        };
-
-    } catch (e) {
-        console.error('Error checking diary eligibility:', e);
-        return {
-            canAdd: false,
-            reason: 'Chyba při kontrole oprávnění.'
-        };
-    }
-};
-
 // Fetch all matched users for diary selection (sorted by match date, newest first)
 export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile & {
     matchCreatedAt: string;
@@ -579,28 +501,39 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return [];
 
-        // Get all matches with created_at
-        const { data: matches } = await supabase
+        // 1. Get all matches from DB (to get created_at and ALL matches)
+        const { data: dbMatches } = await supabase
             .from('matches')
             .select('id, user1_id, user2_id, created_at')
             .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
             .order('created_at', { ascending: false }); // Newest first
 
-        if (!matches || matches.length === 0) return [];
+        if (!dbMatches || dbMatches.length === 0) return [];
 
-        // Get ghost list (users I ghosted)
+        // 2. Get active chat matches (to validate messages)
+        // This uses the EXACT same logic as ChatView, so if it shows there, it will show here.
+        const chatMatches = await fetchMatches();
+        const chatMap = new Map(chatMatches.map(m => [m.partnerId, m]));
+
+        // 3. Get ghost list (users I ghosted)
         const { data: ghostedUsers } = await supabase.rpc('get_ghost_list');
         const ghostedIds = new Set((ghostedUsers || []).map((g: any) => g.blocked_id));
 
-        // For each match, check eligibility and build profile
+        // 4. Filter and build profiles
         const profiles = await Promise.all(
-            matches.map(async (match) => {
+            dbMatches.map(async (match) => {
                 const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
                 const isGhosted = ghostedIds.has(partnerId);
+                const chatMatch = chatMap.get(partnerId);
 
-                // Check eligibility (must have exchanged messages OR be ghosted by me)
-                const eligibility = await checkDiaryEligibility(user.id, partnerId, isGhosted);
-                if (!eligibility.canAdd) return null;
+                // Eligibility Check:
+                // 1. Must be ghosted by me OR
+                // 2. Must have an active chat with at least one message (lastMessage is present)
+                const hasMessages = chatMatch && (chatMatch.lastMessage || chatMatch.lastMessageTime);
+
+                if (!isGhosted && !hasMessages) {
+                    return null;
+                }
 
                 // Fetch partner profile
                 const { data: profile } = await supabase
@@ -611,10 +544,23 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
 
                 if (!profile) return null;
 
+                // Calculate age at match time
+                let ageAtMatch: number | undefined;
+                if (profile.birth_date) {
+                    const birthDate = new Date(profile.birth_date);
+                    const matchDate = new Date(match.created_at);
+                    let age = matchDate.getFullYear() - birthDate.getFullYear();
+                    const m = matchDate.getMonth() - birthDate.getMonth();
+                    if (m < 0 || (m === 0 && matchDate.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    ageAtMatch = age;
+                }
+
                 return {
                     id: profile.id,
                     name: profile.username || 'Neznámý',
-                    age: eligibility.ageAtMatch || 0,
+                    age: ageAtMatch || 0,
                     bio: '',
                     avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.username}`,
                     stats: {} as any,
@@ -623,7 +569,7 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
                     distanceKm: 0,
                     matchCreatedAt: match.created_at,
                     isGhostedByMe: isGhosted,
-                    ageAtMatch: eligibility.ageAtMatch
+                    ageAtMatch: ageAtMatch
                 };
             })
         );

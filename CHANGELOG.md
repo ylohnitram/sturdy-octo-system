@@ -5,6 +5,13 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.4] - 2025-11-24
+### Fixed
+- **[LOGIC] Robust Diary Validation:** Kompletně přepsána logika pro načítání kontaktů do Černé Knihy.
+  - Místo nespolehlivých SQL dotazů se nyní používá **stejná funkce jako pro Chat** (`fetchMatches`).
+  - To garantuje, že pokud vidíte konverzaci v Chatu, uvidíte ji i v Černé Knize.
+  - Odstraněna redundantní funkce `checkDiaryEligibility`.
+
 ## [2.19.3] - 2025-11-24
 
 ### Fixed
