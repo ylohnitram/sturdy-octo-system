@@ -24,6 +24,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
     // Action Modal State
     const [selectedEntryForAction, setSelectedEntryForAction] = useState<ExtendedJournalEntry | null>(null);
     const [showActionModal, setShowActionModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Available matched users for selection
     const [availableUsers, setAvailableUsers] = useState<Array<UserProfile & { matchCreatedAt: string; isGhostedByMe: boolean; ageAtMatch?: number }>>([]);
@@ -189,9 +190,13 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
     // --- ACTIONS ---
 
-    const handleDeleteEntry = async () => {
+    const handleDeleteClick = () => {
+        setShowActionModal(false);
+        setShowDeleteConfirm(true);
+    };
+
+    const performDelete = async () => {
         if (!selectedEntryForAction) return;
-        if (!confirm('Opravdu chceš smazat tento záznam?')) return;
 
         const { error } = await supabase
             .from('journal_entries')
@@ -200,7 +205,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
         if (!error) {
             setEntries(prev => prev.filter(e => e.id !== selectedEntryForAction.id));
-            setShowActionModal(false);
+            setShowDeleteConfirm(false);
         } else {
             alert('Chyba při mazání.');
         }
@@ -442,7 +447,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                         <div className="p-4 grid gap-2">
                             {/* 1. DELETE (Always available) */}
                             <button
-                                onClick={handleDeleteEntry}
+                                onClick={handleDeleteClick}
                                 className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-red-900/20 text-red-400 hover:text-red-300 transition-colors border border-slate-700 hover:border-red-900/50"
                             >
                                 <div className="bg-red-500/10 p-2 rounded-lg"><Trash2 size={20} /></div>
@@ -499,6 +504,44 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                                 className="w-full py-3 text-slate-500 font-medium hover:text-white transition-colors"
                             >
                                 Zrušit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DELETE CONFIRMATION MODAL */}
+            {showDeleteConfirm && selectedEntryForAction && (
+                <div className="fixed inset-0 z-[1001] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+                        {/* Icon */}
+                        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                            <Trash2 size={32} className="text-red-500" />
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-black text-white text-center mb-2">
+                            Smazat záznam?
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-slate-400 text-center text-sm mb-6">
+                            Opravdu chceš smazat záznam o <strong>{selectedEntryForAction.name}</strong>? Tato akce je nevratná.
+                        </p>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Zrušit
+                            </button>
+                            <button
+                                onClick={performDelete}
+                                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/20"
+                            >
+                                Smazat
                             </button>
                         </div>
                     </div>
