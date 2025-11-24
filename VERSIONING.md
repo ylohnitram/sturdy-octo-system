@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.14.7 (2025-11-24)
+- **[FIX] Gallery Modal Overlay:** Opraven problém, kdy se galerie zobrazovala pod hlavičkou aplikace a překrývala obsah. Nyní se vykresluje pomocí React Portal přímo do `body` s nejvyšší prioritou (z-index).
+- **[FIX] Caption Visibility:** Opravena viditelnost popisků, která byla ovlivněna špatným vrstvením elementů.
+
 ### 2.14.6 (2025-11-24)
 - **[SECURITY] DOMPurify:** Implementována knihovna `dompurify` pro robustní sanitizaci uživatelských vstupů (popisků fotek) místo vlastního regex řešení.
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Lock, Image as ImageIcon, Loader2, Unlock, Zap, MessageSquare } from 'lucide-react';
 import { fetchPublicGallery, GalleryImage } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
@@ -46,6 +47,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
         if (selectedImage) {
             setCaptionVisible(true);
             startHideTimer();
+            console.log('Viewing image:', selectedImage.id, 'Caption:', selectedImage.caption);
         }
         return () => {
             if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
@@ -129,8 +131,9 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-md animate-in fade-in flex flex-col">
+    // Use Portal to render outside of the main app container to avoid z-index/stacking context issues
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md animate-in fade-in flex flex-col">
             <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top)+1rem)] bg-slate-900/50 border-b border-slate-800">
                 <div>
                     <h2 className="text-xl font-bold text-white">Galerie</h2>
@@ -343,6 +346,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                     )}
                 </div>
             )}
-        </div>
+        </div>,
+        document.body
     );
 };
