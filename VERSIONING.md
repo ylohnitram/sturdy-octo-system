@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.4 (2025-11-24)
+- **[UI] Unghost Modal:** Přidán potvrzovací modal pro odghostování uživatele v Ghost Listu.
+- **[FEATURE] Ghost Filtering:** Ghostnutí uživatelé (oboustranně) se nyní nezobrazují v Lovu/Radaru.
+
 ### 2.16.3 (2025-11-24)
 - **[FIX] Build:** Oprava syntaxe v `ChatView.tsx` (uzavírací tagy), která způsobovala selhání buildu.
 

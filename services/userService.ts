@@ -287,13 +287,22 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
         const myTarget = currentUser.target_gender; // 'men', 'women', 'both'
         const radius = currentUser.radar_radius || 10;
 
+        // 1.5 Get Excluded IDs (Ghosted users - both directions)
+        const { data: excludedData } = await supabase.rpc('get_excluded_user_ids', { p_user_id: currentUserId });
+        const excludedIds = excludedData?.map((r: any) => r.excluded_id) || [];
+
         // 2. Build Query
         let query = supabase
             .from('profiles')
             .select(`*, user_stats (*)`)
             .neq('id', currentUserId)
-            .is('deletion_scheduled_at', null)
-            .limit(20);
+            .is('deletion_scheduled_at', null);
+
+        if (excludedIds.length > 0) {
+            query = query.not('id', 'in', `(${excludedIds.join(',')})`);
+        }
+
+        query = query.limit(20);
 
         // Filter: Who I want to see
         if (myTarget === 'men') {

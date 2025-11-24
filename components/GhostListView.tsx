@@ -6,6 +6,8 @@ export const GhostListView: React.FC = () => {
     const [ghostedUsers, setGhostedUsers] = useState<GhostedUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [unghosting, setUnghosting] = useState<string | null>(null);
+    const [showUnghostConfirm, setShowUnghostConfirm] = useState(false);
+    const [userToUnghost, setUserToUnghost] = useState<{ id: string, username: string } | null>(null);
 
     useEffect(() => {
         loadGhostList();
@@ -18,10 +20,18 @@ export const GhostListView: React.FC = () => {
         setLoading(false);
     };
 
-    const handleUnghost = async (userId: string, username: string) => {
-        if (!confirm(`Opravdu chceš odghostnout ${username}?\n\nOd této chvíle budete moci znovu komunikovat.`)) return;
+    const handleUnghost = (userId: string, username: string) => {
+        setUserToUnghost({ id: userId, username });
+        setShowUnghostConfirm(true);
+    };
 
+    const confirmUnghost = async () => {
+        if (!userToUnghost) return;
+
+        const userId = userToUnghost.id;
         setUnghosting(userId);
+        setShowUnghostConfirm(false);
+
         const success = await unghostUser(userId);
         if (success) {
             setGhostedUsers(prev => prev.filter(u => u.blockedId !== userId));
@@ -29,6 +39,7 @@ export const GhostListView: React.FC = () => {
             alert('Nepodařilo se odghostnout uživatele.');
         }
         setUnghosting(null);
+        setUserToUnghost(null);
     };
 
     const formatDate = (dateString: string) => {
@@ -120,6 +131,55 @@ export const GhostListView: React.FC = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Unghost Confirmation Modal */}
+            {showUnghostConfirm && userToUnghost && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[10000]">
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+                        {/* Icon */}
+                        <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                            <UserX size={32} className="text-green-400" />
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-black text-white text-center mb-2">
+                            Odghostnout {userToUnghost.username}?
+                        </h3>
+
+                        {/* Description */}
+                        <div className="space-y-2 mb-6">
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Obnoví se možnost komunikace</div>
+                            </div>
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Uživatel se znovu objeví v chatu</div>
+                            </div>
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Budete se navzájem vidět v Lovu</div>
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowUnghostConfirm(false)}
+                                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Zrušit
+                            </button>
+                            <button
+                                onClick={confirmUnghost}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-500/30"
+                            >
+                                Odghostnout
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
