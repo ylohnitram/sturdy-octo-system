@@ -62,10 +62,10 @@ Funkce pro kontrolu premium statusu
 */
 export const checkPremiumStatus = async (userId: string): Promise<boolean> => {
   const { data, error } = await supabase
-    .from('user_stats')
-    .select('is_premium')
-    .eq('user_id', userId)
+    .from('profiles')
+    .select('tier')
+    .eq('id', userId)
     .single();
   if (error) return false;
-  return data?.is_premium || false;
+  return data?.tier === 'PREMIUM';
 };

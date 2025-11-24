@@ -136,7 +136,7 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             bio: profileData.bio || '',
             avatarUrl: profileData.avatar_url || 'https://picsum.photos/200',
             stats: userStats,
-            tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+            tier: profileData.tier || UserTier.FREE,
             isOnline: true,
             distanceKm: 0
         };
@@ -346,7 +346,7 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
                 inviteCode: '',
                 invitesAvailable: 0
             },
-            tier: p.user_stats?.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+            tier: p.tier || UserTier.FREE,
             isOnline: Math.random() > 0.5,
             distanceKm: Math.floor(Math.random() * radius) + 1
         }));
@@ -429,9 +429,8 @@ export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
             .select(`
                 body_count, 
                 weekly_score,
-                is_premium,
                 profiles!inner (
-                    id, username, avatar_url, age, birth_date, deletion_scheduled_at
+                    id, username, avatar_url, age, birth_date, deletion_scheduled_at, tier
                 )
             `)
             .order('body_count', { ascending: false })
@@ -467,7 +466,7 @@ export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
                         weeklyScore: item.weekly_score || 0,
                         matches: 0, avgPartnerAge: 0, preferredType: '', streakDays: 0, aiCredits: 0, coins: 0, inviteCode: '', invitesAvailable: 0
                     },
-                    tier: item.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+                    tier: profile.tier || UserTier.FREE,
                     isOnline: false,
                     distanceKm: 0
                 }
@@ -839,7 +838,7 @@ export const fetchRivalsLeaderboard = async (): Promise<LeaderboardEntry[]> => {
             weeklyScore: item.weekly_score || 0,
             matches: 0, avgPartnerAge: 0, preferredType: '', streakDays: 0, aiCredits: 0, coins: 0, inviteCode: '', invitesAvailable: 0
         },
-        tier: item.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+        tier: item.tier || UserTier.FREE,
         isOnline: false,
         distanceKm: 0
     })).sort((a: any, b: any) => b.score - a.score);

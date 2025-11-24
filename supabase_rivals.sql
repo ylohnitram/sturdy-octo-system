@@ -36,7 +36,7 @@ RETURNS TABLE (
     avatar_url TEXT,
     body_count INTEGER,
     weekly_score INTEGER,
-    is_premium BOOLEAN
+    tier TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -46,7 +46,7 @@ BEGIN
         p.avatar_url,
         s.body_count,
         s.weekly_score,
-        s.is_premium
+        p.tier
     FROM rivals r
     JOIN profiles p ON (p.id = r.requester_id OR p.id = r.recipient_id)
     JOIN user_stats s ON s.user_id = p.id
@@ -62,7 +62,7 @@ BEGIN
         p.avatar_url,
         s.body_count,
         s.weekly_score,
-        s.is_premium
+        p.tier
     FROM profiles p
     JOIN user_stats s ON s.user_id = p.id
     WHERE p.id = user_id;
