@@ -4,6 +4,11 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.1 (2025-11-24)
+- **[UX] Ghost Mode:** Zjednodušeno ghostování - jedno kliknutí místo menu.
+- **[UI] Ghost Tooltip:** Přidán hover tooltip s vysvětlením Ghost Mode a možností vrátit v Ghost List.
+- **[UX] Ghost Confirmation:** Vylepšený potvrzovací dialog s jasným vysvětlením a zmínkou o Ghost List.
+
 ### 2.16.0 (2025-11-24)
 - **[FEATURE] Ghost List:** Nový view pro správu ghostnutých uživatelů s možností odghostnout.
 - **[UI] Chat Ghost Icon:** Nahrazena ikona tří teček moderní ikonou ducha s hover efekty.

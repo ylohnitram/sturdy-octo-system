@@ -20,7 +20,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [inputText, setInputText] = useState('');
     const [sending, setSending] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,7 +115,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
         const msgs = await fetchConversation(match.partnerId);
         setMessages(msgs);
         setLoadingMessages(false);
-        setShowMenu(false);
         loadMatches(); // Refresh list to clear badge
     };
 
@@ -144,7 +142,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     };
 
     const handleGhost = async () => {
-        if (!activeMatch || !confirm('Opravdu chceš tohoto uživatele ignorovat? (Ghost Mode)\n\nUž nikdy neuvidíš jeho zprávy ani profil. Tato akce je nevratná.')) return;
+        if (!activeMatch) return;
+
+        if (!confirm(`Opravdu chceš ghostnout ${activeMatch.partnerUsername}?\n\n✓ Už neuvidíš jeho zprávy\n✓ Zmizí ze seznamu chatů\n✓ Můžeš ho později odghostnout v Ghost List (Profil → Ghost List)`)) {
+            return;
+        }
 
         const success = await ghostUser(activeMatch.partnerId);
         if (success) {
@@ -233,29 +235,20 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         <span className="font-bold text-white">{activeMatch.partnerUsername}</span>
                     </div>
                 </div>
-                <div className="relative">
-                    <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 text-slate-400 hover:text-red-400 transition-colors group"
-                        title="Ghost Mode"
-                    >
-                        <Ghost size={22} className="group-hover:scale-110 transition-transform" />
-                    </button>
-                    {showMenu && (
-                        <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
-                                <button
-                                    onClick={handleGhost}
-                                    className="w-full px-4 py-3 text-left text-red-400 hover:bg-slate-700/50 flex items-center gap-2 text-sm font-medium"
-                                >
-                                    <Ghost size={16} /> Ghost Mode (Ignorovat)
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                <button
+                    onClick={handleGhost}
+                    className="p-2 text-slate-400 hover:text-red-400 transition-colors group relative"
+                    title="Ghost Mode - Ignorovat uživatele (lze vrátit v Ghost List)"
+                >
+                    <Ghost size={22} className="group-hover:scale-110 transition-transform" />
+                    {/* Tooltip on hover */}
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800/95 backdrop-blur border border-slate-700 rounded-lg p-2 text-xs text-slate-300 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
+                        <div className="font-bold text-red-400 mb-1">Ghost Mode</div>
+                        Ignorovat uživatele. Lze vrátit v Ghost List.
+                    </div>
+                </button>
             </div>
+
 
             {/* Messages */}
             <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-slate-950">
