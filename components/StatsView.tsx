@@ -75,7 +75,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ userStats, onOpenPremium }
               <Zap size={12} /> Celkem
             </div>
             <div className="text-4xl font-black text-white">{totalCount}</div>
-            <div className="text-xs text-green-500 mt-1 font-bold">Záznamů</div>
+            <div className="text-xs text-green-500 mt-1 font-bold">Zářezů</div>
           </div>
         </div>
         <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 relative overflow-hidden">

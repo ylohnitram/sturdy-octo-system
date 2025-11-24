@@ -5,6 +5,13 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.11] - 2025-11-24
+### Improved
+- **[UX] Unified Terminology:** Sjednoceno názvosloví napříč aplikací.
+  - Všude nahrazeno "záznam/y" za "zářez/y" (chlipnější, líp zapadá do charakteru appky).
+  - Zkontrolována konzistence ikon pro stejné akce (Trash2 pro smazání, Edit2 pro úpravu, MessageCircle pro zprávy, Image pro galerii).
+  - Změněn text tlačítka "Uložit do Černé Knihy" → "Přidat zářez".
+
 ## [2.19.10] - 2025-11-24
 ### Fixed
 - **[Bug] Body Count Sync:** Opraveno zobrazování počtu zářezů v profilu.

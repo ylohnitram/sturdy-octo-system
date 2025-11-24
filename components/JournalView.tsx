@@ -311,7 +311,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
             <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700 text-center">
                     <div className="text-2xl font-black text-white">{totalEntries}</div>
-                    <div className="text-[10px] text-slate-500 uppercase">Záznamů</div>
+                    <div className="text-[10px] text-slate-500 uppercase">Zářezů</div>
                 </div>
                 <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700 text-center">
                     <div className="text-2xl font-black text-yellow-500">{avgRating}</div>
@@ -451,7 +451,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                                 className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-red-900/20 text-red-400 hover:text-red-300 transition-colors border border-slate-700 hover:border-red-900/50"
                             >
                                 <div className="bg-red-500/10 p-2 rounded-lg"><Trash2 size={20} /></div>
-                                <div className="font-semibold">Smazat záznam</div>
+                                <div className="font-semibold">Smazat zářez</div>
                             </button>
 
                             {/* 2. EDIT (Always available) */}
@@ -460,7 +460,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                                 className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700"
                             >
                                 <div className="bg-slate-700 p-2 rounded-lg"><Edit2 size={20} /></div>
-                                <div className="font-semibold">Upravit záznam</div>
+                                <div className="font-semibold">Upravit zářez</div>
                             </button>
 
                             {/* 3. GALLERY (If not deleted) */}
@@ -521,12 +521,12 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
                         {/* Title */}
                         <h3 className="text-xl font-black text-white text-center mb-2">
-                            Smazat záznam?
+                            Smazat zářez?
                         </h3>
 
                         {/* Description */}
                         <p className="text-slate-400 text-center text-sm mb-6">
-                            Opravdu chceš smazat záznam o <strong>{selectedEntryForAction.name}</strong>? Tato akce je nevratná.
+                            Opravdu chceš smazat zářez o <strong>{selectedEntryForAction.name}</strong>? Tato akce je nevratná.
                         </p>
 
                         {/* Buttons */}
@@ -689,7 +689,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                         {selectedProfile && (
                             <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none rounded-b-3xl">
                                 <Button fullWidth onClick={handleSaveEntry} disabled={!selectedProfile || saving}>
-                                    {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> {editingEntryId ? 'Uložit změny' : 'Uložit do Černé Knihy'}</>}
+                                    {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> {editingEntryId ? 'Uložit změny' : 'Přidat zářez'}</>}
                                 </Button>
                             </div>
                         )}
