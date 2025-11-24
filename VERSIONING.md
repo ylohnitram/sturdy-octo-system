@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.7 (2025-11-24)
+- **[CRITICAL FIX] Message Sending:** Opravena chyba při odesílání zpráv - aktualizován constraint v tabulce `notifications` pro podporu typu 'message'.
+
 ### 2.15.6 (2025-11-24)
 - **[FIX] Message Sending:** Přidáno lepší error handling pro odesílání zpráv s upozorněním uživatele při selhání.
 - **[SECURITY] RLS Policy:** Aktualizována INSERT politika pro zprávy - zabránění odesílání zpráv ghostnutým uživatelům.

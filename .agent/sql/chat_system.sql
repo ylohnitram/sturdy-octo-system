@@ -1,5 +1,10 @@
 -- Chat System & Ghost Mode Implementation
 
+-- 0. Update notifications table to support 'message' type
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
+ALTER TABLE notifications ADD CONSTRAINT notifications_type_check 
+    CHECK (type IN ('like', 'proximity', 'system', 'match', 'rival', 'message'));
+
 -- 1. Messages Table
 CREATE TABLE IF NOT EXISTS messages (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
