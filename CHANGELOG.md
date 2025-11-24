@@ -5,6 +5,13 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.12] - 2025-11-24
+### Updated
+- **[Design] New Logo:** Aktualizováno logo aplikace.
+  - Nahrazeno logo v `/public/logo.png`.
+  - Aktualizovány PWA ikony (`pwa-192x192.png` a `pwa-512x512.png`).
+  - Logo se zobrazuje ve favicon, PWA manifestu a všech relevantních místech aplikace.
+
 ## [2.19.11] - 2025-11-24
 ### Improved
 - **[UX] Unified Terminology:** Sjednoceno názvosloví napříč aplikací.
