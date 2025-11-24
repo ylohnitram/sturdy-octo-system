@@ -81,6 +81,11 @@ CREATE TABLE IF NOT EXISTS public.blocked_users (
 -- Enable RLS for blocked_users
 ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist to avoid conflicts
+DROP POLICY IF EXISTS "Users can see their own blocks" ON public.blocked_users;
+DROP POLICY IF EXISTS "Users can block others" ON public.blocked_users;
+DROP POLICY IF EXISTS "Users can unblock others" ON public.blocked_users;
+
 -- Policies for blocked_users
 CREATE POLICY "Users can see their own blocks" ON public.blocked_users
     FOR SELECT USING (auth.uid() = blocker_id);
