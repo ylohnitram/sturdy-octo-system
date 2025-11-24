@@ -520,9 +520,16 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
         const ghostedIds = new Set((ghostedUsers || []).map((g: any) => g.blocked_id));
 
         // 4. Filter and build profiles
+        const processedPartnerIds = new Set<string>();
+
         const profiles = await Promise.all(
             dbMatches.map(async (match) => {
                 const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
+
+                // Deduplication: If we already processed this partner, skip (since matches are sorted by newest, we keep the latest)
+                if (processedPartnerIds.has(partnerId)) return null;
+                processedPartnerIds.add(partnerId);
+
                 const isGhosted = ghostedIds.has(partnerId);
                 const chatMatch = chatMap.get(partnerId);
 

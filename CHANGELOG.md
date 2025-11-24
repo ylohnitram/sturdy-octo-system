@@ -5,6 +5,11 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.5] - 2025-11-24
+### Fixed
+- **[UI] Duplicate Matches:** Opraveno zobrazování duplicitních uživatelů v seznamu pro Černou Knihu.
+  - Pokud existuje více matchů se stejnou osobou, zobrazí se pouze ten nejnovější.
+
 ## [2.19.4] - 2025-11-24
 ### Fixed
 - **[LOGIC] Robust Diary Validation:** Kompletně přepsána logika pro načítání kontaktů do Černé Knihy.
