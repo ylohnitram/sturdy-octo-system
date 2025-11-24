@@ -5,6 +5,25 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.0] - 2025-11-24
+
+### Changed
+- **[UX] Jednotný Název:** "Deník" přejmenován na **"Černá Kniha"** napříč celou aplikací
+  - Aktualizována navigace, ProfileView, StatsView a vše ostatní
+  - Konzistentní branding napříč celým UI
+- **[UX] Pouze Výběr ze Seznamu:** Odebrána možnost volného textu pro jméno
+  - Uživatelé nyní **musí vybrat** ze seznamu lidí s matchem
+  - Automaticky seřazeno podle data matche (nejnovější nahoře)
+  - Zobrazuje se pouze seznam lidí, se kterými máš match + výměnu zpráv
+- **[FEATURE] Ghost Indikátor:** Uživatelé, které jsi ghostnul, jsou označeni ikonou ducha 👻
+  - Jasně viditelné v seznamu výběru i v záznamech
+  - Pomáhá s orientací v kontaktech
+
+### Technical
+- Nová funkce `fetchAllMatchedUsersForDiary()` v `userService.ts`
+- Kompletní redesign `JournalView.tsx` komponenty
+- Včlenění ghost statusu do výběru uživatelů
+
 ## [2.18.0] - 2025-11-24
 
 ### Added

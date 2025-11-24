@@ -13,7 +13,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate,
   const navItems = [
     { view: AppView.DISCOVERY, icon: Flame, label: 'Lov' },
     { view: AppView.LEADERBOARD, icon: Trophy, label: 'Žebříček' },
-    { view: AppView.JOURNAL, icon: BookLock, label: 'Deník' },
+    { view: AppView.JOURNAL, icon: BookLock, label: 'Černá Kniha' },
     { view: AppView.GALLERY, icon: ImageIcon, label: 'Galerie' },
     { view: AppView.CHAT, icon: MessageCircle, label: 'Zprávy' },
     { view: AppView.PROFILE, icon: User, label: 'Profil' },

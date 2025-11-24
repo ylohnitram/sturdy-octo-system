@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Star, Tag, Calendar, MoreVertical, Lock, X, Save, Link as LinkIcon, User, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, Plus, Star, Tag, X, Save, CheckCircle, Ghost } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { searchMatchedUsers, checkDiaryEligibility } from '../services/userService';
+import { fetchAllMatchedUsersForDiary } from '../services/userService';
 import { JournalEntry, UserProfile } from '../types';
 import { Button } from './Button';
 
@@ -13,22 +13,17 @@ export const JournalView: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+    // Available matched users for selection
+    const [availableUsers, setAvailableUsers] = useState<Array<UserProfile & { matchCreatedAt: string; isGhostedByMe: boolean; ageAtMatch?: number }>>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+
     // Form States
-    const [newName, setNewName] = useState('');
+    const [selectedProfile, setSelectedProfile] = useState<(UserProfile & { matchCreatedAt: string; isGhostedByMe: boolean; ageAtMatch?: number }) | null>(null);
     const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
     const [newRating, setNewRating] = useState(3);
-    const [newAge, setNewAge] = useState('');
     const [newTags, setNewTags] = useState('');
     const [newNotes, setNewNotes] = useState('');
     const [saving, setSaving] = useState(false);
-
-    // Linking Logic
-    const [linkQuery, setLinkQuery] = useState('');
-    const [linkResults, setLinkResults] = useState<UserProfile[]>([]);
-    const [linkedProfile, setLinkedProfile] = useState<UserProfile | null>(null);
-    const [showLinkSearch, setShowLinkSearch] = useState(false);
-    const [linkError, setLinkError] = useState<string | null>(null);
-    const [partnerAgeAtMatch, setPartnerAgeAtMatch] = useState<number | null>(null);
 
     const fetchEntries = async () => {
         setLoading(true);
@@ -48,6 +43,7 @@ export const JournalView: React.FC = () => {
                 date: e.date,
                 rating: e.rating,
                 partnerAge: e.partner_age,
+                partnerAgeAtMatch: e.partner_age_at_match,
                 tags: e.tags || [],
                 notes: e.notes,
                 avatarUrl: e.avatar_url || `https://ui-avatars.com/api/?name=${e.name}&background=random`,
@@ -62,46 +58,26 @@ export const JournalView: React.FC = () => {
         fetchEntries();
     }, []);
 
-    // User Search Debounce - Only search matched users
+    // Load available users when modal opens
     useEffect(() => {
-        const delayDebounceFn = setTimeout(async () => {
-            if (linkQuery.length >= 2) {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const results = await searchMatchedUsers(linkQuery, user.id);
-                    setLinkResults(results);
-                }
-            } else {
-                setLinkResults([]);
-            }
-        }, 500);
-
-        return () => clearTimeout(delayDebounceFn);
-    }, [linkQuery]);
-
-    const handleSelectProfile = async (profile: UserProfile) => {
-        setLinkError(null);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Validate eligibility and get age at match time
-        const eligibility = await checkDiaryEligibility(user.id, profile.id);
-
-        if (!eligibility.canAdd) {
-            setLinkError(eligibility.reason || 'Tento uživatel nesplňuje podmínky.');
-            return;
+        if (isAddModalOpen) {
+            loadAvailableUsers();
         }
+    }, [isAddModalOpen]);
 
-        setLinkedProfile(profile);
-        setNewName(profile.name); // Auto-fill name
-        setPartnerAgeAtMatch(eligibility.ageAtMatch || null); // Store age at match time
-        setNewAge(eligibility.ageAtMatch?.toString() || ''); // Auto-fill age
-        setLinkQuery('');
-        setShowLinkSearch(false);
+    const loadAvailableUsers = async () => {
+        setLoadingUsers(true);
+        const users = await fetchAllMatchedUsersForDiary();
+        setAvailableUsers(users);
+        setLoadingUsers(false);
+    };
+
+    const handleSelectUser = (user: typeof availableUsers[0]) => {
+        setSelectedProfile(user);
     };
 
     const handleSaveEntry = async () => {
-        if (!newName) return;
+        if (!selectedProfile) return;
         setSaving(true);
 
         const { data: { user } } = await supabase.auth.getUser();
@@ -110,28 +86,25 @@ export const JournalView: React.FC = () => {
 
             const { error } = await supabase.from('journal_entries').insert({
                 user_id: user.id,
-                name: newName,
+                name: selectedProfile.name,
                 date: newDate,
                 rating: newRating,
-                partner_age: newAge ? parseInt(newAge) : null,
-                partner_age_at_match: linkedProfile ? partnerAgeAtMatch : null, // Store immutable age at match time
+                partner_age: selectedProfile.age,
+                partner_age_at_match: selectedProfile.ageAtMatch || null,
                 tags: tagsArray,
                 notes: newNotes,
-                linked_profile_id: linkedProfile?.id || null,
-                avatar_url: linkedProfile?.avatarUrl || null
+                linked_profile_id: selectedProfile.id,
+                avatar_url: selectedProfile.avatarUrl
             });
 
             if (!error) {
                 setIsAddModalOpen(false);
                 // Reset form
-                setNewName('');
+                setSelectedProfile(null);
+                setNewDate(new Date().toISOString().split('T')[0]);
                 setNewRating(3);
-                setNewAge('');
                 setNewTags('');
                 setNewNotes('');
-                setLinkedProfile(null);
-                setPartnerAgeAtMatch(null);
-                setLinkError(null);
                 // Refresh list
                 fetchEntries();
             } else {
@@ -157,7 +130,7 @@ export const JournalView: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                        Černá Kniha <Lock size={16} className="text-slate-500" />
+                        Černá Kniha 📕
                     </h1>
                     <p className="text-slate-400 text-sm">Tvůj soukromý seznam úlovků</p>
                 </div>
@@ -202,7 +175,7 @@ export const JournalView: React.FC = () => {
             {loading && (
                 <div className="text-center py-10">
                     <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-slate-500 text-sm">Načítám deník...</p>
+                    <p className="text-slate-500 text-sm">Načítám Černou Knihu...</p>
                 </div>
             )}
 
@@ -246,7 +219,7 @@ export const JournalView: React.FC = () => {
                                             className={`${i < entry.rating ? 'text-yellow-500' : 'text-slate-600'}`}
                                         />
                                     ))}
-                                    {entry.partnerAge && <span className="text-xs text-slate-500 ml-2">• {entry.partnerAge} let</span>}
+                                    {entry.partnerAgeAtMatch && <span className="text-xs text-slate-500 ml-2">• {entry.partnerAgeAtMatch} let</span>}
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -281,141 +254,133 @@ export const JournalView: React.FC = () => {
 
                         <div className="p-6 space-y-4 overflow-y-auto flex-grow min-h-0 overscroll-contain">
 
-                            {/* NAME INPUT WITH LINKING */}
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1 flex justify-between">
-                                    <span>Jméno / Přezdívka</span>
-                                    {!linkedProfile ? (
-                                        <button onClick={() => setShowLinkSearch(!showLinkSearch)} className="text-red-500 flex items-center gap-1 hover:text-red-400">
-                                            <LinkIcon size={10} /> Propojit s Notch profilem
-                                        </button>
-                                    ) : (
-                                        <button onClick={() => { setLinkedProfile(null); setNewName(''); }} className="text-slate-400 flex items-center gap-1 hover:text-white">
-                                            <X size={10} /> Odpojit {linkedProfile.name}
-                                        </button>
-                                    )}
-                                </label>
-
-                                {showLinkSearch && !linkedProfile ? (
-                                    <div className="mb-2 animate-in fade-in slide-in-from-top-2">
-                                        <div className="relative">
-                                            <input
-                                                autoFocus
-                                                type="text"
-                                                className="w-full bg-slate-800 border border-red-500/50 rounded-xl p-2 pl-9 text-sm text-white focus:outline-none"
-                                                placeholder="Hledat uživatele Notch..."
-                                                value={linkQuery}
-                                                onChange={e => setLinkQuery(e.target.value)}
-                                            />
-                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                        </div>
-                                        {linkResults.length > 0 && (
-                                            <div className="mt-1 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden max-h-32 overflow-y-auto">
-                                                {linkResults.map(user => (
-                                                    <div
-                                                        key={user.id}
-                                                        className="flex items-center gap-2 p-2 hover:bg-slate-700 cursor-pointer"
-                                                        onClick={() => handleSelectProfile(user)}
-                                                    >
-                                                        <img src={user.avatarUrl} className="w-6 h-6 rounded-full" alt="" />
-                                                        <span className="text-sm text-white">{user.name}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {linkError && (
-                                            <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
-                                                <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
-                                                <p className="text-xs text-red-400">{linkError}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : null}
-
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        className={`w-full bg-slate-950 border rounded-xl p-3 text-white focus:outline-none ${linkedProfile ? 'border-blue-500 pl-10' : 'border-slate-700 focus:border-red-500'}`}
-                                        value={newName}
-                                        onChange={e => setNewName(e.target.value)}
-                                        placeholder="Např. Katka z baru"
-                                        readOnly={!!linkedProfile}
-                                    />
-                                    {linkedProfile && (
-                                        <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" />
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            {/* USER SELECTION */}
+                            {!selectedProfile ? (
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Datum</label>
-                                    <input
-                                        type="date"
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
-                                        value={newDate}
-                                        onChange={e => setNewDate(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
-                                        Věk {linkedProfile && "(v den matche)"}
+                                    <label className="text-xs font-bold text-slate-500 uppercase block mb-2">
+                                        Vyber osobu (seřazeno podle data matche)
                                     </label>
-                                    <input
-                                        type="number"
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                        value={newAge}
-                                        onChange={e => setNewAge(e.target.value)}
-                                        placeholder="25"
-                                        readOnly={!!linkedProfile}
-                                        disabled={!!linkedProfile}
-                                    />
-                                </div>
-                            </div>
 
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Hodnocení</label>
-                                <div className="flex gap-2 justify-center bg-slate-950 p-3 rounded-xl border border-slate-700">
-                                    {[1, 2, 3, 4, 5].map(r => (
+                                    {loadingUsers ? (
+                                        <div className="text-center py-8">
+                                            <div className="w-6 h-6 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                            <p className="text-xs text-slate-500">Načítám seznam...</p>
+                                        </div>
+                                    ) : availableUsers.length === 0 ? (
+                                        <div className="text-center py-8 text-slate-500 text-sm">
+                                            Nemáš zatím žádné matche s výměnou zpráv.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                                            {availableUsers.map((user) => (
+                                                <div
+                                                    key={user.id}
+                                                    onClick={() => handleSelectUser(user)}
+                                                    className="flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl cursor-pointer border border-slate-700 hover:border-red-500/50 transition-all"
+                                                >
+                                                    <div className="relative">
+                                                        <img src={user.avatarUrl} className="w-10 h-10 rounded-full" alt="" />
+                                                        {user.isGhostedByMe && (
+                                                            <div className="absolute -bottom-1 -right-1 bg-slate-900 rounded-full p-0.5 border border-slate-700">
+                                                                <Ghost size={12} className="text-slate-400" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-grow">
+                                                        <div className="font-semibold text-white">{user.name}</div>
+                                                        <div className="text-xs text-slate-500">{user.ageAtMatch} let (v době matche)</div>
+                                                    </div>
+                                                    <div className="text-xs text-slate-600">
+                                                        {new Date(user.matchCreatedAt).toLocaleDateString('cs-CZ')}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    {/* SELECTED USER DISPLAY */}
+                                    <div className="bg-slate-800 p-3 rounded-xl border border-blue-500/50 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative">
+                                                <img src={selectedProfile.avatarUrl} className="w-10 h-10 rounded-full" alt="" />
+                                                {selectedProfile.isGhostedByMe && (
+                                                    <div className="absolute -bottom-1 -right-1 bg-slate-900 rounded-full p-0.5 border border-slate-700">
+                                                        <Ghost size={12} className="text-slate-400" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-white">{selectedProfile.name}</div>
+                                                <div className="text-xs text-slate-500">{selectedProfile.ageAtMatch} let</div>
+                                            </div>
+                                        </div>
                                         <button
-                                            key={r}
-                                            onClick={() => setNewRating(r)}
-                                            className={`p-2 rounded-full transition-all ${r <= newRating ? 'text-yellow-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
+                                            onClick={() => setSelectedProfile(null)}
+                                            className="text-slate-400 hover:text-white"
                                         >
-                                            <Star size={28} fill={r <= newRating ? "currentColor" : "none"} />
+                                            <X size={16} />
                                         </button>
-                                    ))}
-                                </div>
-                            </div>
+                                    </div>
 
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tagy (odděl čárkou)</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
-                                    value={newTags}
-                                    onChange={e => setNewTags(e.target.value)}
-                                    placeholder="Blondýna, U mě, Rychlovka..."
-                                />
-                            </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Datum</label>
+                                        <input
+                                            type="date"
+                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
+                                            value={newDate}
+                                            onChange={e => setNewDate(e.target.value)}
+                                        />
+                                    </div>
 
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Poznámky</label>
-                                <textarea
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none h-24 resize-none"
-                                    value={newNotes}
-                                    onChange={e => setNewNotes(e.target.value)}
-                                    placeholder="Detaily, co si chceš pamatovat..."
-                                />
-                            </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Hodnocení</label>
+                                        <div className="flex gap-2 justify-center bg-slate-950 p-3 rounded-xl border border-slate-700">
+                                            {[1, 2, 3, 4, 5].map(r => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => setNewRating(r)}
+                                                    className={`p-2 rounded-full transition-all ${r <= newRating ? 'text-yellow-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
+                                                >
+                                                    <Star size={28} fill={r <= newRating ? "currentColor" : "none"} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tagy (odděl čárkou)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
+                                            value={newTags}
+                                            onChange={e => setNewTags(e.target.value)}
+                                            placeholder="Blondýna, U mě, Rychlovka..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Poznámky</label>
+                                        <textarea
+                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none h-24 resize-none"
+                                            value={newNotes}
+                                            onChange={e => setNewNotes(e.target.value)}
+                                            placeholder="Detaily, co si chceš pamatovat..."
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* FIXED FOOTER */}
-                        <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none rounded-b-3xl">
-                            <Button fullWidth onClick={handleSaveEntry} disabled={!newName || saving}>
-                                {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> Uložit do deníku</>}
-                            </Button>
-                        </div>
+                        {selectedProfile && (
+                            <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none rounded-b-3xl">
+                                <Button fullWidth onClick={handleSaveEntry} disabled={!selectedProfile || saving}>
+                                    {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> Uložit do Černé Knihy</>}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

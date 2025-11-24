@@ -4,6 +4,11 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.19.0 (2025-11-24)
+- **[UX] Jednotný Název:** "Deník" přejmenován na "Černá Kniha" napříč celou aplikací pro konzistenci.
+- **[UX] Pouze Výběr:** Odebrána možnost volného textu - uživatelé vybírají pouze ze seznamu matchů s výměnou zpráv, seřazeno od nejnovějších.
+- **[FEATURE] Ghost Indikátor:** Označení ghostnutých uživatelů ikonou ducha v seznamu.
+
 ### 2.18.0 (2025-11-24)
 - **[FEATURE] Diary Match Validation:** Do deníku nyní lze zapsat pouze lidi z platformy, kteří splňují podmínky: oboustranný match + oba poslali aspoň 1 zprávu.
 - **[DATA] Age at Match Time:** Věk partnera se automaticky zaznamená v čase matche a již se nemění.

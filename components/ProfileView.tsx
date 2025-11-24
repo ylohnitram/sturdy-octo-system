@@ -346,7 +346,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         <div className="space-y-4">
                             <div className="bg-slate-800 p-3 rounded-xl">
                                 <div className="text-xs font-bold text-slate-400 uppercase mb-1">Zářezů (Body Count)</div>
-                                <p className="text-sm text-slate-200">Celkový počet úlovků, které jsi zapsal/a do své Černé Knihy (Deníku).</p>
+                                <p className="text-sm text-slate-200">Celkový počet úlovků, které jsi zapsal/a do své Černé Knihy.</p>
                             </div>
                             <div className="bg-slate-800 p-3 rounded-xl">
                                 <div className="text-xs font-bold text-yellow-500 uppercase mb-1">Rank (Pořadí)</div>

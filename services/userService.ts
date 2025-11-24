@@ -528,6 +528,71 @@ export const checkDiaryEligibility = async (
     }
 };
 
+// Fetch all matched users for diary selection (sorted by match date, newest first)
+export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile & {
+    matchCreatedAt: string;
+    isGhostedByMe: boolean;
+    ageAtMatch?: number;
+}>> => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        // Get all matches with created_at
+        const { data: matches } = await supabase
+            .from('matches')
+            .select('id, user1_id, user2_id, created_at')
+            .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+            .order('created_at', { ascending: false }); // Newest first
+
+        if (!matches || matches.length === 0) return [];
+
+        // Get ghost list (users I ghosted)
+        const { data: ghostedUsers } = await supabase.rpc('get_ghost_list');
+        const ghostedIds = new Set((ghostedUsers || []).map((g: any) => g.blocked_id));
+
+        // For each match, check eligibility and build profile
+        const profiles = await Promise.all(
+            matches.map(async (match) => {
+                const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
+
+                // Check eligibility (must have exchanged messages)
+                const eligibility = await checkDiaryEligibility(user.id, partnerId);
+                if (!eligibility.canAdd) return null;
+
+                // Fetch partner profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('id, username, avatar_url, birth_date')
+                    .eq('id', partnerId)
+                    .single();
+
+                if (!profile) return null;
+
+                return {
+                    id: profile.id,
+                    name: profile.username || 'Neznámý',
+                    age: eligibility.ageAtMatch || 0,
+                    bio: '',
+                    avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.username}`,
+                    stats: {} as any,
+                    tier: UserTier.FREE,
+                    isOnline: false,
+                    distanceKm: 0,
+                    matchCreatedAt: match.created_at,
+                    isGhostedByMe: ghostedIds.has(partnerId),
+                    ageAtMatch: eligibility.ageAtMatch
+                };
+            })
+        );
+
+        return profiles.filter(Boolean) as any[];
+    } catch (e) {
+        console.error('Error fetching matched users for diary:', e);
+        return [];
+    }
+};
+
 export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
     try {
         const { data, error } = await supabase
