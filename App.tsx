@@ -347,6 +347,23 @@ const App: React.FC = () => {
     setCurrentView(AppView.CHAT);
   };
 
+  const handleNewNotification = (notification: any) => {
+    setUserStats(prev => {
+      const newStats = { ...prev, notificationCount: (prev.notificationCount || 0) + 1 };
+      if (notification.type === 'message') {
+        newStats.unreadConversationsCount = (prev.unreadConversationsCount || 0) + 1;
+      }
+      return newStats;
+    });
+  };
+
+  const handleMessageRead = () => {
+    setUserStats(prev => ({
+      ...prev,
+      unreadConversationsCount: Math.max(0, (prev.unreadConversationsCount || 0) - 1)
+    }));
+  };
+
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
@@ -365,7 +382,7 @@ const App: React.FC = () => {
       case AppView.ANALYTICS:
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.CHAT:
-        return <ChatView initialChatPartnerId={initialChatPartnerId} />;
+        return <ChatView initialChatPartnerId={initialChatPartnerId} onMessageRead={handleMessageRead} />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}
@@ -401,7 +418,7 @@ const App: React.FC = () => {
       <ReloadPrompt />
       <NotificationManager
         userId={session?.user?.id || null}
-        onNewNotification={() => setUserStats(prev => ({ ...prev, notificationCount: (prev.notificationCount || 0) + 1 }))}
+        onNewNotification={handleNewNotification}
       />
       <PWAInstallPrompt />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}

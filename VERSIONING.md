@@ -4,6 +4,11 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.5 (2025-11-24)
+- **[FIX] Notification Badge:** Opraveno mizení badge nepřečtených zpráv v dolní navigaci ihned po přečtení zprávy.
+- **[FIX] Realtime Notifications:** Opraveno zobrazování notifikací na nové zprávy v reálném čase (hlavní zvoneček).
+- **[UI] Notification Icons:** Přidána specifická ikona pro notifikace zpráv.
+
 ### 2.15.4 (2025-11-24)
 - **[FEATURE] Chat Notifications:** Notifikace na nové zprávy se nyní posílají pouze pro první nepřečtenou zprávu v konverzaci (zamezení spamu).
 - **[UI] Navigation Badge:** Přidán indikátor počtu nepřečtených konverzací na ikonu "Zprávy" v dolní navigaci.

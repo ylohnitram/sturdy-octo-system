@@ -1,13 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabaseClient';
-import { Bell, Heart, MapPin, X } from 'lucide-react';
+import { Bell, Heart, MapPin, X, MessageCircle } from 'lucide-react';
 import { fetchUserData } from '../services/userService';
 
 interface NotificationManagerProps {
     userId: string | null;
     onProximityCheck?: () => void;
-    onNewNotification?: () => void;
+    onNewNotification?: (notification: any) => void;
 }
 
 export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification }) => {
@@ -47,9 +47,11 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
                         showToast('like', 'Někdo ti dal srdíčko! ❤️');
                     } else if (newNotif.type === 'match') {
                         showToast('match', 'Máte nový Match! ❤️‍🔥');
+                    } else if (newNotif.type === 'message') {
+                        showToast('message', 'Nová zpráva! 💬');
                     }
                     // Increment badge count
-                    if (onNewNotification) onNewNotification();
+                    if (onNewNotification) onNewNotification(newNotif);
                 }
             )
             .subscribe();
@@ -102,17 +104,20 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
             <div className="bg-slate-900/95 backdrop-blur border border-slate-700 rounded-2xl p-4 shadow-2xl flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'like' ? 'bg-red-600' :
                     notification.type === 'match' ? 'bg-gradient-to-r from-pink-500 to-purple-500' :
-                        'bg-yellow-500'
+                        notification.type === 'message' ? 'bg-green-500' :
+                            'bg-yellow-500'
                     }`}>
                     {notification.type === 'like' ? <Heart size={20} fill="white" className="text-white" /> :
                         notification.type === 'match' ? <Heart size={20} fill="white" className="text-white animate-pulse" /> :
-                            <MapPin size={20} className="text-black" />}
+                            notification.type === 'message' ? <MessageCircle size={20} className="text-white" /> :
+                                <MapPin size={20} className="text-black" />}
                 </div>
                 <div className="flex-grow">
                     <div className="font-bold text-white text-sm">
                         {notification.type === 'like' ? 'Nový obdivovatel' :
                             notification.type === 'match' ? 'It\'s a Match!' :
-                                'Radar Aktivita'}
+                                notification.type === 'message' ? 'Nová zpráva' :
+                                    'Radar Aktivita'}
                     </div>
                     <div className="text-xs text-slate-300">{notification.text}</div>
                 </div>

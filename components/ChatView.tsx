@@ -8,9 +8,10 @@ import DOMPurify from 'dompurify';
 interface ChatViewProps {
     onBack?: () => void; // If used in a modal or navigation stack
     initialChatPartnerId?: string | null;
+    onMessageRead?: () => void;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -79,6 +80,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
 
                     if (newMsg.sender_id === activeMatch.partnerId) {
                         markConversationAsRead(activeMatch.partnerId);
+                        if (onMessageRead) onMessageRead();
                     }
                 }
             )
@@ -100,6 +102,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
         setActiveMatch(match);
         setLoadingMessages(true);
         await markConversationAsRead(match.partnerId);
+        if (match.unreadCount > 0 && onMessageRead) {
+            onMessageRead();
+        }
         const msgs = await fetchConversation(match.partnerId);
         setMessages(msgs);
         setLoadingMessages(false);
