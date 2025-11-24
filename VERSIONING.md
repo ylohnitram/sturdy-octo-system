@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.14.2 (2025-11-24)
+- **[BUGFIX] Incremental Unlocks:** Opravena chyba v SQL funkci `unlock_user_gallery_v2`, která bránila odemčení nových "permanentních" fotek, pokud už uživatel nějaké odemčené měl. Nyní se vždy přepočítají a aktualizují všechny fotky.
+
 ### 2.14.1 (2025-11-24)
 - **[BUGFIX] Gallery Persistence:** Opravena chyba, kdy se odemčené fotky po znovuotevření galerie jevily jako zamčené.
 - **[FEATURE] Subscription Renewal:** Implementována logika pro obnovení předplatného za sníženou cenu (5 kreditů).
