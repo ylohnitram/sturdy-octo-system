@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.10 (2025-11-24)
+- **[UX] Chat Navigation:** Opravena logika navigace - kliknutí na Chat ikonu v navigaci zobrazí seznam chatů, kliknutí na notifikaci zprávy otevře přímo chat detail.
+- **[UI] Chat Layout:** Přidán max-width container do ChatView pro konzistentní layout s ostatními obrazovkami.
+
 ### 2.15.9 (2025-11-24)
 - **[CRITICAL FIX] Premium Status:** Kompletně opraveno načítání premium statusu - všechny části aplikace nyní správně čtou `profiles.tier` místo zastaralého `user_stats.is_premium`.
 - **[SQL] Rivals Leaderboard:** Aktualizována RPC funkce `get_rivals_leaderboard` pro použití `profiles.tier`.

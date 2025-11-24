@@ -152,11 +152,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     if (!activeMatch) {
         return (
             <div className="flex flex-col h-full bg-slate-900">
-                <div className="p-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-800 bg-slate-900/95 backdrop-blur z-10">
+                <div className="p-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-800 bg-slate-900/95 backdrop-blur z-10 max-w-md mx-auto w-full">
                     <h1 className="text-2xl font-black text-white">Zprávy</h1>
                 </div>
 
-                <div className="flex-grow overflow-y-auto p-4">
+                <div className="flex-grow overflow-y-auto p-4 max-w-md mx-auto w-full">
                     {loadingMatches ? (
                         <div className="flex justify-center py-10">
                             <Loader2 className="animate-spin text-red-500" />

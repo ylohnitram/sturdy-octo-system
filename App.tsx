@@ -371,6 +371,14 @@ const App: React.FC = () => {
     setUserStats(prev => ({ ...prev, unreadConversationsCount: count }));
   };
 
+  const handleNavigate = (view: AppView) => {
+    // Clear initialChatPartnerId when navigating to Chat via bottom nav
+    if (view === AppView.CHAT) {
+      setInitialChatPartnerId(null);
+    }
+    setCurrentView(view);
+  };
+
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
@@ -495,7 +503,7 @@ const App: React.FC = () => {
 
           <Navigation
             currentView={currentView}
-            onNavigate={setCurrentView}
+            onNavigate={handleNavigate}
             unreadConversationsCount={userStats?.unreadConversationsCount}
           />   <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
           <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
