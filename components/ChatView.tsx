@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowLeft, Send, Ghost, MoreVertical, Loader2, MessageCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { fetchMatches, fetchMessages, sendMessage, ghostUser, MatchPreview, ChatMessage } from '../services/userService';
+import { fetchMatches, fetchConversation, sendMessage, ghostUser, MatchPreview, ChatMessage } from '../services/userService';
 import DOMPurify from 'dompurify';
 
 interface ChatViewProps {
@@ -81,7 +82,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
     const openChat = async (match: MatchPreview) => {
         setActiveMatch(match);
         setLoadingMessages(true);
-        const msgs = await fetchMessages(match.matchId);
+        const msgs = await fetchConversation(match.partnerId);
         setMessages(msgs);
         setLoadingMessages(false);
         setShowMenu(false);
@@ -179,8 +180,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
     }
 
     // --- RENDER DETAIL ---
-    return (
-        <div className="flex flex-col h-full bg-slate-950 fixed inset-0 z-[200]">
+    // Use Portal to break out of the main app container and cover everything (Header, Nav)
+    return createPortal(
+        <div className="flex flex-col h-full bg-slate-950 fixed inset-0 z-[9999]">
             {/* Header */}
             <div className="p-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-800 bg-slate-900 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-3">
@@ -226,8 +228,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
                             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 <div
                                     className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${isMe
-                                            ? 'bg-red-600 text-white rounded-tr-none'
-                                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
+                                        ? 'bg-red-600 text-white rounded-tr-none'
+                                        : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
                                         }`}
                                 >
                                     {msg.content}
@@ -261,6 +263,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
                     </button>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

@@ -4,6 +4,13 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.2 (2025-11-24)
+- **[IMPROVEMENT] Chat Grouping:** Seznam chatů nyní seskupuje konverzace podle uživatele (partnera). Pokud máte s někým více shod (Matches), zobrazí se jako jedna konverzace se společnou historií zpráv.
+- **[DB] SQL Update:** Aktualizována funkce `get_user_matches` pro seskupování a přidána funkce `get_conversation_messages`.
+
+### 2.15.1 (2025-11-24)
+- **[FIX] Chat Detail Overlay:** Detail chatu se nyní zobrazuje přes celou obrazovku (pomocí React Portal) a překrývá hlavičku i navigaci, což řeší problém s chybějícím vstupním polem.
+
 ### 2.15.0 (2025-11-24)
 - **[FEATURE] Chat System:** Kompletní implementace chatu pro uživatele s Matchem.
 - **[FEATURE] Ghost Mode:** Možnost ignorovat uživatele (Ghost Mode), což trvale zablokuje komunikaci a skryje uživatele.

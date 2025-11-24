@@ -62,10 +62,37 @@ CREATE POLICY "Users can block others" ON blocked_users
 
 -- 4. Helper Functions
 
--- Fetch Matches with Last Message and Profile
+-- Fetch Conversation Messages (All messages between two users across all matches)
+CREATE OR REPLACE FUNCTION get_conversation_messages(p_user_id UUID, p_partner_id UUID)
+RETURNS TABLE (
+    id UUID,
+    match_id UUID,
+    sender_id UUID,
+    content TEXT,
+    created_at TIMESTAMPTZ,
+    read_at TIMESTAMPTZ
+) LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        msg.id,
+        msg.match_id,
+        msg.sender_id,
+        msg.content,
+        msg.created_at,
+        msg.read_at
+    FROM messages msg
+    JOIN matches m ON m.id = msg.match_id
+    WHERE (m.user1_id = p_user_id AND m.user2_id = p_partner_id)
+       OR (m.user1_id = p_partner_id AND m.user2_id = p_user_id)
+    ORDER BY msg.created_at ASC;
+END;
+$$;
+
+-- Fetch Matches with Last Message and Profile (Grouped by Partner)
 CREATE OR REPLACE FUNCTION get_user_matches(p_user_id UUID)
 RETURNS TABLE (
-    match_id UUID,
+    match_id UUID, -- The latest match ID
     partner_id UUID,
     partner_username TEXT,
     partner_avatar TEXT,
@@ -75,21 +102,59 @@ RETURNS TABLE (
 ) LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
     RETURN QUERY
+    WITH unique_partners AS (
+        SELECT DISTINCT
+            CASE WHEN m.user1_id = p_user_id THEN m.user2_id ELSE m.user1_id END as partner_id
+        FROM matches m
+        WHERE m.user1_id = p_user_id OR m.user2_id = p_user_id
+    )
     SELECT 
-        m.id as match_id,
-        CASE WHEN m.user1_id = p_user_id THEN m.user2_id ELSE m.user1_id END as partner_id,
-        p.username as partner_username,
-        p.avatar_url as partner_avatar,
-        (SELECT content FROM messages msg WHERE msg.match_id = m.id ORDER BY msg.created_at DESC LIMIT 1) as last_message,
-        (SELECT created_at FROM messages msg WHERE msg.match_id = m.id ORDER BY msg.created_at DESC LIMIT 1) as last_message_time,
-        (SELECT COUNT(*) FROM messages msg WHERE msg.match_id = m.id AND msg.sender_id != p_user_id AND msg.read_at IS NULL) as unread_count
-    FROM matches m
-    JOIN profiles p ON p.id = (CASE WHEN m.user1_id = p_user_id THEN m.user2_id ELSE m.user1_id END)
-    WHERE (m.user1_id = p_user_id OR m.user2_id = p_user_id)
-    AND NOT EXISTS (
+        -- Get latest match ID for this partner
+        (
+            SELECT m.id 
+            FROM matches m 
+            WHERE (m.user1_id = p_user_id AND m.user2_id = up.partner_id) 
+               OR (m.user1_id = up.partner_id AND m.user2_id = p_user_id)
+            ORDER BY m.created_at DESC 
+            LIMIT 1
+        ) as match_id,
+        up.partner_id,
+        p.username,
+        p.avatar_url,
+        -- Last message
+        (
+            SELECT msg.content 
+            FROM messages msg 
+            JOIN matches m ON m.id = msg.match_id 
+            WHERE (m.user1_id = p_user_id AND m.user2_id = up.partner_id) 
+               OR (m.user1_id = up.partner_id AND m.user2_id = p_user_id)
+            ORDER BY msg.created_at DESC 
+            LIMIT 1
+        ) as last_message,
+        (
+            SELECT msg.created_at 
+            FROM messages msg 
+            JOIN matches m ON m.id = msg.match_id 
+            WHERE (m.user1_id = p_user_id AND m.user2_id = up.partner_id) 
+               OR (m.user1_id = up.partner_id AND m.user2_id = p_user_id)
+            ORDER BY msg.created_at DESC 
+            LIMIT 1
+        ) as last_message_time,
+        -- Unread count
+        (
+            SELECT COUNT(*) 
+            FROM messages msg 
+            JOIN matches m ON m.id = msg.match_id 
+            WHERE ((m.user1_id = p_user_id AND m.user2_id = up.partner_id) OR (m.user1_id = up.partner_id AND m.user2_id = p_user_id))
+            AND msg.sender_id != p_user_id 
+            AND msg.read_at IS NULL
+        ) as unread_count
+    FROM unique_partners up
+    JOIN profiles p ON p.id = up.partner_id
+    WHERE NOT EXISTS (
         SELECT 1 FROM blocked_users b 
-        WHERE (b.blocker_id = p_user_id AND b.blocked_id = p.id) 
-           OR (b.blocker_id = p.id AND b.blocked_id = p_user_id)
+        WHERE (b.blocker_id = p_user_id AND b.blocked_id = up.partner_id) 
+           OR (b.blocker_id = up.partner_id AND b.blocked_id = p_user_id)
     )
     ORDER BY last_message_time DESC NULLS LAST;
 END;

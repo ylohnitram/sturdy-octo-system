@@ -902,15 +902,17 @@ export const fetchMatches = async (): Promise<MatchPreview[]> => {
     }));
 };
 
-export const fetchMessages = async (matchId: string): Promise<ChatMessage[]> => {
-    const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('match_id', matchId)
-        .order('created_at', { ascending: true });
+export const fetchConversation = async (partnerId: string): Promise<ChatMessage[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase.rpc('get_conversation_messages', {
+        p_user_id: user.id,
+        p_partner_id: partnerId
+    });
 
     if (error) {
-        console.error('Error fetching messages:', error);
+        console.error('Error fetching conversation:', error);
         return [];
     }
 
