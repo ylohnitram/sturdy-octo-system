@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { Image, Lock, Trash2, Plus, X, EyeOff, Shield } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '../services/supabaseClient';
@@ -170,12 +171,21 @@ export const GalleryView: React.FC = () => {
                             <input
                                 type="text"
                                 value={uploadCaption}
-                                onChange={(e) => setUploadCaption(e.target.value)}
+                                onChange={(e) => {
+                                    // Sanitize input: strip all HTML tags using DOMPurify
+                                    const text = DOMPurify.sanitize(e.target.value, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+                                    setUploadCaption(text);
+                                }}
                                 placeholder="Např. 'Na dovolené v Itálii' nebo emoji 🌴"
-                                maxLength={100}
+                                maxLength={80}
                                 className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-red-500 transition-colors"
                             />
-                            <span className="text-[10px] text-slate-600 mt-1 block">{uploadCaption.length}/100</span>
+                            <div className="flex justify-between mt-1">
+                                <span className="text-[10px] text-slate-600">Max. 80 znaků</span>
+                                <span className={`text-[10px] ${uploadCaption.length > 70 ? 'text-orange-500' : 'text-slate-600'}`}>
+                                    {uploadCaption.length}/80
+                                </span>
+                            </div>
                         </div>
 
                         <Button fullWidth onClick={handleGalleryUpload} disabled={uploading}>

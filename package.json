@@ -1,7 +1,7 @@
 {
   "name": "notch",
   "private": true,
-  "version": "2.14.3",
+  "version": "2.14.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@google/genai": "^1.30.0",
     "@supabase/supabase-js": "2.39.0",
+    "dompurify": "^3.3.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -26,6 +27,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/dompurify": "^3.2.0",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/ui": "^4.0.13",

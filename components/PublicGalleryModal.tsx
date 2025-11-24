@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Lock, Image as ImageIcon, Loader2, Unlock, Zap, MessageSquare } from 'lucide-react';
 import { fetchPublicGallery, GalleryImage } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
@@ -26,9 +26,51 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
     const [showUnlockPrompt, setShowUnlockPrompt] = useState(false);
     const [isSubscription, setIsSubscription] = useState(false);
 
+    // Caption visibility state
+    const [captionVisible, setCaptionVisible] = useState(true);
+    const hideTimerRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
         loadGallery();
     }, [targetUserId]);
+
+    // Auto-hide caption logic
+    const startHideTimer = () => {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => {
+            setCaptionVisible(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        if (selectedImage) {
+            setCaptionVisible(true);
+            startHideTimer();
+        }
+        return () => {
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        };
+    }, [selectedImage]);
+
+    const handleCaptionHover = () => {
+        setCaptionVisible(true);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+
+    const handleCaptionLeave = () => {
+        startHideTimer();
+    };
+
+    const toggleCaption = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCaptionVisible(prev => {
+            if (!prev) {
+                startHideTimer();
+                return true;
+            }
+            return false;
+        });
+    };
 
     const loadGallery = async () => {
         setLoading(true);
@@ -267,23 +309,36 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
             )}
 
             {selectedImage && (
-                <div className="fixed inset-0 z-[1100] bg-black flex flex-col items-center justify-center p-4 animate-in zoom-in duration-200" onClick={() => setSelectedImage(null)}>
+                <div className="fixed inset-0 z-[1100] bg-black flex items-center justify-center animate-in zoom-in duration-200" onClick={() => setSelectedImage(null)}>
                     <button
                         onClick={() => setSelectedImage(null)}
-                        className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white z-50 hover:bg-black/70 transition-colors"
+                        className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white z-50 hover:bg-black/70 transition-colors backdrop-blur-sm"
                         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
                     >
                         <X size={32} />
                     </button>
+
                     <img
                         src={selectedImage.imageUrl}
                         alt="Full view"
-                        className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
+                        className="max-w-full max-h-[100dvh] object-contain cursor-pointer"
+                        onClick={toggleCaption}
                     />
+
                     {selectedImage.caption && (
-                        <div className="mt-4 max-w-2xl bg-black/60 backdrop-blur-md rounded-xl px-6 py-3 border border-slate-700" onClick={(e) => e.stopPropagation()}>
-                            <p className="text-white text-center text-sm">{selectedImage.caption}</p>
+                        <div
+                            className="absolute bottom-0 left-0 right-0 h-[30%] z-40 flex items-end justify-center pb-10 px-6 cursor-pointer"
+                            onMouseEnter={handleCaptionHover}
+                            onMouseLeave={handleCaptionLeave}
+                            onClick={toggleCaption}
+                        >
+                            <div className={`transition-opacity duration-1000 ease-in-out ${captionVisible ? 'opacity-100' : 'opacity-0'} w-full`}>
+                                <div className="bg-black/60 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-2xl mx-auto max-w-2xl">
+                                    <p className="text-white text-center text-base font-medium drop-shadow-md">
+                                        {selectedImage.caption}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

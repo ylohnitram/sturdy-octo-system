@@ -4,6 +4,16 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.14.6 (2025-11-24)
+- **[SECURITY] DOMPurify:** Implementována knihovna `dompurify` pro robustní sanitizaci uživatelských vstupů (popisků fotek) místo vlastního regex řešení.
+
+### 2.14.5 (2025-11-24)
+- **[SECURITY] Input Sanitization:** Přidána sanitizace vstupu pro popisky fotek (odstranění HTML tagů) a omezení délky na 80 znaků pro zajištění bezpečnosti a konzistence UI.
+- **[UX] Auto-hide Captions:** Popisky v lightboxu se nyní automaticky skryjí po 3 sekundách pro nerušený zážitek. Znovu se zobrazí při pohybu myši nebo klepnutí.
+
+### 2.14.4 (2025-11-24)
+- **[UI] Lightbox Overlay:** Popisek fotky se nyní zobrazuje jako overlay přes spodní část obrazovky (místo pod fotkou), což zaručuje jeho viditelnost i na mobilních zařízeních s vysokými obrázky.
+
 ### 2.14.3 (2025-11-24)
 - **[UX] Caption Indicator:** Přidána ikona bubliny k fotkám v mřížce galerie, které mají popisek.
 - **[UI] Caption Display:** Zobrazení popisku v lightboxu je nyní plně integrováno.
