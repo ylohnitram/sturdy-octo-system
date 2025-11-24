@@ -413,9 +413,11 @@ const App: React.FC = () => {
       case AppView.DISCOVERY:
         return <DiscoveryView
           userStats={userStats}
+          userAvatarUrl={userAvatar}
           onConsumeAi={consumeAiCredit}
           onConsumeCoins={consumeCoins}
           onOpenPremium={openPremium}
+          onOpenChat={handleOpenChat}
         />;
       case AppView.LEADERBOARD:
         return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;

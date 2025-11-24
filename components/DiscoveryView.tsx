@@ -6,15 +6,18 @@ import { generateIcebreaker } from '../services/geminiService';
 import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
+import { MatchOverlay } from './MatchOverlay';
 
 interface DiscoveryViewProps {
     userStats: UserStats;
+    userAvatarUrl: string; // Added prop
     onConsumeAi: () => boolean;
     onConsumeCoins: (amount: number) => boolean;
     onOpenPremium: () => void;
+    onOpenChat: (partnerId: string) => void; // Added prop
 }
 
-export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsumeAi, onConsumeCoins, onOpenPremium }) => {
+export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAvatarUrl, onConsumeAi, onConsumeCoins, onOpenPremium, onOpenChat }) => {
     const [viewMode, setViewMode] = useState<'swipe' | 'radar'>('swipe');
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
     const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -26,6 +29,9 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
     const [userLocation, setUserLocation] = useState<{ lat: number, long: number } | null>(null);
     const [dailyLikes, setDailyLikes] = useState(0);
     const [showGallery, setShowGallery] = useState(false);
+
+    // Match Overlay State
+    const [matchData, setMatchData] = useState<{ partnerId: string; partnerName: string; partnerAvatar: string } | null>(null);
 
     // Radius State
     const [radius, setRadius] = useState(10);
@@ -96,22 +102,6 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
 
     const currentProfile = profiles[currentIndex];
 
-    const handleSwipe = async (direction: 'left' | 'right') => {
-        if (direction === 'right' && currentProfile) {
-            // Send Like DB Logic
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const result = await sendLike(user.id, currentProfile.id);
-                if (result.isMatch) {
-                    window.dispatchEvent(new CustomEvent('notch_match_found', { detail: { name: currentProfile.name } }));
-                }
-            }
-        }
-
-        setAiIcebreaker(null);
-        setCurrentIndex((prev) => prev + 1);
-    };
-
     const handleRefresh = () => {
         setCurrentIndex(0);
         loadCandidates();
@@ -136,9 +126,49 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, onConsu
         }
     };
 
+    const handleSwipe = async (direction: 'left' | 'right') => {
+        if (direction === 'right' && currentProfile) {
+            // Send Like DB Logic
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const result = await sendLike(user.id, currentProfile.id);
+                if (result.isMatch) {
+                    // SHOW MATCH OVERLAY
+                    setMatchData({
+                        partnerId: currentProfile.id,
+                        partnerName: currentProfile.name,
+                        partnerAvatar: currentProfile.avatarUrl
+                    });
+                    // Also dispatch event for global listeners if needed
+                    window.dispatchEvent(new CustomEvent('notch_match_found', { detail: { name: currentProfile.name } }));
+                }
+            }
+        }
+
+        setAiIcebreaker(null);
+        setCurrentIndex((prev) => prev + 1);
+    };
+
+    // ... (rest of the code)
+
     return (
         <div className="h-full flex flex-col max-w-md mx-auto pt-4 pb-20 px-4 overflow-hidden">
+            {/* Match Overlay */}
+            {matchData && (
+                <MatchOverlay
+                    myAvatarUrl={userAvatarUrl}
+                    partnerAvatarUrl={matchData.partnerAvatar}
+                    partnerName={matchData.partnerName}
+                    onChat={() => {
+                        setMatchData(null);
+                        onOpenChat(matchData.partnerId);
+                    }}
+                    onClose={() => setMatchData(null)}
+                />
+            )}
+
             {/* Top Toggle */}
+            {/* ... */}
             <div className="flex justify-between items-center mb-4">
                 <div className="bg-slate-800 p-1 rounded-xl flex">
                     <button

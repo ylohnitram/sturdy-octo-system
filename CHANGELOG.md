@@ -5,6 +5,12 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.8] - 2025-11-24
+### Added
+- **[UI] Match Celebration:** Přidána nová obrazovka "It's a Match!", která se zobrazí při vzájemné shodě.
+  - Obsahuje animaci avatarů, konfetový efekt a možnost okamžitě napsat zprávu.
+  - Zvyšuje vizuální odezvu a "šťavnatost" aplikace při úspěšném seznámení.
+
 ## [2.19.7] - 2025-11-24
 ### Improved
 - **[UX] Custom Delete Modal:** Nahrazen nativní `confirm()` dialog pro mazání záznamů v Černé Knize vlastním, stylovým modálním oknem, které lépe zapadá do designu aplikace.
