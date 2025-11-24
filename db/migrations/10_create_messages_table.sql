@@ -18,6 +18,11 @@ CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at
 -- Enable RLS for Messages
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist to avoid conflicts
+DROP POLICY IF EXISTS "Users can see messages from their matches" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages to their matches" ON public.messages;
+DROP POLICY IF EXISTS "Users can mark received messages as read" ON public.messages;
+
 -- Policies for Messages
 -- Users can see messages from their own matches
 CREATE POLICY "Users can see messages from their matches" ON public.messages
@@ -63,9 +68,6 @@ CREATE POLICY "Users can mark received messages as read" ON public.messages
             AND messages.sender_id != auth.uid()
         )
     );
-
--- Enable Realtime for Messages
-ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 
 -- Create blocked_users table if it doesn't exist (for ghost functionality)
 CREATE TABLE IF NOT EXISTS public.blocked_users (
