@@ -10,6 +10,7 @@ export const GalleryView: React.FC = () => {
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isPrivateUpload, setIsPrivateUpload] = useState(false);
+    const [uploadCaption, setUploadCaption] = useState(''); // NEW
     const [uploading, setUploading] = useState(false);
     const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,12 +40,13 @@ export const GalleryView: React.FC = () => {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (user) {
-            const newImage = await uploadGalleryImage(user.id, selectedFile, isPrivateUpload);
+            const newImage = await uploadGalleryImage(user.id, selectedFile, isPrivateUpload, uploadCaption);
             if (newImage) {
                 setGalleryImages([newImage, ...galleryImages]);
                 setShowUploadModal(false);
                 setSelectedFile(null);
                 setIsPrivateUpload(false);
+                setUploadCaption(''); // Clear caption
             } else {
                 alert('Chyba při nahrávání fotky.');
             }
@@ -160,6 +162,20 @@ export const GalleryView: React.FC = () => {
                                 <Lock size={20} />
                                 <span className="text-xs font-bold">Soukromá</span>
                             </button>
+                        </div>
+
+                        {/* Caption Input */}
+                        <div className="mb-4">
+                            <label className="text-xs text-slate-400 mb-2 block">Popisek (volitelné)</label>
+                            <input
+                                type="text"
+                                value={uploadCaption}
+                                onChange={(e) => setUploadCaption(e.target.value)}
+                                placeholder="Např. 'Na dovolené v Itálii' nebo emoji 🌴"
+                                maxLength={100}
+                                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-red-500 transition-colors"
+                            />
+                            <span className="text-[10px] text-slate-600 mt-1 block">{uploadCaption.length}/100</span>
                         </div>
 
                         <Button fullWidth onClick={handleGalleryUpload} disabled={uploading}>

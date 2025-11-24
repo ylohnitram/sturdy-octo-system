@@ -4,6 +4,12 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.14.0 (2025-11-24)
+- **[FEATURE] Gallery Captions:** Uživatelé mohou přidávat volitelné popisky k fotkám (max 100 znaků).
+- **[UX] Caption Input:** Nový input v upload modalu pro popisek s emoji supportem.
+- **[BACKEND] Caption Storage:** Nový sloupec `caption` v `gallery_images` tabulce.
+- **[API] Caption Support:** Aktualizován interface `GalleryImage` a všechny fetch/upload funkce.
+
 ### 2.13.24 (2025-11-24)
 - **[UX] Better Gallery Dialog:** Dynamický a srozumitelný text v unlock dialogu podle počtu fotek.
 - **[BUGFIX] RLS Policy:** Přidána SELECT policy pro gallery_images - opraveno zobrazování galerií.

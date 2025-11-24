@@ -537,6 +537,7 @@ export interface GalleryImage {
     imageUrl: string;
     isPrivate: boolean;
     isUnlocked?: boolean; // For frontend logic
+    caption?: string; // Optional caption/description
     createdAt: string;
 }
 
@@ -555,6 +556,7 @@ export const fetchUserGallery = async (userId: string): Promise<GalleryImage[]> 
             imageUrl: img.image_url,
             isPrivate: img.is_private,
             isUnlocked: true, // Owner always sees unlocked
+            caption: img.caption,
             createdAt: img.created_at
         }));
     } catch (e) {
@@ -636,6 +638,7 @@ export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryI
             imageUrl: img.image_url,
             isPrivate: img.is_private,
             isUnlocked: !img.is_private || unlockedMap.has(img.id),
+            caption: img.caption,
             createdAt: img.created_at
         }));
     } catch (e) {
@@ -644,7 +647,7 @@ export const fetchPublicGallery = async (targetUserId: string): Promise<GalleryI
     }
 };
 
-export const uploadGalleryImage = async (userId: string, file: File, isPrivate: boolean): Promise<GalleryImage | null> => {
+export const uploadGalleryImage = async (userId: string, file: File, isPrivate: boolean, caption?: string): Promise<GalleryImage | null> => {
     try {
         const fileExt = file.name.split('.').pop();
         const fileName = `gallery/${userId}/${Date.now()}.${fileExt}`;
@@ -665,7 +668,8 @@ export const uploadGalleryImage = async (userId: string, file: File, isPrivate: 
             .insert({
                 user_id: userId,
                 image_url: imageUrl,
-                is_private: isPrivate
+                is_private: isPrivate,
+                caption: caption || null
             })
             .select()
             .single();
@@ -677,6 +681,7 @@ export const uploadGalleryImage = async (userId: string, file: File, isPrivate: 
             imageUrl: data.image_url,
             isPrivate: data.is_private,
             isUnlocked: true,
+            caption: data.caption,
             createdAt: data.created_at
         };
 
