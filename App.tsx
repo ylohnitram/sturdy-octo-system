@@ -21,6 +21,7 @@ import { NotificationManager } from './components/NotificationManager';
 import { Header } from './components/Header';
 import { NotificationsPanel } from './components/NotificationsPanel';
 import { PublicProfileView } from './components/PublicProfileView';
+import { ChatView } from './components/ChatView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
@@ -356,6 +357,8 @@ const App: React.FC = () => {
         return <GalleryView />;
       case AppView.ANALYTICS:
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
+      case AppView.CHAT:
+        return <ChatView />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}

@@ -859,3 +859,113 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
 
     return count || 0;
 };
+// --- CHAT FUNCTIONS ---
+
+export interface ChatMessage {
+    id: string;
+    matchId: string;
+    senderId: string;
+    content: string;
+    createdAt: string;
+    readAt?: string;
+}
+
+export interface MatchPreview {
+    matchId: string;
+    partnerId: string;
+    partnerUsername: string;
+    partnerAvatar: string;
+    lastMessage?: string;
+    lastMessageTime?: string;
+    unreadCount: number;
+}
+
+export const fetchMatches = async (): Promise<MatchPreview[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase.rpc('get_user_matches', { p_user_id: user.id });
+
+    if (error) {
+        console.error('Error fetching matches:', error);
+        return [];
+    }
+
+    return (data || []).map((m: any) => ({
+        matchId: m.match_id,
+        partnerId: m.partner_id,
+        partnerUsername: m.partner_username,
+        partnerAvatar: m.partner_avatar,
+        lastMessage: m.last_message,
+        lastMessageTime: m.last_message_time,
+        unreadCount: m.unread_count
+    }));
+};
+
+export const fetchMessages = async (matchId: string): Promise<ChatMessage[]> => {
+    const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('match_id', matchId)
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching messages:', error);
+        return [];
+    }
+
+    return (data || []).map((m: any) => ({
+        id: m.id,
+        matchId: m.match_id,
+        senderId: m.sender_id,
+        content: m.content,
+        createdAt: m.created_at,
+        readAt: m.read_at
+    }));
+};
+
+export const sendMessage = async (matchId: string, content: string): Promise<ChatMessage | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+        .from('messages')
+        .insert({
+            match_id: matchId,
+            sender_id: user.id,
+            content: content
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error sending message:', error);
+        return null;
+    }
+
+    return {
+        id: data.id,
+        matchId: data.match_id,
+        senderId: data.sender_id,
+        content: data.content,
+        createdAt: data.created_at,
+        readAt: data.read_at
+    };
+};
+
+export const ghostUser = async (targetUserId: string): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase.rpc('ghost_user', {
+        p_blocker_id: user.id,
+        p_blocked_id: targetUserId
+    });
+
+    if (error) {
+        console.error('Error ghosting user:', error);
+        return false;
+    }
+
+    return true;
+};

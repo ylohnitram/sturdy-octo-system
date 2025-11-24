@@ -101,7 +101,8 @@ export enum AppView {
   GALLERY = 'gallery',
   ANALYTICS = 'analytics',
   PROFILE = 'profile',
-  USER_PROFILE = 'user_profile'
+  USER_PROFILE = 'user_profile',
+  CHAT = 'chat'
 }
 
 export interface Hotspot {

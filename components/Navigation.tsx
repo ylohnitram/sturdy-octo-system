@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Flame, Trophy, PieChart, User, BookLock, ImageIcon } from 'lucide-react';
+import { Flame, Trophy, PieChart, User, BookLock, ImageIcon, MessageCircle } from 'lucide-react';
 import { AppView } from '../types';
 
 interface NavigationProps {
@@ -14,7 +14,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate 
     { view: AppView.LEADERBOARD, icon: Trophy, label: 'Žebříček' },
     { view: AppView.JOURNAL, icon: BookLock, label: 'Deník' },
     { view: AppView.GALLERY, icon: ImageIcon, label: 'Galerie' },
-    { view: AppView.ANALYTICS, icon: PieChart, label: 'Statistika' },
+    { view: AppView.CHAT, icon: MessageCircle, label: 'Zprávy' },
     { view: AppView.PROFILE, icon: User, label: 'Profil' },
   ];
 

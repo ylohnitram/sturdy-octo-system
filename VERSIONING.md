@@ -4,6 +4,12 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.0 (2025-11-24)
+- **[FEATURE] Chat System:** Kompletní implementace chatu pro uživatele s Matchem.
+- **[FEATURE] Ghost Mode:** Možnost ignorovat uživatele (Ghost Mode), což trvale zablokuje komunikaci a skryje uživatele.
+- **[UI] Navigation:** Přidána záložka "Zprávy" do hlavní navigace (nahradila "Statistika").
+- **[DB] Schema:** Přidány tabulky `messages` a `blocked_users` a příslušné funkce.
+
 ### 2.14.7 (2025-11-24)
 - **[FIX] Gallery Modal Overlay:** Opraven problém, kdy se galerie zobrazovala pod hlavičkou aplikace a překrývala obsah. Nyní se vykresluje pomocí React Portal přímo do `body` s nejvyšší prioritou (z-index).
 - **[FIX] Caption Visibility:** Opravena viditelnost popisků, která byla ovlivněna špatným vrstvením elementů.
