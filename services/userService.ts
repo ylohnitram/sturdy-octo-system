@@ -103,6 +103,10 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             ? Math.min(100, Math.round(((statsData.body_count * 10) + (statsData.weekly_score * 2)) / 1.5))
             : 0;
 
+        // Check premium status
+        const isPremium = statsData.is_premium === true;
+        const tier = isPremium ? UserTier.PREMIUM : (profileData.tier || UserTier.FREE);
+
         const userStats: UserStats = {
             username: profileData.username || 'Lovce',
             bodyCount: statsData.body_count,
@@ -117,7 +121,7 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             invitesAvailable: statsData.invites_left,
             rank: undefined, // Fetched separately in LeaderboardView
             heat: heat,
-            tier: profileData.tier || UserTier.FREE,
+            tier: tier,
             isOnline: true,
             notificationCount: notificationCount,
             unreadConversationsCount: unreadConversationsCount
@@ -136,7 +140,7 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             bio: profileData.bio || '',
             avatarUrl: profileData.avatar_url || 'https://picsum.photos/200',
             stats: userStats,
-            tier: profileData.tier || UserTier.FREE,
+            tier: tier,
             isOnline: true,
             distanceKm: 0
         };
@@ -155,7 +159,7 @@ export const updateUserPreferences = async (userId: string, gender: Gender, targ
         .eq('id', userId);
 };
 
-export const updateNotificationSettings = async (userId: string, settings: { notifyProximity?: boolean, notifyLikes?: boolean }) => {
+export const updateNotificationSettings = async (userId: string, settings: { notifyProximity?: boolean, notifyLikes?: boolean, notifyRivals?: boolean }) => {
     const updateData: any = {};
     if (settings.notifyProximity !== undefined) updateData.notify_proximity = settings.notifyProximity;
     if (settings.notifyLikes !== undefined) updateData.notify_likes = settings.notifyLikes;

@@ -432,12 +432,14 @@ const App: React.FC = () => {
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}
+          avatarUrl={userAvatar}
           onActivatePanic={activatePanic}
           onOpenStore={openStore}
           onOpenPremium={openPremium}
           onConsumeAi={consumeAiCredit}
           onConsumeCoins={consumeCoins}
           onNavigate={(view) => setCurrentView(view as AppView)}
+          onAvatarUpdate={(newUrl) => setUserAvatar(newUrl)}
         />;
       case AppView.USER_PROFILE:
         return selectedUserId ? (

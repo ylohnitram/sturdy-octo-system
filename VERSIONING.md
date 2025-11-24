@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.5 (2025-11-24)
+- **[FIX] Profile Picture:** Opravena chyba, kdy se profilová fotka po nahrání neaktualizovala v UI (přidána synchronizace stavu).
+- **[FIX] Gold Status:** Opraveno zobrazování "FREE" účtu pro uživatele s aktivním Gold členstvím. Nyní se správně zobrazuje "Notch Gold AKTIVNÍ" a deaktivuje se prodejní modal.
+
 ### 2.16.4 (2025-11-24)
 - **[UI] Unghost Modal:** Přidán potvrzovací modal pro odghostování uživatele v Ghost Listu.
 - **[FEATURE] Ghost Filtering:** Ghostnutí uživatelé (oboustranně) se nyní nezobrazují v Lovu/Radaru.

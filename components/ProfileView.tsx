@@ -15,6 +15,8 @@ interface ProfileViewProps {
     onConsumeAi: () => boolean;
     onConsumeCoins: (amount: number) => boolean;
     onNavigate?: (view: string) => void;
+    onAvatarUpdate?: (newUrl: string) => void;
+    avatarUrl?: string;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -24,7 +26,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     onOpenPremium,
     onConsumeAi,
     onConsumeCoins,
-    onNavigate
+    onNavigate,
+    onAvatarUpdate,
+    avatarUrl: initialAvatarUrl
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -32,7 +36,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     const [generatingBio, setGeneratingBio] = useState(false);
     const [unlockedGalleries, setUnlockedGalleries] = useState<number[]>([]);
     const [uploading, setUploading] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || '');
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
@@ -50,6 +54,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Sync state with prop if it changes
+    useEffect(() => {
+        if (initialAvatarUrl) {
+            setAvatarUrl(initialAvatarUrl);
+        }
+    }, [initialAvatarUrl]);
+
     // Fetch profile data on mount
     useEffect(() => {
         const getUser = async () => {
@@ -59,7 +70,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     const { data } = await supabase.from('profiles').select('bio, avatar_url, target_gender, notify_proximity, notify_likes').eq('id', user.id).single();
                     if (data) {
                         if (data.bio) setBio(data.bio);
-                        if (data.avatar_url) setAvatarUrl(data.avatar_url);
+                        // Only set from DB if we don't have it from props/state yet, or to ensure freshness
+                        if (data.avatar_url && !initialAvatarUrl) setAvatarUrl(data.avatar_url);
                         if (data.target_gender) setTargetGender(data.target_gender);
                         if (data.notify_proximity !== undefined) setNotifyProximity(data.notify_proximity);
                         if (data.notify_likes !== undefined) setNotifyLikes(data.notify_likes);
@@ -72,7 +84,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             }
         }
         getUser();
-    }, []);
+    }, [initialAvatarUrl]);
 
     const handleCopyInvite = () => {
         navigator.clipboard.writeText(userStats.inviteCode);
@@ -133,7 +145,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
             if (user) {
                 const publicUrl = await uploadAvatar(user.id, file);
-                if (publicUrl) setAvatarUrl(publicUrl);
+                if (publicUrl) {
+                    setAvatarUrl(publicUrl);
+                    if (onAvatarUpdate) onAvatarUpdate(publicUrl);
+                }
             }
         } catch (error) {
             alert('Error uploading avatar!');
@@ -416,15 +431,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             {/* Settings Group */}
             <div className="space-y-3">
                 <div
-                    onClick={onOpenPremium}
-                    className="bg-slate-800 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-700 transition-colors"
+                    onClick={userStats.tier === 'PREMIUM' ? undefined : onOpenPremium}
+                    className={`bg-slate-800 rounded-xl p-4 flex items-center gap-4 transition-colors ${userStats.tier === 'PREMIUM' ? 'opacity-100' : 'cursor-pointer hover:bg-slate-700'}`}
                 >
-                    <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
-                        <Star size={20} />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${userStats.tier === 'PREMIUM' ? 'bg-yellow-500 text-slate-900' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                        <Star size={20} fill={userStats.tier === 'PREMIUM' ? 'currentColor' : 'none'} />
                     </div>
                     <div className="flex-grow">
-                        <div className="font-bold text-white">Notch Gold</div>
-                        <div className="text-xs text-slate-400">Získej neomezené swipy a přehledy</div>
+                        <div className="font-bold text-white flex items-center gap-2">
+                            Notch Gold
+                            {userStats.tier === 'PREMIUM' && <span className="text-[10px] bg-yellow-500 text-slate-900 px-2 py-0.5 rounded-full font-bold">AKTIVNÍ</span>}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                            {userStats.tier === 'PREMIUM' ? 'Máš aktivní Gold členství' : 'Získej neomezené swipy a přehledy'}
+                        </div>
                     </div>
                 </div>
 
