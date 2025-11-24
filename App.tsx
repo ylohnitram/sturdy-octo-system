@@ -265,6 +265,34 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Real-time notification count updates
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const channel = supabase
+      .channel('notification_updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        async () => {
+          // Refresh notification count
+          const { getUnreadNotificationsCount } = await import('./services/userService');
+          const count = await getUnreadNotificationsCount(session.user.id);
+          setUserStats(prev => ({ ...prev, notificationCount: count }));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id]);
+
   // Monetization & Features Logic
   const openPremium = () => setIsPremiumModalOpen(true);
   const closePremium = () => setIsPremiumModalOpen(false);
@@ -434,6 +462,7 @@ const App: React.FC = () => {
       <NotificationManager
         userId={session?.user?.id || null}
         onNewNotification={handleNewNotification}
+        currentView={currentView}
       />
       <PWAInstallPrompt />
       {session && showOnboarding && <OnboardingWizard userId={session.user.id} onComplete={handleOnboardingComplete} />}

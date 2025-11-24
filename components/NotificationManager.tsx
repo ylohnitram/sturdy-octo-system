@@ -8,9 +8,10 @@ interface NotificationManagerProps {
     userId: string | null;
     onProximityCheck?: () => void;
     onNewNotification?: (notification: any) => void;
+    currentView?: string;
 }
 
-export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification }) => {
+export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId, onProximityCheck, onNewNotification, currentView }) => {
     const [notification, setNotification] = useState<{ type: string, text: string } | null>(null);
     const [settings, setSettings] = useState({ proximity: true, likes: true });
 
@@ -48,7 +49,10 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({ userId
                     } else if (newNotif.type === 'match') {
                         showToast('match', 'Máte nový Match! ❤️‍🔥');
                     } else if (newNotif.type === 'message') {
-                        showToast('message', 'Nová zpráva! 💬');
+                        // Don't show toast if user is currently in chat view
+                        if (currentView !== 'CHAT') {
+                            showToast('message', 'Nová zpráva! 💬');
+                        }
                     }
                     // Increment badge count
                     if (onNewNotification) onNewNotification(newNotif);

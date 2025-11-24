@@ -70,14 +70,21 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                 },
                 (payload) => {
                     const newMsg = payload.new as any;
-                    setMessages(prev => [...prev, {
-                        id: newMsg.id,
-                        matchId: newMsg.match_id,
-                        senderId: newMsg.sender_id,
-                        content: newMsg.content,
-                        createdAt: newMsg.created_at,
-                        readAt: newMsg.read_at
-                    }]);
+
+                    // Check if message already exists (prevent duplicates from optimistic update)
+                    setMessages(prev => {
+                        const exists = prev.some(m => m.id === newMsg.id);
+                        if (exists) return prev;
+
+                        return [...prev, {
+                            id: newMsg.id,
+                            matchId: newMsg.match_id,
+                            senderId: newMsg.sender_id,
+                            content: newMsg.content,
+                            createdAt: newMsg.created_at,
+                            readAt: newMsg.read_at
+                        }];
+                    });
 
                     if (newMsg.sender_id === activeMatch.partnerId) {
                         markConversationAsRead(activeMatch.partnerId);
