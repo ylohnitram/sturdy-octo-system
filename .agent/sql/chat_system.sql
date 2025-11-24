@@ -180,6 +180,37 @@ BEGIN
 END;
 $$;
 
+-- Unghost User Function (Remove from blocked list)
+CREATE OR REPLACE FUNCTION unghost_user(p_blocker_id UUID, p_blocked_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    DELETE FROM blocked_users
+    WHERE blocker_id = p_blocker_id AND blocked_id = p_blocked_id;
+END;
+$$;
+
+-- Get Ghost List (Users I have ghosted)
+CREATE OR REPLACE FUNCTION get_ghost_list(p_user_id UUID)
+RETURNS TABLE (
+    blocked_id UUID,
+    username TEXT,
+    avatar_url TEXT,
+    blocked_at TIMESTAMPTZ
+) LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        b.blocked_id,
+        p.username,
+        p.avatar_url,
+        b.created_at as blocked_at
+    FROM blocked_users b
+    JOIN profiles p ON p.id = b.blocked_id
+    WHERE b.blocker_id = p_user_id
+    ORDER BY b.created_at DESC;
+END;
+$$;
+
 -- Mark Conversation as Read (and notifications)
 CREATE OR REPLACE FUNCTION mark_conversation_as_read(p_user_id UUID, p_partner_id UUID)
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$

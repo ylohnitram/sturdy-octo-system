@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Settings, Edit, Shield, Star, Share2, LogOut, Plus, Lock, Award, EyeOff, Wand2, Coins, Copy, Camera, Ticket, KeyRound, Trash2, AlertTriangle, Cookie, Footprints, Info, X, Users, Bell, Sparkles } from 'lucide-react';
+import { Settings, Edit, Shield, Star, Share2, LogOut, Plus, Lock, Award, EyeOff, Wand2, Coins, Copy, Camera, Ticket, KeyRound, Trash2, AlertTriangle, Cookie, Footprints, Info, X, Users, Bell, Sparkles, Ghost } from 'lucide-react';
 import { Button } from './Button';
 import { UserStats, TargetGender } from '../types';
 import { generateUserBio } from '../services/geminiService';
@@ -14,6 +14,7 @@ interface ProfileViewProps {
     onOpenPremium: () => void;
     onConsumeAi: () => boolean;
     onConsumeCoins: (amount: number) => boolean;
+    onNavigate?: (view: string) => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -22,7 +23,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     onOpenStore,
     onOpenPremium,
     onConsumeAi,
-    onConsumeCoins
+    onConsumeCoins,
+    onNavigate
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -425,6 +427,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         <div className="text-xs text-slate-400">Získej neomezené swipy a přehledy</div>
                     </div>
                 </div>
+
+                {/* Ghost List */}
+                <button
+                    onClick={() => onNavigate?.('GHOST_LIST')}
+                    className="bg-slate-800 rounded-xl p-4 flex items-center gap-4 hover:bg-slate-700 transition-colors text-left w-full"
+                >
+                    <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
+                        <Ghost size={20} />
+                    </div>
+                    <div className="flex-grow">
+                        <div className="font-bold text-white">Ghost List</div>
+                        <div className="text-xs text-slate-400">Ghostnutí uživatelé</div>
+                    </div>
+                </button>
 
                 {/* Preferences */}
                 <div className="bg-slate-800 rounded-xl overflow-hidden">

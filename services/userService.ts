@@ -995,3 +995,48 @@ export const markConversationAsRead = async (partnerId: string): Promise<void> =
         console.error('Error marking conversation as read:', error);
     }
 };
+
+export const unghostUser = async (targetUserId: string): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase.rpc('unghost_user', {
+        p_blocker_id: user.id,
+        p_blocked_id: targetUserId
+    });
+
+    if (error) {
+        console.error('Error unghosting user:', error);
+        return false;
+    }
+
+    return true;
+};
+
+export interface GhostedUser {
+    blockedId: string;
+    username: string;
+    avatarUrl: string;
+    blockedAt: string;
+}
+
+export const fetchGhostList = async (): Promise<GhostedUser[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase.rpc('get_ghost_list', {
+        p_user_id: user.id
+    });
+
+    if (error) {
+        console.error('Error fetching ghost list:', error);
+        return [];
+    }
+
+    return (data || []).map((item: any) => ({
+        blockedId: item.blocked_id,
+        username: item.username,
+        avatarUrl: item.avatar_url,
+        blockedAt: item.blocked_at
+    }));
+};

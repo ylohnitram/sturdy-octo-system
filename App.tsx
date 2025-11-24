@@ -22,6 +22,7 @@ import { Header } from './components/Header';
 import { NotificationsPanel } from './components/NotificationsPanel';
 import { PublicProfileView } from './components/PublicProfileView';
 import { ChatView } from './components/ChatView';
+import { GhostListView } from './components/GhostListView';
 import { LoadingScreen } from './components/LoadingScreen';
 import { AppView, UserStats } from './types';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
@@ -426,6 +427,8 @@ const App: React.FC = () => {
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.CHAT:
         return <ChatView initialChatPartnerId={initialChatPartnerId} onMessageRead={handleMessageRead} onRefreshStats={handleRefreshStats} />;
+      case AppView.GHOST_LIST:
+        return <GhostListView />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}
@@ -434,6 +437,7 @@ const App: React.FC = () => {
           onOpenPremium={openPremium}
           onConsumeAi={consumeAiCredit}
           onConsumeCoins={consumeCoins}
+          onNavigate={(view) => setCurrentView(view as AppView)}
         />;
       case AppView.USER_PROFILE:
         return selectedUserId ? (

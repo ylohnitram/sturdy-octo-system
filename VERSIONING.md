@@ -4,6 +4,12 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.0 (2025-11-24)
+- **[FEATURE] Ghost List:** Nový view pro správu ghostnutých uživatelů s možností odghostnout.
+- **[UI] Chat Ghost Icon:** Nahrazena ikona tří teček moderní ikonou ducha s hover efekty.
+- **[SQL] Unghost Function:** Přidána funkce `unghost_user` a `get_ghost_list` pro správu ghost listu.
+- **[UX] Ghost Management:** Uživatelé mohou odghostnout ostatní a obnovit komunikaci od daného okamžiku.
+
 ### 2.15.11 (2025-11-24)
 - **[FIX] Duplicate Messages:** Opraveno zobrazování zpráv 2x - přidána kontrola duplicit v realtime subscription.
 - **[UX] Chat Notifications:** Toast notifikace se již nezobrazují když je uživatel v Chat view (vidí zprávy přímo).

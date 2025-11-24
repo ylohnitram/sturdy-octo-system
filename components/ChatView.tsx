@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Send, Ghost, MoreVertical, Loader2, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, Ghost, Loader2, MessageCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
 import DOMPurify from 'dompurify';
@@ -234,8 +234,12 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                     </div>
                 </div>
                 <div className="relative">
-                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 text-slate-400 hover:text-white">
-                        <MoreVertical size={20} />
+                    <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-2 text-slate-400 hover:text-red-400 transition-colors group"
+                        title="Ghost Mode"
+                    >
+                        <Ghost size={22} className="group-hover:scale-110 transition-transform" />
                     </button>
                     {showMenu && (
                         <>
