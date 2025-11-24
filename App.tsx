@@ -420,7 +420,7 @@ const App: React.FC = () => {
       case AppView.LEADERBOARD:
         return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.JOURNAL:
-        return <JournalView />;
+        return <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />;
       case AppView.GALLERY:
         return <GalleryView />;
       case AppView.ANALYTICS:

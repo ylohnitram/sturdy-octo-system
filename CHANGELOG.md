@@ -5,6 +5,13 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.6] - 2025-11-24
+### Added
+- **[UI] Journal Action Menu:** Přidáno interaktivní menu pro záznamy v Černé Knize.
+  - Po kliknutí na záznam se zobrazí možnosti: Smazat, Upravit, Galerie, Zpráva, Odghostnout.
+  - Menu dynamicky reaguje na stav uživatele (Aktivní, Ghost, Smazaný).
+  - Přidána vizuální indikace stavu profilu (lebka pro smazané, duch pro ghostnuté).
+
 ## [2.19.5] - 2025-11-24
 ### Fixed
 - **[UI] Duplicate Matches:** Opraveno zobrazování duplicitních uživatelů v seznamu pro Černou Knihu.

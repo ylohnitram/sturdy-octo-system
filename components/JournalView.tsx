@@ -1,17 +1,29 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Star, Tag, X, Save, CheckCircle, Ghost } from 'lucide-react';
+import { Search, Plus, Star, Tag, X, Save, CheckCircle, Ghost, Trash2, Edit2, Image, MessageCircle, UserX, Skull, MoreHorizontal } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { fetchAllMatchedUsersForDiary } from '../services/userService';
+import { fetchAllMatchedUsersForDiary, unghostUser } from '../services/userService';
 import { JournalEntry, UserProfile } from '../types';
 import { Button } from './Button';
 
+interface JournalViewProps {
+    onOpenChat?: (partnerId: string) => void;
+    onViewProfile?: (userId: string) => void;
+}
 
-export const JournalView: React.FC = () => {
+interface ExtendedJournalEntry extends JournalEntry {
+    profileStatus: 'active' | 'ghosted' | 'deleted';
+}
+
+export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProfile }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [entries, setEntries] = useState<JournalEntry[]>([]);
+    const [entries, setEntries] = useState<ExtendedJournalEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // Action Modal State
+    const [selectedEntryForAction, setSelectedEntryForAction] = useState<ExtendedJournalEntry | null>(null);
+    const [showActionModal, setShowActionModal] = useState(false);
 
     // Available matched users for selection
     const [availableUsers, setAvailableUsers] = useState<Array<UserProfile & { matchCreatedAt: string; isGhostedByMe: boolean; ageAtMatch?: number }>>([]);
@@ -24,31 +36,64 @@ export const JournalView: React.FC = () => {
     const [newTags, setNewTags] = useState('');
     const [newNotes, setNewNotes] = useState('');
     const [saving, setSaving] = useState(false);
+    const [editingEntryId, setEditingEntryId] = useState<string | null>(null); // ID if editing existing entry
 
     const fetchEntries = async () => {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data, error } = await supabase
+        // 1. Fetch Journal Entries
+        const { data: journalData, error } = await supabase
             .from('journal_entries')
             .select('*')
             .eq('user_id', user.id)
             .order('date', { ascending: false });
 
-        if (data) {
-            const mappedEntries: JournalEntry[] = data.map((e: any) => ({
-                id: e.id,
-                name: e.name,
-                date: e.date,
-                rating: e.rating,
-                partnerAge: e.partner_age,
-                partnerAgeAtMatch: e.partner_age_at_match,
-                tags: e.tags || [],
-                notes: e.notes,
-                avatarUrl: e.avatar_url || `https://ui-avatars.com/api/?name=${e.name}&background=random`,
-                linkedProfileId: e.linked_profile_id
-            }));
+        if (journalData) {
+            // 2. Collect Linked Profile IDs
+            const linkedIds = journalData
+                .map((e: any) => e.linked_profile_id)
+                .filter((id: string) => id); // Remove nulls
+
+            // 3. Fetch Profiles (to check existence)
+            const { data: profilesData } = await supabase
+                .from('profiles')
+                .select('id')
+                .in('id', linkedIds);
+
+            const existingProfileIds = new Set((profilesData || []).map((p: any) => p.id));
+
+            // 4. Fetch Ghost List
+            const { data: ghostData } = await supabase.rpc('get_ghost_list');
+            const ghostedIds = new Set((ghostData || []).map((g: any) => g.blocked_id));
+
+            // 5. Map Entries with Status
+            const mappedEntries: ExtendedJournalEntry[] = journalData.map((e: any) => {
+                let status: 'active' | 'ghosted' | 'deleted' = 'active';
+
+                if (e.linked_profile_id) {
+                    if (!existingProfileIds.has(e.linked_profile_id)) {
+                        status = 'deleted';
+                    } else if (ghostedIds.has(e.linked_profile_id)) {
+                        status = 'ghosted';
+                    }
+                }
+
+                return {
+                    id: e.id,
+                    name: e.name,
+                    date: e.date,
+                    rating: e.rating,
+                    partnerAge: e.partner_age,
+                    partnerAgeAtMatch: e.partner_age_at_match,
+                    tags: e.tags || [],
+                    notes: e.notes,
+                    avatarUrl: e.avatar_url || `https://ui-avatars.com/api/?name=${e.name}&background=random`,
+                    linkedProfileId: e.linked_profile_id,
+                    profileStatus: status
+                };
+            });
             setEntries(mappedEntries);
         }
         setLoading(false);
@@ -84,28 +129,41 @@ export const JournalView: React.FC = () => {
         if (user) {
             const tagsArray = newTags.split(',').map(t => t.trim()).filter(t => t.length > 0);
 
-            const { error } = await supabase.from('journal_entries').insert({
-                user_id: user.id,
-                name: selectedProfile.name,
-                date: newDate,
-                rating: newRating,
-                partner_age: selectedProfile.age,
-                partner_age_at_match: selectedProfile.ageAtMatch || null,
-                tags: tagsArray,
-                notes: newNotes,
-                linked_profile_id: selectedProfile.id,
-                avatar_url: selectedProfile.avatarUrl
-            });
+            let error;
+
+            if (editingEntryId) {
+                // UPDATE
+                const { error: updateError } = await supabase
+                    .from('journal_entries')
+                    .update({
+                        date: newDate,
+                        rating: newRating,
+                        tags: tagsArray,
+                        notes: newNotes,
+                        // Name, Age, LinkedProfile, Avatar are NOT updated to preserve history/integrity
+                    })
+                    .eq('id', editingEntryId);
+                error = updateError;
+            } else {
+                // INSERT
+                const { error: insertError } = await supabase.from('journal_entries').insert({
+                    user_id: user.id,
+                    name: selectedProfile.name,
+                    date: newDate,
+                    rating: newRating,
+                    partner_age: selectedProfile.age,
+                    partner_age_at_match: selectedProfile.ageAtMatch || null,
+                    tags: tagsArray,
+                    notes: newNotes,
+                    linked_profile_id: selectedProfile.id,
+                    avatar_url: selectedProfile.avatarUrl
+                });
+                error = insertError;
+            }
 
             if (!error) {
                 setIsAddModalOpen(false);
-                // Reset form
-                setSelectedProfile(null);
-                setNewDate(new Date().toISOString().split('T')[0]);
-                setNewRating(3);
-                setNewTags('');
-                setNewNotes('');
-                // Refresh list
+                resetForm();
                 fetchEntries();
             } else {
                 alert('Chyba při ukládání.');
@@ -114,6 +172,95 @@ export const JournalView: React.FC = () => {
         }
         setSaving(false);
     };
+
+    const resetForm = () => {
+        setSelectedProfile(null);
+        setNewDate(new Date().toISOString().split('T')[0]);
+        setNewRating(3);
+        setNewTags('');
+        setNewNotes('');
+        setEditingEntryId(null);
+    };
+
+    const handleEntryClick = (entry: ExtendedJournalEntry) => {
+        setSelectedEntryForAction(entry);
+        setShowActionModal(true);
+    };
+
+    // --- ACTIONS ---
+
+    const handleDeleteEntry = async () => {
+        if (!selectedEntryForAction) return;
+        if (!confirm('Opravdu chceš smazat tento záznam?')) return;
+
+        const { error } = await supabase
+            .from('journal_entries')
+            .delete()
+            .eq('id', selectedEntryForAction.id);
+
+        if (!error) {
+            setEntries(prev => prev.filter(e => e.id !== selectedEntryForAction.id));
+            setShowActionModal(false);
+        } else {
+            alert('Chyba při mazání.');
+        }
+    };
+
+    const handleEditEntry = () => {
+        if (!selectedEntryForAction) return;
+
+        // Pre-fill form
+        setSelectedProfile({
+            id: selectedEntryForAction.linkedProfileId || '',
+            name: selectedEntryForAction.name,
+            age: selectedEntryForAction.partnerAge,
+            avatarUrl: selectedEntryForAction.avatarUrl,
+            matchCreatedAt: '', // Not needed for edit
+            isGhostedByMe: selectedEntryForAction.profileStatus === 'ghosted',
+            ageAtMatch: selectedEntryForAction.partnerAgeAtMatch,
+            bio: '', stats: {} as any, tier: 'FREE' as any, isOnline: false, distanceKm: 0
+        });
+        setNewDate(selectedEntryForAction.date);
+        setNewRating(selectedEntryForAction.rating);
+        setNewTags(selectedEntryForAction.tags.join(', '));
+        setNewNotes(selectedEntryForAction.notes || '');
+        setEditingEntryId(selectedEntryForAction.id);
+
+        setShowActionModal(false);
+        setIsAddModalOpen(true);
+    };
+
+    const handleViewGallery = () => {
+        if (selectedEntryForAction?.linkedProfileId && onViewProfile) {
+            onViewProfile(selectedEntryForAction.linkedProfileId);
+            setShowActionModal(false);
+        }
+    };
+
+    const handleSendMessage = () => {
+        if (selectedEntryForAction?.linkedProfileId && onOpenChat) {
+            onOpenChat(selectedEntryForAction.linkedProfileId);
+            setShowActionModal(false);
+        }
+    };
+
+    const handleUnghost = async () => {
+        if (!selectedEntryForAction?.linkedProfileId) return;
+
+        const success = await unghostUser(selectedEntryForAction.linkedProfileId);
+        if (success) {
+            // Update local state
+            setEntries(prev => prev.map(e =>
+                e.id === selectedEntryForAction.id ? { ...e, profileStatus: 'active' } : e
+            ));
+            // Update selected entry status to refresh modal buttons immediately
+            setSelectedEntryForAction(prev => prev ? { ...prev, profileStatus: 'active' } : null);
+            alert('Uživatel byl odghostnut.');
+        } else {
+            alert('Chyba při odghostování.');
+        }
+    };
+
 
     // Stats Calculation
     const totalEntries = entries.length;
@@ -136,7 +283,7 @@ export const JournalView: React.FC = () => {
                 </div>
                 <Button
                     size="sm"
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={() => { resetForm(); setIsAddModalOpen(true); }}
                     className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full w-10 h-10 !p-0 flex items-center justify-center shadow-lg shadow-red-900/20"
                 >
                     <Plus size={24} />
@@ -184,27 +331,41 @@ export const JournalView: React.FC = () => {
                 <div className="text-center py-10 border-2 border-dashed border-slate-700 rounded-2xl">
                     <p className="text-slate-500 font-bold mb-2">Zatím prázdno.</p>
                     <p className="text-xs text-slate-600 mb-4">Ulov někoho a přidej první zářez.</p>
-                    <Button size="sm" variant="secondary" onClick={() => setIsAddModalOpen(true)}>+ Přidat první</Button>
+                    <Button size="sm" variant="secondary" onClick={() => { resetForm(); setIsAddModalOpen(true); }}>+ Přidat první</Button>
                 </div>
             )}
 
             {/* Entries List */}
             <div className="space-y-4 pb-20">
                 {entries.filter(e => e.name.toLowerCase().includes(searchTerm.toLowerCase()) || e.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))).map((entry) => (
-                    <div key={entry.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 relative group hover:border-red-500/50 transition-colors">
+                    <div
+                        key={entry.id}
+                        onClick={() => handleEntryClick(entry)}
+                        className="bg-slate-800 rounded-xl p-4 border border-slate-700 relative group hover:border-red-500/50 transition-all cursor-pointer active:scale-[0.98]"
+                    >
 
                         <div className="flex items-start gap-4">
                             <div className="relative">
-                                <img src={entry.avatarUrl} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 bg-slate-700" />
-                                {entry.linkedProfileId && (
+                                <img src={entry.avatarUrl} alt="" className={`w-12 h-12 rounded-full object-cover border-2 bg-slate-700 ${entry.profileStatus === 'ghosted' ? 'grayscale border-slate-600' : 'border-slate-600'}`} />
+                                {entry.profileStatus === 'active' && entry.linkedProfileId && (
                                     <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 border-2 border-slate-800" title="Ověřený Notch uživatel">
                                         <CheckCircle size={10} className="text-white" />
+                                    </div>
+                                )}
+                                {entry.profileStatus === 'ghosted' && (
+                                    <div className="absolute -bottom-1 -right-1 bg-slate-700 rounded-full p-0.5 border-2 border-slate-800" title="Ghostnutý uživatel">
+                                        <Ghost size={10} className="text-slate-400" />
+                                    </div>
+                                )}
+                                {entry.profileStatus === 'deleted' && (
+                                    <div className="absolute -bottom-1 -right-1 bg-red-900 rounded-full p-0.5 border-2 border-slate-800" title="Smazaný profil">
+                                        <Skull size={10} className="text-red-400" />
                                     </div>
                                 )}
                             </div>
                             <div className="flex-grow">
                                 <div className="flex justify-between items-start pr-2">
-                                    <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                                    <h3 className={`font-bold text-lg flex items-center gap-2 ${entry.profileStatus === 'deleted' ? 'text-slate-500 line-through' : 'text-white'}`}>
                                         {entry.name}
                                     </h3>
                                     <span className="text-xs text-slate-500 font-mono">{entry.date}</span>
@@ -236,17 +397,120 @@ export const JournalView: React.FC = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* More Icon Indicator */}
+                            <div className="absolute top-4 right-4 text-slate-600 opacity-50 group-hover:opacity-100">
+                                <MoreHorizontal size={20} />
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {/* ACTION MODAL */}
+            {showActionModal && selectedEntryForAction && (
+                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowActionModal(false)}>
+                    <div className="w-full max-w-sm bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="p-6 text-center border-b border-slate-800 bg-slate-900/50">
+                            <div className="relative inline-block mb-3">
+                                <img
+                                    src={selectedEntryForAction.avatarUrl}
+                                    className={`w-20 h-20 rounded-full object-cover border-4 border-slate-800 shadow-xl ${selectedEntryForAction.profileStatus === 'ghosted' ? 'grayscale' : ''}`}
+                                    alt=""
+                                />
+                                {selectedEntryForAction.profileStatus === 'ghosted' && (
+                                    <div className="absolute bottom-0 right-0 bg-slate-700 p-1.5 rounded-full border-4 border-slate-900">
+                                        <Ghost size={16} className="text-slate-300" />
+                                    </div>
+                                )}
+                                {selectedEntryForAction.profileStatus === 'deleted' && (
+                                    <div className="absolute bottom-0 right-0 bg-red-900 p-1.5 rounded-full border-4 border-slate-900">
+                                        <Skull size={16} className="text-red-300" />
+                                    </div>
+                                )}
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-1">{selectedEntryForAction.name}</h3>
+                            <div className="text-sm text-slate-500">
+                                {selectedEntryForAction.profileStatus === 'active' && 'Aktivní profil'}
+                                {selectedEntryForAction.profileStatus === 'ghosted' && 'Ghostnutý uživatel'}
+                                {selectedEntryForAction.profileStatus === 'deleted' && 'Smazaný profil'}
+                            </div>
+                        </div>
+
+                        {/* Actions Grid */}
+                        <div className="p-4 grid gap-2">
+                            {/* 1. DELETE (Always available) */}
+                            <button
+                                onClick={handleDeleteEntry}
+                                className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-red-900/20 text-red-400 hover:text-red-300 transition-colors border border-slate-700 hover:border-red-900/50"
+                            >
+                                <div className="bg-red-500/10 p-2 rounded-lg"><Trash2 size={20} /></div>
+                                <div className="font-semibold">Smazat záznam</div>
+                            </button>
+
+                            {/* 2. EDIT (Always available) */}
+                            <button
+                                onClick={handleEditEntry}
+                                className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700"
+                            >
+                                <div className="bg-slate-700 p-2 rounded-lg"><Edit2 size={20} /></div>
+                                <div className="font-semibold">Upravit záznam</div>
+                            </button>
+
+                            {/* 3. GALLERY (If not deleted) */}
+                            {selectedEntryForAction.profileStatus !== 'deleted' && (
+                                <button
+                                    onClick={handleViewGallery}
+                                    className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700"
+                                >
+                                    <div className="bg-purple-500/10 p-2 rounded-lg text-purple-400"><Image size={20} /></div>
+                                    <div className="font-semibold">Zobrazit galerii</div>
+                                </button>
+                            )}
+
+                            {/* 4. MESSAGE (Only if active) */}
+                            {selectedEntryForAction.profileStatus === 'active' && (
+                                <button
+                                    onClick={handleSendMessage}
+                                    className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700"
+                                >
+                                    <div className="bg-blue-500/10 p-2 rounded-lg text-blue-400"><MessageCircle size={20} /></div>
+                                    <div className="font-semibold">Napsat zprávu</div>
+                                </button>
+                            )}
+
+                            {/* 5. UNGHOST (Only if ghosted) */}
+                            {selectedEntryForAction.profileStatus === 'ghosted' && (
+                                <button
+                                    onClick={handleUnghost}
+                                    className="flex items-center gap-3 w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700"
+                                >
+                                    <div className="bg-green-500/10 p-2 rounded-lg text-green-400"><UserX size={20} /></div>
+                                    <div className="font-semibold">Odghostnout</div>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Cancel */}
+                        <div className="p-4 pt-0">
+                            <button
+                                onClick={() => setShowActionModal(false)}
+                                className="w-full py-3 text-slate-500 font-medium hover:text-white transition-colors"
+                            >
+                                Zrušit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ADD ENTRY MODAL */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-4">
                     <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-                            <h3 className="font-bold text-white">Nový Zářez</h3>
+                            <h3 className="font-bold text-white">{editingEntryId ? 'Upravit Zářez' : 'Nový Zářez'}</h3>
                             <button onClick={() => setIsAddModalOpen(false)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white">
                                 <X size={20} />
                             </button>
@@ -301,7 +565,7 @@ export const JournalView: React.FC = () => {
                             ) : (
                                 <>
                                     {/* SELECTED USER DISPLAY */}
-                                    <div className="bg-slate-800 p-3 rounded-xl border border-blue-500/50 flex items-center justify-between">
+                                    <div className={`bg-slate-800 p-3 rounded-xl border border-blue-500/50 flex items-center justify-between ${editingEntryId ? 'opacity-75' : ''}`}>
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <img src={selectedProfile.avatarUrl} className="w-10 h-10 rounded-full" alt="" />
@@ -316,12 +580,17 @@ export const JournalView: React.FC = () => {
                                                 <div className="text-xs text-slate-500">{selectedProfile.ageAtMatch} let</div>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => setSelectedProfile(null)}
-                                            className="text-slate-400 hover:text-white"
-                                        >
-                                            <X size={16} />
-                                        </button>
+                                        {!editingEntryId && (
+                                            <button
+                                                onClick={() => setSelectedProfile(null)}
+                                                className="text-slate-400 hover:text-white"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        )}
+                                        {editingEntryId && (
+                                            <span className="text-xs text-slate-500 italic px-2">Nelze změnit</span>
+                                        )}
                                     </div>
 
                                     <div>
@@ -377,7 +646,7 @@ export const JournalView: React.FC = () => {
                         {selectedProfile && (
                             <div className="p-4 border-t border-slate-800 bg-slate-900 flex-none rounded-b-3xl">
                                 <Button fullWidth onClick={handleSaveEntry} disabled={!selectedProfile || saving}>
-                                    {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> Uložit do Černé Knihy</>}
+                                    {saving ? 'Ukládám...' : <><Save size={18} className="mr-2" /> {editingEntryId ? 'Uložit změny' : 'Uložit do Černé Knihy'}</>}
                                 </Button>
                             </div>
                         )}
