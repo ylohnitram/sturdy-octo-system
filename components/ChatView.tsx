@@ -128,6 +128,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
         if (newMsg) {
             setMessages(prev => [...prev, newMsg]);
             setInputText('');
+        } else {
+            console.error('[ChatView] Failed to send message');
+            alert('Nepodařilo se odeslat zprávu. Zkontroluj konzoli pro detaily.');
         }
         setSending(false);
     };

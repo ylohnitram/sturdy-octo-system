@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.6 (2025-11-24)
+- **[FIX] Message Sending:** Přidáno lepší error handling pro odesílání zpráv s upozorněním uživatele při selhání.
+- **[SECURITY] RLS Policy:** Aktualizována INSERT politika pro zprávy - zabránění odesílání zpráv ghostnutým uživatelům.
+
 ### 2.15.5 (2025-11-24)
 - **[FIX] Notification Badge:** Opraveno mizení badge nepřečtených zpráv v dolní navigaci ihned po přečtení zprávy.
 - **[FIX] Realtime Notifications:** Opraveno zobrazování notifikací na nové zprávy v reálném čase (hlavní zvoneček).

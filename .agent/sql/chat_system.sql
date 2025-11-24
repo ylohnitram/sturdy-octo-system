@@ -43,6 +43,11 @@ CREATE POLICY "Users can insert messages in their matches" ON messages
             SELECT 1 FROM matches m
             WHERE m.id = match_id
             AND (m.user1_id = auth.uid() OR m.user2_id = auth.uid())
+            AND NOT EXISTS (
+                SELECT 1 FROM blocked_users b
+                WHERE (b.blocker_id = m.user1_id AND b.blocked_id = m.user2_id)
+                   OR (b.blocker_id = m.user2_id AND b.blocked_id = m.user1_id)
+            )
         )
         AND sender_id = auth.uid()
     );
