@@ -5,6 +5,13 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.3] - 2025-11-24
+
+### Fixed
+- **[LOGIC] Ghosted User Journaling:** Umožněno přidávat do Černé Knihy i uživatele, které jste ghostnuli (zablokovali).
+  - Pro ghostnuté uživatele se přeskakuje kontrola zpráv (protože zprávy od blokovaných uživatelů nejsou viditelné).
+  - Tito uživatelé se zobrazí v seznamu s ikonou ducha 👻.
+
 ## [2.19.2] - 2025-11-24
 
 ### Fixed

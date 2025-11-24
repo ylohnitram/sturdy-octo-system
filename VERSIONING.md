@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.19.3 (2025-11-24)
+- **[FIX] Ghost Journaling:** Oprava logiky pro zahrnutí ghostnutých uživatelů do výběru v Černé Knize (skip message check).
+
 ### 2.19.2 (2025-11-24)
 - **[FIX] Diary Logic:** Přechod na client-side validaci pro Černou Knihu (obchází SQL RPC problémy).
 

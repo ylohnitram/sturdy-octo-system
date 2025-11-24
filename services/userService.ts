@@ -492,7 +492,7 @@ export const searchMatchedUsers = async (query: string, currentUserId: string): 
 };
 
 // Check if a user is eligible to be added to diary
-export const checkDiaryEligibility = async (requesterId: string, targetId: string): Promise<{
+export const checkDiaryEligibility = async (requesterId: string, targetId: string, isGhostedByMe: boolean = false): Promise<{
     canAdd: boolean;
     matchId?: string;
     matchCreatedAt?: string;
@@ -511,22 +511,24 @@ export const checkDiaryEligibility = async (requesterId: string, targetId: strin
             return { canAdd: false, reason: 'Nemáte spolu match.' };
         }
 
-        // 2. Check for ANY messages in the match
-        // Using head: true to only get count, not data
-        const { count, error: msgError } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('match_id', match.id);
+        // 2. Check messages (SKIP if ghosted by me - we want to be able to journal ghosted users)
+        if (!isGhostedByMe) {
+            // Check for ANY messages using the SAME method as Chat
+            // We use the RPC function that drives the Chat view to guarantee consistency.
+            const { data: messages, error: msgError } = await supabase.rpc('get_conversation_messages', {
+                p_user_id: requesterId,
+                p_partner_id: targetId
+            });
 
-        if (msgError) {
-            console.error('Error checking messages:', msgError);
-            // Fallback: If we can't check messages, assume false to be safe, or true if we want to be lenient?
-            // Let's assume false but log it.
-            return { canAdd: false, reason: 'Chyba při kontrole zpráv.' };
-        }
+            if (msgError) {
+                console.error('Error checking messages via RPC:', msgError);
+                return { canAdd: false, reason: 'Chyba při načítání zpráv.' };
+            }
 
-        if (count === null || count === 0) {
-            return { canAdd: false, reason: 'Musíte si vyměnit alespoň jednu zprávu.' };
+            // If no messages returned from the chat function
+            if (!messages || messages.length === 0) {
+                return { canAdd: false, reason: 'Musíte si vyměnit alespoň jednu zprávu.' };
+            }
         }
 
         // 3. Calculate Age at Match Time
@@ -594,9 +596,10 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
         const profiles = await Promise.all(
             matches.map(async (match) => {
                 const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
+                const isGhosted = ghostedIds.has(partnerId);
 
-                // Check eligibility (must have exchanged messages)
-                const eligibility = await checkDiaryEligibility(user.id, partnerId);
+                // Check eligibility (must have exchanged messages OR be ghosted by me)
+                const eligibility = await checkDiaryEligibility(user.id, partnerId, isGhosted);
                 if (!eligibility.canAdd) return null;
 
                 // Fetch partner profile
@@ -619,7 +622,7 @@ export const fetchAllMatchedUsersForDiary = async (): Promise<Array<UserProfile 
                     isOnline: false,
                     distanceKm: 0,
                     matchCreatedAt: match.created_at,
-                    isGhostedByMe: ghostedIds.has(partnerId),
+                    isGhostedByMe: isGhosted,
                     ageAtMatch: eligibility.ageAtMatch
                 };
             })
