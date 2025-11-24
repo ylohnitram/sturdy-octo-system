@@ -426,7 +426,12 @@ const App: React.FC = () => {
       case AppView.ANALYTICS:
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.CHAT:
-        return <ChatView initialChatPartnerId={initialChatPartnerId} onMessageRead={handleMessageRead} onRefreshStats={handleRefreshStats} />;
+        return <ChatView
+          initialChatPartnerId={initialChatPartnerId}
+          onMessageRead={handleMessageRead}
+          onRefreshStats={handleRefreshStats}
+          onViewProfile={handleViewProfile}
+        />;
       case AppView.GHOST_LIST:
         return <GhostListView />;
       case AppView.PROFILE:

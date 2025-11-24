@@ -10,9 +10,10 @@ interface ChatViewProps {
     initialChatPartnerId?: string | null;
     onMessageRead?: () => void;
     onRefreshStats?: () => void;
+    onViewProfile?: (userId: string) => void;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats, onViewProfile }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -229,7 +230,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                     <button onClick={() => { setActiveMatch(null); if (onRefreshStats) onRefreshStats(); }} className="p-2 -ml-2 text-slate-400 hover:text-white">
                         <ArrowLeft size={24} />
                     </button>
-                    <div className="flex items-center gap-2">
+                    <div
+                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => onViewProfile && onViewProfile(activeMatch.partnerId)}
+                    >
                         <img
                             src={activeMatch.partnerAvatar}
                             alt={activeMatch.partnerUsername}

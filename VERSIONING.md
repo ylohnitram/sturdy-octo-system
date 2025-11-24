@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.6 (2025-11-24)
+- **[UX] Chat Profile:** Kliknutí na hlavičku chatu (avatar nebo jméno) nyní otevře profil uživatele (s možností zobrazit galerii).
+- **[DEV] Chat Props:** Přidán `onViewProfile` callback do `ChatView`.
+
 ### 2.16.5 (2025-11-24)
 - **[FIX] Profile Picture:** Opravena chyba, kdy se profilová fotka po nahrání neaktualizovala v UI (přidána synchronizace stavu).
 - **[FIX] Gold Status:** Opraveno zobrazování "FREE" účtu pro uživatele s aktivním Gold členstvím. Nyní se správně zobrazuje "Notch Gold AKTIVNÍ" a deaktivuje se prodejní modal.
