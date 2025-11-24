@@ -5,6 +5,12 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.9] - 2025-11-24
+### Fixed
+- **[Bug] Ghost Status in Journal:** Opraveno zobrazování ghost ikony v Černé Knize.
+  - Přidána chybějící RPC funkce `get_ghost_list()`, která vrací seznam ghostnutých uživatelů.
+  - Ghostnutí uživatelé se nyní správně zobrazují s ikonou ducha a nabízejí možnost "Odghostnout".
+
 ## [2.19.8] - 2025-11-24
 ### Added
 - **[UI] Match Celebration:** Přidána nová obrazovka "It's a Match!", která se zobrazí při vzájemné shodě.
