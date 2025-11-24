@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Lock, Image as ImageIcon, Loader2, Unlock, Zap } from 'lucide-react';
+import { X, Lock, Image as ImageIcon, Loader2, Unlock, Zap, MessageSquare } from 'lucide-react';
 import { fetchPublicGallery, GalleryImage } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 
@@ -175,6 +175,12 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                                         {img.isPrivate && (galleryUnlocked || img.isUnlocked) && (
                                             <div className="absolute top-2 right-2 bg-green-500/20 backdrop-blur border border-green-500/50 p-1 rounded-full">
                                                 <Unlock size={12} className="text-green-400" />
+                                            </div>
+                                        )}
+
+                                        {img.caption && (
+                                            <div className="absolute bottom-2 left-2 bg-black/40 backdrop-blur p-1 rounded-full">
+                                                <MessageSquare size={12} className="text-white/80" />
                                             </div>
                                         )}
                                     </div>
