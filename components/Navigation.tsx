@@ -6,9 +6,10 @@ import { AppView } from '../types';
 interface NavigationProps {
   currentView: AppView;
   onNavigate: (view: AppView) => void;
+  unreadConversationsCount?: number;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate }) => {
+export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate, unreadConversationsCount }) => {
   const navItems = [
     { view: AppView.DISCOVERY, icon: Flame, label: 'Lov' },
     { view: AppView.LEADERBOARD, icon: Trophy, label: 'Žebříček' },
@@ -54,6 +55,12 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate 
                   strokeWidth={isActive ? 2.5 : 2}
                   className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}
                 />
+                {/* Badge for Chat */}
+                {item.view === AppView.CHAT && unreadConversationsCount && unreadConversationsCount > 0 ? (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-slate-900 z-20 animate-bounce">
+                    <span className="text-[9px] font-bold text-white">{unreadConversationsCount}</span>
+                  </div>
+                ) : null}
               </div>
 
               {/* Label */}

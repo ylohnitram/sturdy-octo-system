@@ -36,6 +36,7 @@ export interface UserStats {
   tier?: UserTier;
   isOnline?: boolean;
   notificationCount?: number;
+  unreadConversationsCount?: number;
 }
 
 export interface UserProfile {
@@ -78,7 +79,7 @@ export interface JournalEntry {
 export interface Notification {
   id: string;
   user_id: string;
-  type: 'like' | 'proximity' | 'system' | 'match' | 'rival';
+  type: 'like' | 'proximity' | 'system' | 'match' | 'rival' | 'message';
   content: string;
   is_read?: boolean;
   created_at: string;

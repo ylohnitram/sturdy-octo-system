@@ -4,6 +4,16 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.4 (2025-11-24)
+- **[FEATURE] Chat Notifications:** Notifikace na nové zprávy se nyní posílají pouze pro první nepřečtenou zprávu v konverzaci (zamezení spamu).
+- **[UI] Navigation Badge:** Přidán indikátor počtu nepřečtených konverzací na ikonu "Zprávy" v dolní navigaci.
+- **[UX] Notification Handling:** Kliknutí na notifikaci zprávy otevře přímo daný chat. Přečtení zprávy automaticky označí i notifikaci jako přečtenou.
+
+### 2.15.3 (2025-11-24)
+- **[UX] Chat Menu:** Menu v chatu (Ghost Mode) se nyní zavře kliknutím kamkoliv mimo něj.
+- **[FIX] Realtime Chat:** Opraveno načítání zpráv v reálném čase (přidána chybějící publikace pro tabulku `messages`).
+- **[FIX] Unread Badge:** Indikátor nepřečtených zpráv se nyní správně aktualizuje ihned po otevření chatu.
+
 ### 2.15.2 (2025-11-24)
 - **[IMPROVEMENT] Chat Grouping:** Seznam chatů nyní seskupuje konverzace podle uživatele (partnera). Pokud máte s někým více shod (Matches), zobrazí se jako jedna konverzace se společnou historií zpráv.
 - **[DB] SQL Update:** Aktualizována funkce `get_user_matches` pro seskupování a přidána funkce `get_conversation_messages`.

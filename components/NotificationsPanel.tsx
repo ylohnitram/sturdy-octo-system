@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Heart, MapPin, Users, Check, ChevronRight } from 'lucide-react';
+import { X, Heart, MapPin, Users, Check, ChevronRight, MessageCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { Notification } from '../types';
 
@@ -8,9 +8,10 @@ interface NotificationsPanelProps {
     onClose: () => void;
     onNotificationCountChange: (count: number) => void;
     onViewProfile: (userId: string) => void;
+    onOpenChat: (partnerId: string) => void;
 }
 
-export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, onClose, onNotificationCountChange, onViewProfile }) => {
+export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, onClose, onNotificationCountChange, onViewProfile, onOpenChat }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -81,6 +82,12 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
     const handleNotificationClick = async (notif: any) => {
         if (!notif.read_at) await markAsRead(notif.id);
 
+        if (notif.type === 'message' && notif.related_user_id) {
+            onOpenChat(notif.related_user_id);
+            onClose();
+            return;
+        }
+
         if (notif.related_user_id) {
             onViewProfile(notif.related_user_id);
             onClose();
@@ -93,6 +100,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ userId, 
             case 'proximity': return <MapPin size={20} className="text-yellow-500" />;
             case 'rival': return <Users size={20} className="text-blue-500" />;
             case 'match': return <Heart size={20} className="text-purple-500" fill="currentColor" />;
+            case 'message': return <MessageCircle size={20} className="text-green-500" />;
             default: return <Heart size={20} className="text-slate-500" />;
         }
     };

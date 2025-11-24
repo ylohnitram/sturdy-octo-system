@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, Send, Ghost, MoreVertical, Loader2, MessageCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { fetchMatches, fetchConversation, sendMessage, ghostUser, MatchPreview, ChatMessage } from '../services/userService';
+import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
 import DOMPurify from 'dompurify';
 
 interface ChatViewProps {
     onBack?: () => void; // If used in a modal or navigation stack
+    initialChatPartnerId?: string | null;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -21,6 +22,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const lastProcessedIdRef = useRef<string | null>(null);
 
     // Initial load
     useEffect(() => {
@@ -31,6 +33,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
         };
         init();
     }, []);
+
+    // Handle deep linking to chat
+    useEffect(() => {
+        if (initialChatPartnerId && initialChatPartnerId !== lastProcessedIdRef.current && matches.length > 0) {
+            const match = matches.find(m => m.partnerId === initialChatPartnerId);
+            if (match) {
+                openChat(match);
+                lastProcessedIdRef.current = initialChatPartnerId;
+            }
+        }
+    }, [initialChatPartnerId, matches]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -63,6 +76,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
                         createdAt: newMsg.created_at,
                         readAt: newMsg.read_at
                     }]);
+
+                    if (newMsg.sender_id === activeMatch.partnerId) {
+                        markConversationAsRead(activeMatch.partnerId);
+                    }
                 }
             )
             .subscribe();
@@ -82,10 +99,12 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
     const openChat = async (match: MatchPreview) => {
         setActiveMatch(match);
         setLoadingMessages(true);
+        await markConversationAsRead(match.partnerId);
         const msgs = await fetchConversation(match.partnerId);
         setMessages(msgs);
         setLoadingMessages(false);
         setShowMenu(false);
+        loadMatches(); // Refresh list to clear badge
     };
 
     const handleSend = async () => {
@@ -203,14 +222,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack }) => {
                         <MoreVertical size={20} />
                     </button>
                     {showMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
-                            <button
-                                onClick={handleGhost}
-                                className="w-full px-4 py-3 text-left text-red-400 hover:bg-slate-700/50 flex items-center gap-2 text-sm font-medium"
-                            >
-                                <Ghost size={16} /> Ghost Mode (Ignorovat)
-                            </button>
-                        </div>
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+                                <button
+                                    onClick={handleGhost}
+                                    className="w-full px-4 py-3 text-left text-red-400 hover:bg-slate-700/50 flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <Ghost size={16} /> Ghost Mode (Ignorovat)
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

@@ -57,6 +57,8 @@ const App: React.FC = () => {
   const [showRestoreNotification, setShowRestoreNotification] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [initialChatPartnerId, setInitialChatPartnerId] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>('');
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -340,6 +342,11 @@ const App: React.FC = () => {
     setShowNotifications(false);
   };
 
+  const handleOpenChat = (partnerId: string) => {
+    setInitialChatPartnerId(partnerId);
+    setCurrentView(AppView.CHAT);
+  };
+
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
@@ -358,7 +365,7 @@ const App: React.FC = () => {
       case AppView.ANALYTICS:
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.CHAT:
-        return <ChatView />;
+        return <ChatView initialChatPartnerId={initialChatPartnerId} />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}
@@ -406,6 +413,7 @@ const App: React.FC = () => {
           onClose={() => setShowNotifications(false)}
           onNotificationCountChange={(count) => setUserStats(prev => ({ ...prev, notificationCount: count }))}
           onViewProfile={handleViewProfile}
+          onOpenChat={handleOpenChat}
         />
       )}
 
@@ -461,9 +469,11 @@ const App: React.FC = () => {
             </div>
           </main>
 
-          <Navigation currentView={currentView} onNavigate={setCurrentView} />
-
-          <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
+          <Navigation
+            currentView={currentView}
+            onNavigate={setCurrentView}
+            unreadConversationsCount={userStats?.unreadConversationsCount}
+          />   <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />
           <StoreModal isOpen={isStoreModalOpen} onClose={closeStore} onPurchase={addCoins} />
         </>
       )}

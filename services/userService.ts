@@ -65,10 +65,11 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
         // PARALLEL QUERIES - Load both profile and stats at the same time
         console.log('[fetchUserData] Starting parallel queries...');
         const queryStart = performance.now();
-        const [profileResult, statsResult, notificationCount] = await Promise.all([
+        const [profileResult, statsResult, notificationCount, unreadConversationsCount] = await Promise.all([
             supabase.from('profiles').select('*').eq('id', userId).single(),
             supabase.from('user_stats').select('*').eq('user_id', userId).single(),
-            getUnreadNotificationsCount(userId)
+            getUnreadNotificationsCount(userId),
+            getUnreadConversationsCount(userId)
         ]);
         const queryTime = performance.now() - queryStart;
         console.log(`[fetchUserData] Queries completed in ${queryTime.toFixed(0)}ms`);
@@ -116,9 +117,10 @@ export const fetchUserData = async (userId: string): Promise<{ profile: UserProf
             invitesAvailable: statsData.invites_left,
             rank: undefined, // Fetched separately in LeaderboardView
             heat: heat,
-            tier: statsData.is_premium ? UserTier.PREMIUM : UserTier.FREE,
+            tier: profileData.tier || UserTier.FREE,
             isOnline: true,
-            notificationCount: notificationCount
+            notificationCount: notificationCount,
+            unreadConversationsCount: unreadConversationsCount
         };
 
         const userProfile: UserProfile = {
@@ -859,6 +861,15 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
 
     return count || 0;
 };
+
+export const getUnreadConversationsCount = async (userId: string): Promise<number> => {
+    const { data, error } = await supabase.rpc('get_unread_conversations_count', { p_user_id: userId });
+    if (error) {
+        console.error('Error fetching unread conversations count:', error);
+        return 0;
+    }
+    return data || 0;
+};
 // --- CHAT FUNCTIONS ---
 
 export interface ChatMessage {
@@ -970,4 +981,18 @@ export const ghostUser = async (targetUserId: string): Promise<boolean> => {
     }
 
     return true;
+};
+
+export const markConversationAsRead = async (partnerId: string): Promise<void> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.rpc('mark_conversation_as_read', {
+        p_user_id: user.id,
+        p_partner_id: partnerId
+    });
+
+    if (error) {
+        console.error('Error marking conversation as read:', error);
+    }
 };

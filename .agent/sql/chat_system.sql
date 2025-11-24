@@ -169,3 +169,126 @@ BEGIN
     ON CONFLICT DO NOTHING;
 END;
 $$;
+
+-- Mark Conversation as Read (and notifications)
+CREATE OR REPLACE FUNCTION mark_conversation_as_read(p_user_id UUID, p_partner_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    -- Mark messages as read
+    UPDATE messages
+    SET read_at = now()
+    WHERE sender_id = p_partner_id
+    AND read_at IS NULL
+    AND match_id IN (
+        SELECT id FROM matches 
+        WHERE (user1_id = p_user_id AND user2_id = p_partner_id)
+           OR (user1_id = p_partner_id AND user2_id = p_user_id)
+    );
+
+    -- Mark notifications as read
+    UPDATE notifications
+    SET read_at = now()
+    WHERE user_id = p_user_id
+    AND related_user_id = p_partner_id
+    AND type = 'message'
+    AND read_at IS NULL;
+END;
+$$;
+
+-- Get Unread Conversations Count
+CREATE OR REPLACE FUNCTION get_unread_conversations_count(p_user_id UUID)
+RETURNS BIGINT LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+    v_count BIGINT;
+BEGIN
+    SELECT COUNT(DISTINCT m.sender_id) INTO v_count
+    FROM messages m
+    JOIN matches mat ON mat.id = m.match_id
+    WHERE (mat.user1_id = p_user_id OR mat.user2_id = p_user_id)
+    AND m.sender_id != p_user_id
+    AND m.read_at IS NULL;
+    
+    RETURN v_count;
+END;
+$$;
+
+-- 5. Enable Realtime
+-- This is critical for chat updates to work!
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+    AND tablename = 'messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  END IF;
+END $$;
+
+-- 6. Notifications Trigger
+CREATE OR REPLACE FUNCTION handle_new_message_notification()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_recipient_id UUID;
+    v_sender_username TEXT;
+    v_unread_count INT;
+BEGIN
+    -- Find recipient (the other user in the match)
+    SELECT 
+        CASE 
+            WHEN m.user1_id = NEW.sender_id THEN m.user2_id 
+            ELSE m.user1_id 
+        END INTO v_recipient_id
+    FROM matches m
+    WHERE m.id = NEW.match_id;
+
+    -- Check if ghosted/blocked
+    IF EXISTS (
+        SELECT 1 FROM blocked_users 
+        WHERE (blocker_id = v_recipient_id AND blocked_id = NEW.sender_id)
+    ) THEN
+        RETURN NEW; -- Do nothing if blocked
+    END IF;
+
+    -- Check for existing unread messages from this sender to this recipient
+    -- We want to notify ONLY if this is the FIRST unread message.
+    SELECT COUNT(*) INTO v_unread_count
+    FROM messages m
+    JOIN matches mat ON mat.id = m.match_id
+    WHERE m.sender_id = NEW.sender_id
+    AND (
+        (mat.user1_id = v_recipient_id AND mat.user2_id = NEW.sender_id) OR
+        (mat.user1_id = NEW.sender_id AND mat.user2_id = v_recipient_id)
+    )
+    AND m.read_at IS NULL;
+    
+    -- If v_unread_count > 1, it means there were already unread messages (including this one).
+    -- So we DO NOT send a notification.
+    IF v_unread_count > 1 THEN
+        RETURN NEW;
+    END IF;
+
+    -- Get sender username
+    SELECT username INTO v_sender_username
+    FROM profiles
+    WHERE id = NEW.sender_id;
+
+    -- Insert notification
+    INSERT INTO notifications (user_id, type, content, related_user_id, created_at)
+    VALUES (
+        v_recipient_id, 
+        'message', 
+        'Nová zpráva od ' || COALESCE(v_sender_username, 'Uživatel'), 
+        NEW.sender_id, 
+        NOW()
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_new_message ON messages;
+CREATE TRIGGER on_new_message
+    AFTER INSERT ON messages
+    FOR EACH ROW
+    EXECUTE FUNCTION handle_new_message_notification();
