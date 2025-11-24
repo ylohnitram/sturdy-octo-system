@@ -295,51 +295,63 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                     <button
                         type="submit"
                         disabled={!inputText.trim() || sending}
-                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-                        <Ghost size={32} className="text-red-400" />
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-xl font-black text-white text-center mb-2">
-                        Ghostnout {activeMatch.partnerUsername}?
-                    </h3>
-
-                    {/* Description */}
-                    <div className="space-y-2 mb-6">
-                        <div className="flex items-start gap-2 text-sm text-slate-300">
-                            <div className="text-green-400 mt-0.5">✓</div>
-                            <div>Už neuvidíš jeho zprávy</div>
-                        </div>
-                        <div className="flex items-start gap-2 text-sm text-slate-300">
-                            <div className="text-green-400 mt-0.5">✓</div>
-                            <div>Zmizí ze seznamu chatů</div>
-                        </div>
-                        <div className="flex items-start gap-2 text-sm text-slate-300">
-                            <div className="text-green-400 mt-0.5">✓</div>
-                            <div>Můžeš ho později odghostnout v <span className="font-bold text-white">Ghost List</span> (Profil → Ghost List)</div>
-                        </div>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => setShowGhostConfirm(false)}
-                            className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
-                        >
-                            Zrušit
-                        </button>
-                        <button
-                            onClick={confirmGhost}
-                            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/30"
-                        >
-                            Ghostnout
-                        </button>
-                    </div>
+                        className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
+                    >
+                        {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                    </button>
+                </form>
             </div>
-        </div>
-    )
-}
+
+            {/* Ghost Confirmation Modal */}
+            {showGhostConfirm && activeMatch && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[10000]">
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+                        {/* Icon */}
+                        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                            <Ghost size={32} className="text-red-400" />
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-black text-white text-center mb-2">
+                            Ghostnout {activeMatch.partnerUsername}?
+                        </h3>
+
+                        {/* Description */}
+                        <div className="space-y-2 mb-6">
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Už neuvidíš jeho zprávy</div>
+                            </div>
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Zmizí ze seznamu chatů</div>
+                            </div>
+                            <div className="flex items-start gap-2 text-sm text-slate-300">
+                                <div className="text-green-400 mt-0.5">✓</div>
+                                <div>Můžeš ho později odghostnout v <span className="font-bold text-white">Ghost List</span> (Profil → Ghost List)</div>
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowGhostConfirm(false)}
+                                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Zrušit
+                            </button>
+                            <button
+                                onClick={confirmGhost}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/30"
+                            >
+                                Ghostnout
+                            </button>
+                        </div>
+                    </div>
+                </div >
+            )
+            }
         </div >,
-    document.body
+        document.body
     );
 };

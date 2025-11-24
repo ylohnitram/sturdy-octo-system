@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.16.3 (2025-11-24)
+- **[FIX] Build:** Oprava syntaxe v `ChatView.tsx` (uzavírací tagy), která způsobovala selhání buildu.
+
 ### 2.16.2 (2025-11-24)
 - **[UI] Ghost Modal:** Nahrazen systémový `confirm()` dialog vlastním moderním modalem pro potvrzení ghostování.
 - **[UX] Ghost Feedback:** Modal jasně vysvětluje důsledky akce a možnost návratu přes Ghost List.
