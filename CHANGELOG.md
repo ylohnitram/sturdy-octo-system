@@ -5,6 +5,12 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.10] - 2025-11-24
+### Fixed
+- **[Bug] Body Count Sync:** Opraveno zobrazování počtu zářezů v profilu.
+  - Přidán database trigger, který automaticky aktualizuje `user_stats.body_count` při přidání/odebrání záznamu v Černé Knize.
+  - Počet zářezů se nyní správně zobrazuje v profilu v reálném čase.
+
 ## [2.19.9] - 2025-11-24
 ### Fixed
 - **[Bug] Ghost Status in Journal:** Opraveno zobrazování ghost ikony v Černé Knize.

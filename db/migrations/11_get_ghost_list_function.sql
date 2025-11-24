@@ -10,9 +10,9 @@ SECURITY DEFINER
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT bu.blocked_user_id
+    SELECT bu.blocked_id
     FROM public.blocked_users bu
-    WHERE bu.blocker_user_id = auth.uid()
+    WHERE bu.blocker_id = auth.uid()
     AND bu.created_at IS NOT NULL;
 END;
 $$;
