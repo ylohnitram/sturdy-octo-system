@@ -492,10 +492,7 @@ export const searchMatchedUsers = async (query: string, currentUserId: string): 
 };
 
 // Check if a user is eligible to be added to diary
-export const checkDiaryEligibility = async (
-    requesterId: string,
-    targetId: string
-): Promise<{
+export const checkDiaryEligibility = async (requesterId: string, targetId: string): Promise<{
     canAdd: boolean;
     matchId?: string;
     matchCreatedAt?: string;
@@ -503,22 +500,64 @@ export const checkDiaryEligibility = async (
     reason?: string;
 }> => {
     try {
-        const { data, error } = await supabase
-            .rpc('can_add_to_diary', {
-                p_requester_id: requesterId,
-                p_target_id: targetId
-            })
+        // 1. Find Match
+        const { data: match, error: matchError } = await supabase
+            .from('matches')
+            .select('id, created_at')
+            .or(`and(user1_id.eq.${requesterId},user2_id.eq.${targetId}),and(user1_id.eq.${targetId},user2_id.eq.${requesterId})`)
+            .maybeSingle();
+
+        if (matchError || !match) {
+            return { canAdd: false, reason: 'Nemáte spolu match.' };
+        }
+
+        // 2. Check for ANY messages in the match
+        // Using head: true to only get count, not data
+        const { count, error: msgError } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('match_id', match.id);
+
+        if (msgError) {
+            console.error('Error checking messages:', msgError);
+            // Fallback: If we can't check messages, assume false to be safe, or true if we want to be lenient?
+            // Let's assume false but log it.
+            return { canAdd: false, reason: 'Chyba při kontrole zpráv.' };
+        }
+
+        if (count === null || count === 0) {
+            return { canAdd: false, reason: 'Musíte si vyměnit alespoň jednu zprávu.' };
+        }
+
+        // 3. Calculate Age at Match Time
+        let ageAtMatch: number | undefined;
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('birth_date')
+            .eq('id', targetId)
             .single();
 
-        if (error) throw error;
+        if (profile?.birth_date) {
+            const birthDate = new Date(profile.birth_date);
+            const matchDate = new Date(match.created_at);
+
+            let age = matchDate.getFullYear() - birthDate.getFullYear();
+            const m = matchDate.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && matchDate.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            ageAtMatch = age;
+        }
 
         return {
-            canAdd: data.can_add,
-            matchId: data.match_id,
-            matchCreatedAt: data.match_created_at,
-            ageAtMatch: data.target_age_at_match,
-            reason: data.reason
+            canAdd: true,
+            matchId: match.id,
+            matchCreatedAt: match.created_at,
+            ageAtMatch: ageAtMatch,
+            reason: 'OK'
         };
+
     } catch (e) {
         console.error('Error checking diary eligibility:', e);
         return {

@@ -4,6 +4,9 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.19.2 (2025-11-24)
+- **[FIX] Diary Logic:** Přechod na client-side validaci pro Černou Knihu (obchází SQL RPC problémy).
+
 ### 2.19.1 (2025-11-24)
 - **[FIX] Diary Validation:** Oprava logiky pro zobrazování kontaktů v Černé Knize (stačí 1 zpráva).
 - **[DB] Messages:** Fix chybějící tabulky messages a RLS policies.

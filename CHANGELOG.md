@@ -5,6 +5,14 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.2] - 2025-11-24
+
+### Fixed
+- **[LOGIC] Client-side Diary Validation:** Přepsána logika `checkDiaryEligibility` z SQL RPC na přímé klientské dotazy.
+  - Řeší problém, kdy SQL funkce "neviděla" zprávy, i když v chatu byly.
+  - Zajišťuje konzistenci mezi Chatem a Černou Knihou.
+  - Věk v době matche se nyní počítá v JavaScriptu.
+
 ## [2.19.1] - 2025-11-24
 
 ### Fixed
