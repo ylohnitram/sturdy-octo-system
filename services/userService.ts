@@ -435,6 +435,99 @@ export const searchUsers = async (query: string, currentUserId: string): Promise
     }
 };
 
+// Search only users that the current user has matched with AND both sent messages
+export const searchMatchedUsers = async (query: string, currentUserId: string): Promise<UserProfile[]> => {
+    if (!query || query.length < 2) return [];
+
+    try {
+        // Get all matched user IDs
+        const { data: matches } = await supabase
+            .from('matches')
+            .select('user1_id, user2_id')
+            .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
+
+        if (!matches || matches.length === 0) return [];
+
+        // Extract partner IDs
+        const matchedUserIds = matches.map(m =>
+            m.user1_id === currentUserId ? m.user2_id : m.user1_id
+        );
+
+        // Search within matched users
+        const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .in('id', matchedUserIds)
+            .ilike('username', `%${query}%`)
+            .limit(5);
+
+        if (error) throw error;
+
+        // For each profile, check if both users have sent messages
+        const validProfiles = await Promise.all(
+            profiles.map(async (p) => {
+                const eligibility = await checkDiaryEligibility(currentUserId, p.id);
+                if (eligibility.canAdd) {
+                    return {
+                        id: p.id,
+                        name: p.username || 'Neznámý',
+                        age: eligibility.ageAtMatch || 0,
+                        bio: '',
+                        avatarUrl: p.avatar_url || '',
+                        stats: {} as any,
+                        tier: UserTier.FREE,
+                        isOnline: false,
+                        distanceKm: 0
+                    };
+                }
+                return null;
+            })
+        );
+
+        return validProfiles.filter(Boolean) as UserProfile[];
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+};
+
+// Check if a user is eligible to be added to diary
+export const checkDiaryEligibility = async (
+    requesterId: string,
+    targetId: string
+): Promise<{
+    canAdd: boolean;
+    matchId?: string;
+    matchCreatedAt?: string;
+    ageAtMatch?: number;
+    reason?: string;
+}> => {
+    try {
+        const { data, error } = await supabase
+            .rpc('can_add_to_diary', {
+                p_requester_id: requesterId,
+                p_target_id: targetId
+            })
+            .single();
+
+        if (error) throw error;
+
+        return {
+            canAdd: data.can_add,
+            matchId: data.match_id,
+            matchCreatedAt: data.match_created_at,
+            ageAtMatch: data.target_age_at_match,
+            reason: data.reason
+        };
+    } catch (e) {
+        console.error('Error checking diary eligibility:', e);
+        return {
+            canAdd: false,
+            reason: 'Chyba při kontrole oprávnění.'
+        };
+    }
+};
+
 export const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
     try {
         const { data, error } = await supabase

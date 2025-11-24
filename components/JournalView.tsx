@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Star, Tag, Calendar, MoreVertical, Lock, X, Save, Link as LinkIcon, User, CheckCircle } from 'lucide-react';
+import { Search, Plus, Star, Tag, Calendar, MoreVertical, Lock, X, Save, Link as LinkIcon, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { searchUsers } from '../services/userService';
+import { searchMatchedUsers, checkDiaryEligibility } from '../services/userService';
 import { JournalEntry, UserProfile } from '../types';
 import { Button } from './Button';
+
 
 export const JournalView: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -26,6 +27,8 @@ export const JournalView: React.FC = () => {
     const [linkResults, setLinkResults] = useState<UserProfile[]>([]);
     const [linkedProfile, setLinkedProfile] = useState<UserProfile | null>(null);
     const [showLinkSearch, setShowLinkSearch] = useState(false);
+    const [linkError, setLinkError] = useState<string | null>(null);
+    const [partnerAgeAtMatch, setPartnerAgeAtMatch] = useState<number | null>(null);
 
     const fetchEntries = async () => {
         setLoading(true);
@@ -59,13 +62,13 @@ export const JournalView: React.FC = () => {
         fetchEntries();
     }, []);
 
-    // User Search Debounce
+    // User Search Debounce - Only search matched users
     useEffect(() => {
         const delayDebounceFn = setTimeout(async () => {
             if (linkQuery.length >= 2) {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
-                    const results = await searchUsers(linkQuery, user.id);
+                    const results = await searchMatchedUsers(linkQuery, user.id);
                     setLinkResults(results);
                 }
             } else {
@@ -76,9 +79,23 @@ export const JournalView: React.FC = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [linkQuery]);
 
-    const handleSelectProfile = (profile: UserProfile) => {
+    const handleSelectProfile = async (profile: UserProfile) => {
+        setLinkError(null);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Validate eligibility and get age at match time
+        const eligibility = await checkDiaryEligibility(user.id, profile.id);
+
+        if (!eligibility.canAdd) {
+            setLinkError(eligibility.reason || 'Tento uživatel nesplňuje podmínky.');
+            return;
+        }
+
         setLinkedProfile(profile);
         setNewName(profile.name); // Auto-fill name
+        setPartnerAgeAtMatch(eligibility.ageAtMatch || null); // Store age at match time
+        setNewAge(eligibility.ageAtMatch?.toString() || ''); // Auto-fill age
         setLinkQuery('');
         setShowLinkSearch(false);
     };
@@ -97,6 +114,7 @@ export const JournalView: React.FC = () => {
                 date: newDate,
                 rating: newRating,
                 partner_age: newAge ? parseInt(newAge) : null,
+                partner_age_at_match: linkedProfile ? partnerAgeAtMatch : null, // Store immutable age at match time
                 tags: tagsArray,
                 notes: newNotes,
                 linked_profile_id: linkedProfile?.id || null,
@@ -112,6 +130,8 @@ export const JournalView: React.FC = () => {
                 setNewTags('');
                 setNewNotes('');
                 setLinkedProfile(null);
+                setPartnerAgeAtMatch(null);
+                setLinkError(null);
                 // Refresh list
                 fetchEntries();
             } else {
@@ -303,6 +323,12 @@ export const JournalView: React.FC = () => {
                                                 ))}
                                             </div>
                                         )}
+                                        {linkError && (
+                                            <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
+                                                <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                                <p className="text-xs text-red-400">{linkError}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : null}
 
@@ -332,13 +358,17 @@ export const JournalView: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Věk (volitelné)</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                                        Věk {linkedProfile && "(v den matche)"}
+                                    </label>
                                     <input
                                         type="number"
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none"
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:border-red-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                         value={newAge}
                                         onChange={e => setNewAge(e.target.value)}
                                         placeholder="25"
+                                        readOnly={!!linkedProfile}
+                                        disabled={!!linkedProfile}
                                     />
                                 </div>
                             </div>

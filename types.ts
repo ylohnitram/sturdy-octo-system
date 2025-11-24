@@ -70,6 +70,7 @@ export interface JournalEntry {
   date: string;
   rating: number; // 1-5
   partnerAge?: number;
+  partnerAgeAtMatch?: number; // Age at time of match - immutable
   tags: string[]; // e.g. "Bydlí sama", "Wild"
   notes: string;
   avatarUrl?: string; // Optional for UI
