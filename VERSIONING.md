@@ -4,6 +4,10 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.15.8 (2025-11-24)
+- **[FIX] Chat Badge:** Opraveno mizení badge nepřečtených zpráv - přidán refresh při zavření chat detailu.
+- **[FIX] Premium Tier:** Opraveno načítání premium statusu z `profiles.tier` místo zastaralého `user_stats.is_premium`.
+
 ### 2.15.7 (2025-11-24)
 - **[CRITICAL FIX] Message Sending:** Opravena chyba při odesílání zpráv - aktualizován constraint v tabulce `notifications` pro podporu typu 'message'.
 

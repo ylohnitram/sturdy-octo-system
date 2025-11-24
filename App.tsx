@@ -364,6 +364,13 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleRefreshStats = async () => {
+    if (!session?.user?.id) return;
+    const { getUnreadConversationsCount } = await import('./services/userService');
+    const count = await getUnreadConversationsCount(session.user.id);
+    setUserStats(prev => ({ ...prev, unreadConversationsCount: count }));
+  };
+
   const renderView = () => {
     switch (currentView) {
       case AppView.DISCOVERY:
@@ -382,7 +389,7 @@ const App: React.FC = () => {
       case AppView.ANALYTICS:
         return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
       case AppView.CHAT:
-        return <ChatView initialChatPartnerId={initialChatPartnerId} onMessageRead={handleMessageRead} />;
+        return <ChatView initialChatPartnerId={initialChatPartnerId} onMessageRead={handleMessageRead} onRefreshStats={handleRefreshStats} />;
       case AppView.PROFILE:
         return <ProfileView
           userStats={userStats}

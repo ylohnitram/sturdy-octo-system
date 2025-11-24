@@ -9,9 +9,10 @@ interface ChatViewProps {
     onBack?: () => void; // If used in a modal or navigation stack
     initialChatPartnerId?: string | null;
     onMessageRead?: () => void;
+    onRefreshStats?: () => void;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -213,7 +214,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
             {/* Header */}
             <div className="p-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-800 bg-slate-900 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => setActiveMatch(null)} className="p-2 -ml-2 text-slate-400 hover:text-white">
+                    <button onClick={() => { setActiveMatch(null); if (onRefreshStats) onRefreshStats(); }} className="p-2 -ml-2 text-slate-400 hover:text-white">
                         <ArrowLeft size={24} />
                     </button>
                     <div className="flex items-center gap-2">
