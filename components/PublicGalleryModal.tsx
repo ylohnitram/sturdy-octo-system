@@ -44,8 +44,12 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
     const privateImageCount = images.filter(img => img.isPrivate).length;
     const hasPrivateImages = privateImageCount > 0;
 
+    const remainingLockedCount = images.filter(img => img.isPrivate && !img.isUnlocked).length;
+    const isRenewal = isSubscription && remainingLockedCount > 0 && remainingLockedCount < privateImageCount;
+    const unlockCost = isRenewal ? 5 : 10;
+
     const handleImageClick = (image: GalleryImage) => {
-        if (!image.isPrivate || galleryUnlocked) {
+        if (!image.isPrivate || galleryUnlocked || image.isUnlocked) {
             setSelectedImage(image);
         } else {
             setShowUnlockPrompt(true);
@@ -55,15 +59,13 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
     const unlockGallery = async () => {
         if (unlocking) return;
 
-        const GALLERY_UNLOCK_COST = 10;
-
         if (userIsPremium) {
             setGalleryUnlocked(true);
             setShowUnlockPrompt(false);
             return;
         }
 
-        if (onConsumeCoins(GALLERY_UNLOCK_COST)) {
+        if (onConsumeCoins(unlockCost)) {
             setUnlocking(true);
             setShowUnlockPrompt(false);
 
@@ -72,7 +74,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                 const { data, error } = await supabase.rpc('unlock_user_gallery_v2', {
                     p_viewer_id: user.id,
                     p_owner_id: targetUserId,
-                    p_cost: GALLERY_UNLOCK_COST
+                    p_cost: unlockCost
                 });
 
                 if (!error && data) {
@@ -115,15 +117,15 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                     </div>
                 ) : (
                     <>
-                        {hasPrivateImages && !galleryUnlocked && (
+                        {hasPrivateImages && !galleryUnlocked && remainingLockedCount > 0 && (
                             <div className="mb-4 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20 border border-red-500/30 rounded-xl">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-bold text-white mb-1">
-                                            🔒 {privateImageCount} privátní {privateImageCount === 1 ? 'fotka' : privateImageCount < 5 ? 'fotky' : 'fotek'}
+                                            🔒 {remainingLockedCount} privátní {remainingLockedCount === 1 ? 'fotka' : remainingLockedCount < 5 ? 'fotky' : 'fotek'}
                                         </p>
                                         <p className="text-xs text-slate-300">
-                                            {userIsPremium ? 'Klikni na fotku pro zobrazení' : 'Odemkni celou galerii za 10 kreditů'}
+                                            {userIsPremium ? 'Klikni na fotku pro zobrazení' : `Odemkni zbytek galerie za ${unlockCost} kreditů`}
                                         </p>
                                     </div>
                                     {!userIsPremium && (
@@ -146,7 +148,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {images.map(img => {
-                                const isLocked = img.isPrivate && !galleryUnlocked;
+                                const isLocked = img.isPrivate && !galleryUnlocked && !img.isUnlocked;
 
                                 return (
                                     <div
@@ -170,7 +172,7 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                                             </div>
                                         )}
 
-                                        {img.isPrivate && galleryUnlocked && (
+                                        {img.isPrivate && (galleryUnlocked || img.isUnlocked) && (
                                             <div className="absolute top-2 right-2 bg-green-500/20 backdrop-blur border border-green-500/50 p-1 rounded-full">
                                                 <Unlock size={12} className="text-green-400" />
                                             </div>
@@ -187,18 +189,22 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                 <div className="fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setShowUnlockPrompt(false)}>
                     <div className="bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-slate-700 animate-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-xl font-bold text-white mb-2">
-                            {isSubscription ? 'Předplatné galerie' : 'Odemknout galerii'}
+                            {isSubscription ? (isRenewal ? 'Obnovit předplatné' : 'Předplatné galerie') : 'Odemknout galerii'}
                         </h3>
                         <p className="text-slate-300 text-sm mb-4">
                             {isSubscription ? (
                                 <>
-                                    Odemkne se <span className="font-bold text-white">všech {privateImageCount} privátních {privateImageCount === 1 ? 'fotka' : privateImageCount < 5 ? 'fotky' : 'fotek'}</span> na <span className="font-bold text-white">30 dní</span>.
+                                    Odemkne se <span className="font-bold text-white">všech {remainingLockedCount} zamčených fotek</span> na <span className="font-bold text-white">30 dní</span>.
                                     <br /><br />
-                                    Po expiraci zůstanou <span className="font-bold text-green-400">prvních 5 fotek navždy</span>, zbytek se zamkne.
+                                    {isRenewal ? (
+                                        <span className="text-green-400">Zvýhodněná cena pro obnovení!</span>
+                                    ) : (
+                                        <>Po expiraci zůstanou <span className="font-bold text-green-400">prvních 5 fotek navždy</span>, zbytek se zamkne.</>
+                                    )}
                                 </>
                             ) : (
                                 <>
-                                    Odemkne se <span className="font-bold text-white">{privateImageCount === 1 ? '1 privátní fotka' : `všechny ${privateImageCount} privátní fotky`}</span> <span className="font-bold text-green-400">navždy</span> za jednorázovou platbu.
+                                    Odemkne se <span className="font-bold text-white">{remainingLockedCount === 1 ? '1 privátní fotka' : `všechny ${remainingLockedCount} privátní fotky`}</span> <span className="font-bold text-green-400">navždy</span> za jednorázovou platbu.
                                 </>
                             )}
                         </p>
@@ -222,11 +228,11 @@ export const PublicGalleryModal: React.FC<PublicGalleryModalProps> = ({
                         <div className="bg-slate-800 rounded-lg p-3 mb-4">
                             <div className="flex justify-between text-sm mb-1">
                                 <span className="text-slate-400">Cena:</span>
-                                <span className="font-bold text-white">10 kreditů</span>
+                                <span className="font-bold text-white">{unlockCost} kreditů</span>
                             </div>
                             <div className="flex justify-between text-xs">
                                 <span className="text-slate-500">Vlastník dostane:</span>
-                                <span className="text-green-400">5 kreditů (50%)</span>
+                                <span className="text-green-400">{unlockCost / 2} kreditů (50%)</span>
                             </div>
                         </div>
                         <div className="flex gap-3">

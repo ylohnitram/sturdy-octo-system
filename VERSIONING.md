@@ -4,6 +4,11 @@ Tento dokument popisuje standardy pro verzování aplikace Notch.
 
 ## Changelog
 
+### 2.14.1 (2025-11-24)
+- **[BUGFIX] Gallery Persistence:** Opravena chyba, kdy se odemčené fotky po znovuotevření galerie jevily jako zamčené.
+- **[FEATURE] Subscription Renewal:** Implementována logika pro obnovení předplatného za sníženou cenu (5 kreditů).
+- **[UX] Dynamic Unlock UI:** Vylepšené texty a UI pro rozlišení mezi prvním odemčením a obnovením.
+
 ### 2.14.0 (2025-11-24)
 - **[FEATURE] Gallery Captions:** Uživatelé mohou přidávat volitelné popisky k fotkám (max 100 znaků).
 - **[UX] Caption Input:** Nový input v upload modalu pro popisek s emoji supportem.
