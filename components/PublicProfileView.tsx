@@ -121,43 +121,38 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
                     </p>
 
                     {/* Actions */}
-                    <div className="space-y-3 mt-2">
-                        {/* Gallery Button */}
+                    <div className="grid grid-cols-4 gap-4 items-center mt-2">
+                        <button
+                            onClick={onBack}
+                            className="col-span-1 aspect-square rounded-full border-2 border-slate-600 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:border-slate-500 hover:text-white transition-all"
+                        >
+                            <X size={28} />
+                        </button>
+
                         <button
                             onClick={() => setShowGallery(true)}
-                            className="w-full h-12 rounded-2xl bg-slate-800/80 backdrop-blur border border-slate-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all"
+                            className="col-span-2 h-14 rounded-2xl bg-slate-800/80 backdrop-blur border border-slate-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all relative overflow-hidden"
                         >
                             <ImageIcon size={20} />
                             <span>Galerie</span>
                         </button>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={onBack}
-                                className="col-span-1 h-14 rounded-2xl border-2 border-slate-600 text-slate-300 font-bold flex items-center justify-center hover:bg-slate-800 hover:text-white transition-all"
-                            >
-                                <X size={24} className="mr-2" /> Ignorovat
-                            </button>
-
-                            <button
-                                onClick={handleLike}
-                                disabled={sendingLike || hasLiked}
-                                className={`col-span-1 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${hasLiked
+                        <button
+                            onClick={handleLike}
+                            disabled={sendingLike || hasLiked}
+                            className={`col-span-1 aspect-square rounded-full flex items-center justify-center shadow-lg transition-all ${hasLiked
                                     ? 'bg-green-600 text-white cursor-default'
-                                    : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
-                                    }`}
-                            >
-                                {sendingLike ? (
-                                    <Loader2 size={24} className="animate-spin" />
-                                ) : hasLiked ? (
-                                    <>Odesláno</>
-                                ) : (
-                                    <>
-                                        <Heart size={24} fill="currentColor" /> Like
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                                    : sendingLike
+                                        ? 'bg-slate-700 text-white'
+                                        : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
+                                }`}
+                        >
+                            {sendingLike ? (
+                                <Loader2 size={28} className="animate-spin" />
+                            ) : (
+                                <Heart size={28} fill={hasLiked ? "currentColor" : "currentColor"} />
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
