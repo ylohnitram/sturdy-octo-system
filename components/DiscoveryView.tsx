@@ -3,7 +3,7 @@ import { Heart, X, MapPin, Zap, Target, Map, Users, Rocket, RefreshCw, Radar, Im
 import { UserProfile, UserTier, UserStats, Hotspot } from '../types';
 import { Button } from './Button';
 import { generateIcebreaker } from '../services/geminiService';
-import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
+import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, recordDismiss, updateUserLocation, fetchActiveHotspots, getDailyLikeCount } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
 import { MatchOverlay } from './MatchOverlay';
@@ -127,22 +127,24 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
     };
 
     const handleSwipe = async (direction: 'left' | 'right') => {
-        if (direction === 'right' && currentProfile) {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (direction === 'right' && currentProfile && user) {
             // Send Like DB Logic
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const result = await sendLike(user.id, currentProfile.id);
-                if (result.isMatch) {
-                    // SHOW MATCH OVERLAY
-                    setMatchData({
-                        partnerId: currentProfile.id,
-                        partnerName: currentProfile.name,
-                        partnerAvatar: currentProfile.avatarUrl
-                    });
-                    // Also dispatch event for global listeners if needed
-                    window.dispatchEvent(new CustomEvent('notch_match_found', { detail: { name: currentProfile.name } }));
-                }
+            const result = await sendLike(user.id, currentProfile.id);
+            if (result.isMatch) {
+                // SHOW MATCH OVERLAY
+                setMatchData({
+                    partnerId: currentProfile.id,
+                    partnerName: currentProfile.name,
+                    partnerAvatar: currentProfile.avatarUrl
+                });
+                // Also dispatch event for global listeners if needed
+                window.dispatchEvent(new CustomEvent('notch_match_found', { detail: { name: currentProfile.name } }));
             }
+        } else if (direction === 'left' && currentProfile && user) {
+            // Record Dismiss (X button)
+            await recordDismiss(user.id, currentProfile.id);
         }
 
         setAiIcebreaker(null);

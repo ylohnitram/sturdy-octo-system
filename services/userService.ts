@@ -276,6 +276,26 @@ export const sendLike = async (fromUserId: string, toUserId: string): Promise<{ 
     }
 };
 
+export const recordDismiss = async (fromUserId: string, toUserId: string): Promise<{ success: boolean }> => {
+    try {
+        const { error } = await supabase
+            .from('dismisses')
+            .insert({ from_user_id: fromUserId, to_user_id: toUserId });
+
+        if (error) {
+            if (error.code === '23505') return { success: false }; // Duplicate dismiss today
+            throw error;
+        }
+
+        return { success: true };
+
+    } catch (e) {
+        console.error('Error recording dismiss:', e);
+        return { success: false };
+    }
+};
+
+
 export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<UserProfile[]> => {
     try {
         // 1. Get Current User Prefs
@@ -291,8 +311,8 @@ export const fetchDiscoveryCandidates = async (currentUserId: string): Promise<U
         const myTarget = currentUser.target_gender; // 'men', 'women', 'both'
         const radius = currentUser.radar_radius || 10;
 
-        // 1.5 Get Excluded IDs (Ghosted users - both directions)
-        const { data: excludedData } = await supabase.rpc('get_excluded_user_ids', { p_user_id: currentUserId });
+        // 1.5 Get Excluded IDs (Ghosted + Matched + Dismissed Today)
+        const { data: excludedData } = await supabase.rpc('get_discovery_exclusions', { p_user_id: currentUserId });
         const excludedIds = excludedData?.map((r: any) => r.excluded_id) || [];
 
         // 2. Build Query

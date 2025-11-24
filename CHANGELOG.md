@@ -5,6 +5,15 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.0] - 2025-11-25
+### Added
+- **[Core] Smart Discovery Filtering:** Implementováno chytré filtrování kandidátů v Lovu.
+  - **Vyloučeni permanentně:** Ghostnutoí uživatelé (obousměrně) a matched uživatelé.
+  - **Vyloučeni na 1 den:** Uživatelé, kterým jsem dnes dal like (čekám na odpověď), a uživatelé, kterým jsem dnes dal X (dismissed).
+  - Přidána tabulka `dismisses` pro tracking odmítnutí.
+  - Nová RPC funkce `get_discovery_exclusions` pro efektivní filtrování.
+  - Každý den se profily "resetují" a mohou se objevit znovu (kromě matched a ghosted).
+
 ## [2.19.12] - 2025-11-24
 ### Updated
 - **[Design] New Logo:** Aktualizováno logo aplikace.
