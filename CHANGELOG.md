@@ -5,6 +5,12 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.2] - 2025-11-25
+### Improved
+- **[Core] Location Tracking:** Přidáno automatické sledování polohy uživatele.
+  - Poloha se nyní aktualizuje při startu aplikace a následně každých 5 minut.
+  - To zajišťuje přesnější fungování Radaru a zobrazování relevantních hotspotů.
+
 ## [2.20.1] - 2025-11-25
 ### Improved
 - **[Radar] Places Aggregation:** Opravena logika radaru.
