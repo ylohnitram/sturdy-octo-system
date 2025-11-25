@@ -114,4 +114,6 @@ export interface Hotspot {
   distance: number;
   count: number;
   label: string;
+  latitude: number;
+  longitude: number;
 }

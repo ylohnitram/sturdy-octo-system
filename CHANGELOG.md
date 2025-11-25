@@ -5,6 +5,14 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.1] - 2025-11-25
+### Improved
+- **[Radar] Places Aggregation:** Opravena logika radaru.
+  - Místo jednotlivých uživatelů se nyní zobrazují známá místa (kluby, bary, parky).
+  - Uživatelé jsou shlukováni do těchto míst (pokud jsou v okruhu 500m).
+  - Vytvořena databáze míst (`places`) s testovacími daty pro Prahu.
+  - Hotspoty nyní ukazují název místa a počet lidí v něm.
+
 ## [2.20.0] - 2025-11-25
 ### Added
 - **[Core] Smart Discovery Filtering:** Implementováno chytré filtrování kandidátů v Lovu.
