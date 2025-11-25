@@ -6,12 +6,14 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.21.3] - 2025-11-25
-### Added
-- **[UI] Logo Integration:** Logo nyní viditelné přímo v aplikaci.
-  - Přidáno na **AuthView** (login/registrace) - nad nadpisem.
-  - Přidáno na **LoadingScreen** - místo textového loga.
-  - Logo má animované pulzování a glow efekt.
+## [2.21.4] - 2025-11-25
+### Changed
+- **[Branding] Simplified Favicon:** Nový zjednodušený favicon pro lepší čitelnost.
+  - 3 diagonální pruhy (2 bílé, 1 červený uprostřed) na černém pozadí.
+  - Jednoduchý, ikonický design perfektní pro malé rozměry (32×32px).
+  - Okamžitě rozpoznatelný i v tabu browseru.
+- **[UI] Removed Logo from UI:** Odstraněno logo z AuthView a LoadingScreen.
+  - Vráceno textové zobrazení - minimalistický design.
 
 ## [2.21.2] - 2025-11-25
 ### Changed

@@ -333,15 +333,6 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin, initialView = 'sign
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          {/* Logo */}
-          <div className="mb-6 flex justify-center">
-            <img
-              src="/logo.png"
-              alt="Notch"
-              className="w-24 h-24 object-contain drop-shadow-2xl"
-            />
-          </div>
-
           <h1 className="text-4xl font-black tracking-tighter mb-2">
             NOTCH <span className="text-red-600">ID</span>
           </h1>

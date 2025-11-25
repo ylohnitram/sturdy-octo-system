@@ -22,15 +22,12 @@ export const LoadingScreen: React.FC = () => {
 
             {/* Main content */}
             <div className="relative z-10 flex flex-col items-center gap-8 px-6">
-                {/* Logo with animated glow */}
+                {/* Logo with pulse */}
                 <div className="relative">
-                    <div className="absolute inset-0 bg-red-600/30 blur-3xl rounded-full animate-pulse"></div>
-                    <img
-                        src="/logo.png"
-                        alt="Notch"
-                        className="relative w-32 h-32 object-contain drop-shadow-2xl animate-pulse"
-                        style={{ animationDuration: '2s' }}
-                    />
+                    <div className="absolute inset-0 bg-red-600/20 blur-3xl rounded-full animate-pulse"></div>
+                    <h1 className="relative text-6xl font-black tracking-tighter text-white">
+                        NOTCH
+                    </h1>
                 </div>
 
                 {/* Loading animation - 3 rotating icons */}
