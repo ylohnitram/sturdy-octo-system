@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.6] - 2025-11-25
+### Added
+- **[PWA] Professional Splash Screens:** Implementovány vlastní splash screens pro perfektní vzhled při spouštění PWA.
+  - **iOS**: Vlastní splash screens pro všechny iPhone a iPad modely (9 různých rozlišení).
+  - **Android**: Maskable adaptive icon s bezpečnými zónami pro jakýkoliv tvar ikony.
+  - **Design**: Černé pozadí (#0F172A) s centrovaným logem a názvem aplikace pro konzistentní branding.
+  - **Automatizace**: Nový skript `scripts/generate-splash-screens.js` pro generování všech variant.
+  - **Dokumentace**: Kompletní guide v `SPLASH_SCREENS.md` včetně troubleshooting a testování.
+  - Vyřešen problém s neprofesionálně vypadajícím splash screenem (čtverečkové logo s neladícími barvami).
+
 ## [2.21.5] - 2025-11-25
 ### Changed
 - **[Branding] New Logo Implementation:** Implementováno nové logo s designem 4 diagonálních pruhů (slash marks).

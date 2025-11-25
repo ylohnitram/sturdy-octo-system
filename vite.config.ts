@@ -15,7 +15,15 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'logo.png', 'pwa-192x192.png', 'pwa-512x512.png', 'apple-touch-icon.png'],
+        includeAssets: [
+          'favicon.ico',
+          'logo.png',
+          'pwa-192x192.png',
+          'pwa-512x512.png',
+          'pwa-512x512-maskable.png',
+          'apple-touch-icon.png',
+          'apple-splash-*.png'
+        ],
         devOptions: {
           enabled: true,
           type: 'module'
@@ -42,10 +50,10 @@ export default defineConfig(({ mode }) => {
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
+              src: 'pwa-512x512-maskable.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'maskable'
             },
             {
               src: 'apple-touch-icon.png',
