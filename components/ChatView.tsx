@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, Send, Ghost, Loader2, MessageCircle } from 'lucide-react';
+import { PageHeader } from './PageHeader';
 import { supabase } from '../services/supabaseClient';
 import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
 import DOMPurify from 'dompurify';
@@ -165,8 +166,13 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     if (!activeMatch) {
         return (
             <div className="flex flex-col h-full bg-slate-900">
-                <div className="p-4 pt-[calc(env(safe-area-inset-top)+1rem)] border-b border-slate-800 bg-slate-900/95 backdrop-blur z-10 max-w-md mx-auto w-full">
-                    <h1 className="text-2xl font-black text-white">Zprávy</h1>
+                <div className="p-4 pt-4 border-b border-slate-800 bg-slate-900/95 backdrop-blur z-10 max-w-md mx-auto w-full">
+                    <PageHeader
+                        title="Moje"
+                        highlight="Zprávy"
+                        subtitle="Chatuj se svými úlovky"
+                        icon={<MessageCircle size={24} />}
+                    />
                 </div>
 
                 <div className="flex-grow overflow-y-auto p-4 max-w-md mx-auto w-full">
@@ -181,36 +187,49 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             <p className="text-xs mt-2">Najdi si Match a začni chatovat!</p>
                         </div>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {matches.map(match => (
                                 <div
                                     key={match.matchId}
                                     onClick={() => openChat(match)}
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 transition-colors cursor-pointer"
+                                    className="relative group p-4 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 hover:border-red-500/30 hover:bg-slate-800/80 transition-all duration-300 cursor-pointer overflow-hidden"
                                 >
-                                    <img
-                                        src={match.partnerAvatar}
-                                        alt={match.partnerUsername}
-                                        className="w-12 h-12 rounded-full object-cover border border-slate-600"
-                                    />
-                                    <div className="flex-grow min-w-0">
-                                        <div className="flex justify-between items-baseline mb-1">
-                                            <h3 className="font-bold text-white truncate">{match.partnerUsername}</h3>
-                                            {match.lastMessageTime && (
-                                                <span className="text-[10px] text-slate-500">
-                                                    {new Date(match.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                    {/* Hover Glow Effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="relative">
+                                            <img
+                                                src={match.partnerAvatar}
+                                                alt={match.partnerUsername}
+                                                className="w-14 h-14 rounded-full object-cover border-2 border-slate-700 group-hover:border-red-500/50 transition-colors"
+                                            />
+                                            {match.unreadCount > 0 && (
+                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 flex items-center justify-center shadow-lg shadow-red-900/40 border border-slate-900">
+                                                    <span className="text-[10px] font-bold text-white">{match.unreadCount}</span>
+                                                </div>
                                             )}
                                         </div>
-                                        <p className={`text-sm truncate ${match.unreadCount > 0 ? 'text-white font-medium' : 'text-slate-400'}`}>
-                                            {match.lastMessage || 'Začni konverzaci...'}
-                                        </p>
-                                    </div>
-                                    {match.unreadCount > 0 && (
-                                        <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shrink-0">
-                                            <span className="text-[10px] font-bold text-white">{match.unreadCount}</span>
+
+                                        <div className="flex-grow min-w-0">
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h3 className="text-lg font-bold text-white truncate group-hover:text-red-400 transition-colors">{match.partnerUsername}</h3>
+                                                {match.lastMessageTime && (
+                                                    <span className="text-[10px] text-slate-500 font-medium">
+                                                        {new Date(match.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className={`text-sm truncate ${match.unreadCount > 0 ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-slate-300 transition-colors`}>
+                                                {match.lastMessage || 'Začni konverzaci...'}
+                                            </p>
                                         </div>
-                                    )}
+
+                                        {/* Chevron for affordance */}
+                                        <div className="text-slate-600 group-hover:text-red-500/50 transition-colors">
+                                            <ArrowLeft size={16} className="rotate-180" />
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>

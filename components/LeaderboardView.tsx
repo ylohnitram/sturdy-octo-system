@@ -135,7 +135,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {loading ? (
           <div className="text-center text-slate-500 py-10">Načítání...</div>
         ) : leaderboardData.length === 0 ? (
@@ -144,13 +144,42 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
           </div>
         ) : (
           leaderboardData.map((entry, index) => (
-            <div key={entry.id} className="flex items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-              <div className="w-8 text-center font-bold text-slate-500">#{index + 1}</div>
-              <img src={entry.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover mx-3" />
-              <div className="flex-grow">
-                <div className="font-bold text-slate-200">{entry.name}</div>
+            <div
+              key={entry.id}
+              className="relative group p-4 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 hover:border-yellow-500/30 hover:bg-slate-800/80 transition-all duration-300 overflow-hidden"
+            >
+              {/* Hover Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+              <div className="flex items-center gap-4 relative z-10">
+                {/* Rank Badge */}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900 shadow-lg shadow-yellow-500/30' :
+                    index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-lg shadow-slate-400/20' :
+                      index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-slate-900 shadow-lg shadow-orange-500/20' :
+                        'bg-slate-800 text-slate-400 border border-slate-700'
+                  }`}>
+                  #{index + 1}
+                </div>
+
+                {/* Avatar */}
+                <img
+                  src={entry.avatarUrl}
+                  alt=""
+                  className="w-12 h-12 rounded-full object-cover border-2 border-slate-700 group-hover:border-yellow-500/50 transition-colors"
+                />
+
+                {/* Name */}
+                <div className="flex-grow min-w-0">
+                  <div className="font-bold text-white text-lg truncate group-hover:text-yellow-400 transition-colors">
+                    {entry.name}
+                  </div>
+                </div>
+
+                {/* Score */}
+                <div className="text-xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent shrink-0">
+                  {entry.score}
+                </div>
               </div>
-              <div className="text-lg font-black text-red-500">{entry.score}</div>
             </div>
           ))
         )}

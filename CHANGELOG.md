@@ -6,6 +6,17 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.1] - 2025-11-25
+### Improved
+- **[UI] Premium Card Design System:** Kompletní redesign všech seznamů a karet v aplikaci.
+  - **ChatView**: Konverzace mají gradientní pozadí, hover efekty (glow), větší avatary a chevron indikátor.
+  - **JournalView (Černá Kniha)**: Zářezy mají nový premium vzhled s gradientními kartami a hover efekty.
+  - **LeaderboardView**: Žebříček s barevnými medailemi pro top 3 (zlato, stříbro, bronz) a gradientním skóre.
+  - **GhostListView**: Ghostnutí uživatelé s konzistentním stylem a lepší vizuální hierarchií.
+  - Všechny karty nyní používají jednotný design: `rounded-2xl`, gradient pozadí `from-slate-800/50 to-slate-900/50`, hover glow efekty.
+  - Konzistentní spacing: `space-y-3`, `p-4`, `gap-4`.
+  - Interaktivní hover stavy s barevným přechodem (červená/oranžová, žlutá/zlatá, zelená).
+
 ## [2.21.0] - 2025-11-25
 ### Improved
 - **[UI] Unified Page Headers:** Sjednocen vzhled hlaviček na všech podstránkách.

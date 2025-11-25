@@ -86,18 +86,18 @@ export const GhostListView: React.FC = () => {
                     {ghostedUsers.map(user => (
                         <div
                             key={user.blockedId}
-                            className="relative group p-4 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 hover:border-red-500/30 transition-all duration-300"
+                            className="relative group p-4 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 hover:border-green-500/30 hover:bg-slate-800/80 transition-all duration-300 overflow-hidden"
                         >
                             {/* Glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-sm"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 relative z-10">
                                 {/* Avatar */}
                                 <div className="relative">
                                     <img
                                         src={user.avatarUrl}
                                         alt={user.username}
-                                        className="w-14 h-14 rounded-full object-cover border-2 border-slate-600 opacity-60"
+                                        className="w-14 h-14 rounded-full object-cover border-2 border-slate-600 opacity-60 grayscale group-hover:opacity-80 transition-all"
                                     />
                                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center border-2 border-red-500/50">
                                         <Ghost size={12} className="text-red-400" />
@@ -106,7 +106,7 @@ export const GhostListView: React.FC = () => {
 
                                 {/* Info */}
                                 <div className="flex-grow min-w-0">
-                                    <h3 className="font-bold text-white truncate">{user.username}</h3>
+                                    <h3 className="font-bold text-lg text-white truncate group-hover:text-green-400 transition-colors">{user.username}</h3>
                                     <p className="text-xs text-slate-500">
                                         Ghostnuto: {formatDate(user.blockedAt)}
                                     </p>

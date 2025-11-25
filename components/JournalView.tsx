@@ -347,12 +347,14 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                     <div
                         key={entry.id}
                         onClick={() => handleEntryClick(entry)}
-                        className="bg-slate-800 rounded-xl p-4 border border-slate-700 relative group hover:border-red-500/50 transition-all cursor-pointer active:scale-[0.98]"
+                        className="relative group p-4 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 hover:border-red-500/30 hover:bg-slate-800/80 transition-all duration-300 cursor-pointer overflow-hidden"
                     >
+                        {/* Hover Glow Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-4 relative z-10">
                             <div className="relative">
-                                <img src={entry.avatarUrl} alt="" className={`w-12 h-12 rounded-full object-cover border-2 bg-slate-700 ${entry.profileStatus === 'ghosted' ? 'grayscale border-slate-600' : 'border-slate-600'}`} />
+                                <img src={entry.avatarUrl} alt="" className={`w-14 h-14 rounded-full object-cover border-2 bg-slate-700 transition-colors ${entry.profileStatus === 'ghosted' ? 'grayscale border-slate-600' : 'border-slate-700 group-hover:border-red-500/50'}`} />
                                 {entry.profileStatus === 'active' && entry.linkedProfileId && (
                                     <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 border-2 border-slate-800" title="Ověřený Notch uživatel">
                                         <CheckCircle size={10} className="text-white" />
@@ -369,12 +371,12 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-grow">
+                            <div className="flex-grow min-w-0">
                                 <div className="flex justify-between items-start pr-2">
-                                    <h3 className={`font-bold text-lg flex items-center gap-2 ${entry.profileStatus === 'deleted' ? 'text-slate-500 line-through' : 'text-white'}`}>
+                                    <h3 className={`font-bold text-lg flex items-center gap-2 truncate group-hover:text-red-400 transition-colors ${entry.profileStatus === 'deleted' ? 'text-slate-500 line-through' : 'text-white'}`}>
                                         {entry.name}
                                     </h3>
-                                    <span className="text-xs text-slate-500 font-mono">{entry.date}</span>
+                                    <span className="text-xs text-slate-500 font-mono shrink-0">{entry.date}</span>
                                 </div>
 
                                 <div className="flex items-center gap-1 mb-2">
@@ -391,21 +393,21 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
                                 <div className="flex flex-wrap gap-2 mb-3">
                                     {entry.tags.map(tag => (
-                                        <span key={tag} className="px-2 py-0.5 bg-slate-700 rounded text-[10px] text-slate-300 flex items-center gap-1 border border-slate-600">
+                                        <span key={tag} className="px-2 py-0.5 bg-slate-700/50 rounded text-[10px] text-slate-300 flex items-center gap-1 border border-slate-600/50 group-hover:border-slate-500/50 transition-colors">
                                             <Tag size={10} /> {tag}
                                         </span>
                                     ))}
                                 </div>
 
                                 {entry.notes && (
-                                    <div className="bg-slate-900/50 p-3 rounded-lg text-xs text-slate-400 italic border border-slate-800">
+                                    <div className="bg-slate-900/50 p-3 rounded-lg text-xs text-slate-400 italic border border-slate-800 group-hover:border-slate-700 transition-colors">
                                         "{entry.notes}"
                                     </div>
                                 )}
                             </div>
 
                             {/* More Icon Indicator */}
-                            <div className="absolute top-4 right-4 text-slate-600 opacity-50 group-hover:opacity-100">
+                            <div className="absolute top-4 right-4 text-slate-600 opacity-50 group-hover:opacity-100 group-hover:text-red-500/50 transition-all">
                                 <MoreHorizontal size={20} />
                             </div>
                         </div>
