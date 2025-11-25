@@ -3,7 +3,7 @@ import { Heart, Target, Zap } from 'lucide-react';
 
 export const LoadingScreen: React.FC = () => {
     return (
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
             {/* Animated background particles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {[...Array(20)].map((_, i) => (
