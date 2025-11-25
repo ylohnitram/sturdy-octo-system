@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
           short_name: 'Notch',
           description: 'Notch - Moderní dating aplikace pro odvážné lovce',
           theme_color: '#DC2626',
-          background_color: '#0F172A',
+          background_color: '#000000',
           display: 'standalone',
           scope: '/',
           start_url: '/',

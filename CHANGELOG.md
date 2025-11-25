@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.8] - 2025-11-26
+### Changed
+- **[PWA] Black Splash Screen Background:** Změněno pozadí splash screenů z tmavě modré (#0F172A) na černou (#000000).
+  - Pozadí nyní perfektně ladí s černým saténovým pozadím loga (tygří drapance).
+  - Aktualizováno pro všechny iOS splash screens a Android maskable icon.
+  - PWA manifest `background_color` změněn na #000000.
+
 ## [2.21.6] - 2025-11-25
 ### Added
 - **[PWA] Professional Splash Screens:** Implementovány vlastní splash screens pro perfektní vzhled při spouštění PWA.
