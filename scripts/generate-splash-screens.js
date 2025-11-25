@@ -7,7 +7,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
-const SOURCE_LOGO = path.join(PUBLIC_DIR, 'logo.png');
 
 // iOS Splash Screen sizes (all common iPhone/iPad resolutions)
 const SPLASH_SIZES = [
@@ -31,85 +30,66 @@ const SPLASH_SIZES = [
     { width: 2048, height: 2732, name: 'apple-splash-2048-2732' },
 ];
 
+// Create simple minimalist splash screen with red dot and "Notch" text
+function createMinimalistSplash(width, height) {
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Calculate sizes based on screen dimensions
+    const dotSize = Math.min(width, height) * 0.04; // Red dot size
+    const fontSize = Math.min(width, height) * 0.08; // Text size
+    const spacing = dotSize * 2; // Space between dot and text
+
+    return `
+<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  <!-- Solid black background -->
+  <rect width="${width}" height="${height}" fill="#000000"/>
+  
+  <!-- Red dot (positioned to the left of center) -->
+  <circle 
+    cx="${centerX - spacing}" 
+    cy="${centerY}" 
+    r="${dotSize}" 
+    fill="#DC2626"
+  />
+  
+  <!-- "Notch" text (positioned to the right of dot) -->
+  <text 
+    x="${centerX + spacing * 0.5}" 
+    y="${centerY + fontSize * 0.35}" 
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" 
+    font-size="${fontSize}" 
+    font-weight="700"
+    fill="#FFFFFF" 
+    text-anchor="start"
+    letter-spacing="1"
+  >Notch</text>
+</svg>`;
+}
+
 async function generateSplashScreens() {
-    console.log('🎨 Generating splash screens for iOS and Android...\n');
+    console.log('🎨 Generating minimalist splash screens...\n');
+    console.log('✨ Red dot + "Notch" text on solid black background\n');
 
     try {
-        // Check if source logo exists
-        if (!fs.existsSync(SOURCE_LOGO)) {
-            console.error('❌ Source logo not found at:', SOURCE_LOGO);
-            return;
-        }
-
-        const logoBuffer = fs.readFileSync(SOURCE_LOGO);
-        const metadata = await sharp(logoBuffer).metadata();
-
-        console.log('📁 Source logo loaded:', SOURCE_LOGO);
-        console.log(`   Original size: ${metadata.width}x${metadata.height}px\n`);
-
-        // 1. Generate maskable icon (for Android adaptive icons)
+        // 1. Generate maskable icon for Android
         console.log('🤖 Generating maskable icon for Android...');
 
-        // Maskable icon needs 20% safe zone on each side
-        // So if icon is 512px, logo should be centered in ~307px area (60% of size)
         const maskableSize = 512;
-        const logoSize = Math.floor(maskableSize * 0.6); // 60% of canvas
-
-        const maskableSvg = `
-<svg width="${maskableSize}" height="${maskableSize}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${maskableSize}" height="${maskableSize}" fill="#0F172A"/>
-  
-  <!-- Center the logo with safe margins -->
-  <image 
-    href="data:image/png;base64,${logoBuffer.toString('base64')}" 
-    x="${(maskableSize - logoSize) / 2}" 
-    y="${(maskableSize - logoSize) / 2}" 
-    width="${logoSize}" 
-    height="${logoSize}"
-  />
-</svg>`;
+        const maskableSvg = createMinimalistSplash(maskableSize, maskableSize);
 
         await sharp(Buffer.from(maskableSvg))
             .resize(512, 512)
             .png()
             .toFile(path.join(PUBLIC_DIR, 'pwa-512x512-maskable.png'));
 
-        console.log('✅ pwa-512x512-maskable.png created (with safe zone)\n');
+        console.log('✅ pwa-512x512-maskable.png created (minimalist design)\n');
 
         // 2. Generate iOS splash screens
         console.log('🍎 Generating iOS splash screens...');
 
         for (const size of SPLASH_SIZES) {
-            // Calculate logo size (should be ~40% of screen height for good look)
-            const logoHeight = Math.floor(size.height * 0.25);
-            const logoWidth = logoHeight; // Keep aspect ratio square-ish
-
-            // Create splash screen with centered logo
-            const splashSvg = `
-<svg width="${size.width}" height="${size.height}" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background matching app theme -->
-  <rect width="${size.width}" height="${size.height}" fill="#0F172A"/>
-  
-  <!-- Center the logo -->
-  <image 
-    href="data:image/png;base64,${logoBuffer.toString('base64')}" 
-    x="${(size.width - logoWidth) / 2}" 
-    y="${(size.height - logoHeight) / 2}" 
-    width="${logoWidth}" 
-    height="${logoHeight}"
-  />
-  
-  <!-- Optional: Add app name below logo -->
-  <text 
-    x="${size.width / 2}" 
-    y="${(size.height / 2) + logoHeight / 2 + 60}" 
-    font-family="system-ui, -apple-system, sans-serif" 
-    font-size="40" 
-    font-weight="700"
-    fill="#DC2626" 
-    text-anchor="middle"
-  >NOTCH</text>
-</svg>`;
+            const splashSvg = createMinimalistSplash(size.width, size.height);
 
             await sharp(Buffer.from(splashSvg))
                 .resize(size.width, size.height)
@@ -125,11 +105,13 @@ async function generateSplashScreens() {
         console.log('\n📦 Summary:');
         console.log('   - 1 maskable icon (Android adaptive icon)');
         console.log(`   - ${SPLASH_SIZES.length} iOS splash screens`);
-
-        console.log('\n💡 Next steps:');
-        console.log('   1. Update index.html with splash screen links');
-        console.log('   2. Update vite.config.ts with maskable icon');
-        console.log('   3. Test on real device or simulator');
+        console.log('\n✨ Minimalist design:');
+        console.log('   - Solid black background (#000000)');
+        console.log('   - Red dot (#DC2626)');
+        console.log('   - "Notch" text in white');
+        console.log('   - Clean and professional');
+        console.log('\n💡 Note: Static splash screens cannot animate.');
+        console.log('   For animated red dot, see LoadingScreen component.');
 
     } catch (error) {
         console.error('❌ Error generating splash screens:', error);

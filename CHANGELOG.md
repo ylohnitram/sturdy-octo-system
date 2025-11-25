@@ -6,6 +6,15 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.7] - 2025-11-26
+### Changed
+- **[PWA] Minimalist Splash Screen Redesign:** Kompletně předělaný splash screen na ultra-minimalistický design.
+  - **Statický splash screen**: Červená tečka + text "Notch" na solid černém pozadí (#000000).
+  - **Animovaný loading screen**: Blikající červená tečka v LoadingScreen komponentě (zobrazí se hned po splash screenu).
+  - Odstraněno složité logo design - jednoduché, čisté a profesionální.
+  - Background color změněn z #0F172A na #000000 pro konzistenci.
+  - Animace blikání (fade + scale) pro červenou tečku v aplikaci.
+
 ## [2.21.6] - 2025-11-25
 ### Added
 - **[PWA] Professional Splash Screens:** Implementovány vlastní splash screens pro perfektní vzhled při spouštění PWA.
