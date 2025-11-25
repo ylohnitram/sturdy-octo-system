@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Assets Preview - Notch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: white;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #DC2626, #EA580C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94A3B8;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #DC2626;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(220, 38, 38, 0.2);
+        }
+
+        .icon-display {
+            background: #000;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .icon-display img {
+            display: block;
+            border-radius: 8px;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #DC2626;
+        }
+
+        .card .details {
+            font-size: 0.9rem;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(220, 38, 38, 0.2);
+            color: #DC2626;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .source-section {
+            background: rgba(220, 38, 38, 0.1);
+            border: 2px solid #DC2626;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .source-section h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .source-section .icon-display {
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748B;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: #DC2626;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎨 Logo Assets Preview</h1>
+        <p class="subtitle">All generated variants of the Notch logo and favicons</p>
+
+        <div class="source-section">
+            <h2>📦 Source Logo</h2>
+            <div class="icon-display">
+                <img src="/logo.png" alt="Source Logo" style="max-width: 100%; height: auto;">
+            </div>
+            <p class="details">
+                <strong>File:</strong> logo.png<br>
+                <strong>Purpose:</strong> Original source file for all variants<br>
+                <strong>Design:</strong> 4 diagonal slashes (white-white-red-white)
+            </p>
+            <span class="badge">SOURCE</span>
+        </div>
+
+        <h2 style="margin-bottom: 20px; font-size: 1.5rem;">Generated Assets</h2>
+
+        <div class="grid">
+            <div class="card">
+                <div class="icon-display">
+                    <img src="/pwa-192x192.png" alt="PWA 192" width="192" height="192">
+                </div>
+                <h3>PWA Icon (192×192)</h3>
+                <p class="details">
+                    Standard PWA/Android app icon<br>
+                    <strong>File:</strong> pwa-192x192.png<br>
+                    <strong>Size:</strong> 192×192 pixels
+                </p>
+                <span class="badge">PWA</span>
+            </div>
+
+            <div class="card">
+                <div class="icon-display">
+                    <img src="/pwa-512x512.png" alt="PWA 512" width="192" height="192" style="max-width: 192px;">
+                </div>
+                <h3>PWA Icon (512×512)</h3>
+                <p class="details">
+                    High-res PWA icon &amp; maskable<br>
+                    <strong>File:</strong> pwa-512x512.png<br>
+                    <strong>Size:</strong> 512×512 pixels
+                </p>
+                <span class="badge">PWA</span>
+                <span class="badge">MASKABLE</span>
+            </div>
+
+            <div class="card">
+                <div class="icon-display">
+                    <img src="/apple-touch-icon.png" alt="Apple Touch Icon" width="180" height="180">
+                </div>
+                <h3>Apple Touch Icon</h3>
+                <p class="details">
+                    iOS home screen icon<br>
+                    <strong>File:</strong> apple-touch-icon.png<br>
+                    <strong>Size:</strong> 180×180 pixels
+                </p>
+                <span class="badge">iOS</span>
+            </div>
+
+            <div class="card">
+                <div class="icon-display">
+                    <img src="/favicon-32x32.png" alt="Favicon 32" width="32" height="32"
+                        style="image-rendering: pixelated; width: 128px; height: 128px;">
+                </div>
+                <h3>Favicon PNG</h3>
+                <p class="details">
+                    Browser tab icon (PNG)<br>
+                    <strong>File:</strong> favicon-32x32.png<br>
+                    <strong>Size:</strong> 32×32 pixels<br>
+                    <em>(shown 4× enlarged)</em>
+                </p>
+                <span class="badge">FAVICON</span>
+            </div>
+
+            <div class="card">
+                <div class="icon-display">
+                    <img src="/favicon.ico" alt="Favicon ICO" width="32" height="32"
+                        style="image-rendering: pixelated; width: 128px; height: 128px;">
+                </div>
+                <h3>Favicon ICO</h3>
+                <p class="details">
+                    Browser tab icon (ICO)<br>
+                    <strong>File:</strong> favicon.ico<br>
+                    <strong>Format:</strong> Multi-resolution ICO<br>
+                    <em>(shown 4× enlarged)</em>
+                </p>
+                <span class="badge">FAVICON</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>Notch</strong> - Moderní dating aplikace pro odvážné lovce<br>
+                Generated with <strong>scripts/generate-logo-assets.js</strong><br>
+                <a href="/LOGO.md">📖 Read Documentation</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

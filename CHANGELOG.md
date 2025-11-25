@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.5] - 2025-11-25
+### Changed
+- **[Branding] New Logo Implementation:** Implementováno nové logo s designem 4 diagonálních pruhů (slash marks).
+  - Design: 3 bílé pruhy + 1 červený na černém pozadí - moderní, agresivní vizuální identita.
+  - Aktualizovány všechny logo assety: `logo.png`, `pwa-192x192.png`, `pwa-512x512.png`, `apple-touch-icon.png`.
+  - Nový favicon vygenerovaný z loga pro konzistentní branding (`favicon.ico`, `favicon-32x32.png`).
+  - Vytvořen automatický skript `scripts/generate-logo-assets.js` pro generování všech variant z source loga.
+  - Přidána dokumentace `LOGO.md` s kompletním popisem implementace a regenerační návodem.
+  - Vytvořena preview stránka `public/logo-preview.html` pro vizuální kontrolu všech assetů.
+
 ## [2.21.4] - 2025-11-25
 ### Changed
 - **[Branding] Simplified Favicon:** Nový zjednodušený favicon pro lepší čitelnost.
