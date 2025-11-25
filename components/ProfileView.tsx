@@ -264,10 +264,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                                 {uploading ? <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : <Camera size={16} />}
                             </button>
                         </div>
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-2 h-8">
+                        <h1 className="text-3xl font-black uppercase tracking-tighter italic text-white flex items-center gap-2 h-8">
                             {userStats.username ? (
                                 <>
-                                    {userStats.username} <Shield size={16} className="text-blue-400" fill="currentColor" />
+                                    {userStats.username} <Shield size={24} className="text-blue-400" fill="currentColor" />
                                 </>
                             ) : (
                                 <div className="h-6 w-32 bg-slate-800 rounded animate-pulse"></div>

@@ -5,6 +5,15 @@ Všechny významné změny v projektu Notch budou dokumentovány v tomto souboru
 Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.21.0] - 2025-11-25
+### Improved
+- **[UI] Unified Page Headers:** Sjednocen vzhled hlaviček na všech podstránkách.
+  - Vytvořena nová komponenta `PageHeader` pro konzistentní typografii a layout.
+  - Použita v `LeaderboardView`, `JournalView`, `StatsView`, `GhostListView` a `GalleryView`.
+  - Hlavičky nyní používají "Red & Gold" téma s gradienty a ikonami.
+- **[UI] Typography Polish:** Aktualizována typografie v `ProfileView` a `DiscoveryView` (Radar) pro shodu s novým design systémem (font-black, uppercase, italic).
+
 ## [2.20.2] - 2025-11-25
 ### Improved
 - **[Core] Location Tracking:** Přidáno automatické sledování polohy uživatele.

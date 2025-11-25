@@ -6,6 +6,7 @@ import { fetchJournalStats } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 import { Zap, Calendar, Activity, Lock, Eye } from 'lucide-react';
 import { Button } from './Button';
+import { PageHeader } from './PageHeader';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -61,10 +62,12 @@ export const StatsView: React.FC<StatsViewProps> = ({ userStats, onOpenPremium }
 
   return (
     <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Tvoje Statistiky</h1>
-        <p className="text-slate-400 text-sm">Analýza tvého lovu (z Černé Knihy)</p>
-      </div>
+      <PageHeader
+        title="Tvoje"
+        highlight="Statistiky"
+        subtitle="Analýza tvého lovu (z Černé Knihy)"
+        icon={<Activity size={24} />}
+      />
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-2 gap-3 mb-6">

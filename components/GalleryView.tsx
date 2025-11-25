@@ -5,6 +5,7 @@ import { Image, Lock, Trash2, Plus, X, EyeOff, Shield } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '../services/supabaseClient';
 import { fetchUserGallery, uploadGalleryImage, deleteGalleryImage, GalleryImage } from '../services/userService';
+import { PageHeader } from './PageHeader';
 
 export const GalleryView: React.FC = () => {
     const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -69,12 +70,13 @@ export const GalleryView: React.FC = () => {
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500 uppercase tracking-tighter">
-                    Galerie
-                </h1>
-                <p className="text-slate-400 text-sm">Tvoje fotky a vzpomínky</p>
-            </div>
+            {/* Header */}
+            <PageHeader
+                title="Moje"
+                highlight="Galerie"
+                subtitle="Tvoje fotky a vzpomínky"
+                icon={<Image size={24} />}
+            />
 
             {/* Upload Button */}
             <div className="mb-4">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Ghost, UserX, Loader2 } from 'lucide-react';
 import { fetchGhostList, unghostUser, GhostedUser } from '../services/userService';
+import { PageHeader } from './PageHeader';
 
 export const GhostListView: React.FC = () => {
     const [ghostedUsers, setGhostedUsers] = useState<GhostedUser[]>([]);
@@ -57,17 +58,13 @@ export const GhostListView: React.FC = () => {
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0 bg-slate-900">
             {/* Header */}
-            <div className="mb-6">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700">
-                        <Ghost size={24} className="text-red-400" />
-                    </div>
-                    <h1 className="text-2xl font-black text-white">Ghost List</h1>
-                </div>
-                <p className="text-sm text-slate-400">
-                    Uživatelé, které jsi ghostnul. Můžeš je odghostnout a obnovit komunikaci.
-                </p>
-            </div>
+            {/* Header */}
+            <PageHeader
+                title="Ghost"
+                highlight="List"
+                subtitle="Uživatelé, které jsi ghostnul. Můžeš je odghostnout a obnovit komunikaci."
+                icon={<Ghost size={24} />}
+            />
 
             {/* Ghost List */}
             {loading ? (

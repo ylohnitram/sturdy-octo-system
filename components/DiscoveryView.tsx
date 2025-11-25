@@ -214,8 +214,8 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                     </div>
 
                     <div className="relative z-10 flex-grow">
-                        <h2 className="text-xl font-bold text-white mb-4 text-center flex items-center justify-center gap-2">
-                            <Radar className="text-red-500" /> Aktivní Místa
+                        <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white mb-6 text-center flex items-center justify-center gap-2">
+                            <Radar className="text-red-500" size={28} /> Aktivní <span className="text-red-500">Místa</span>
                         </h2>
 
                         {!userLocation ? (

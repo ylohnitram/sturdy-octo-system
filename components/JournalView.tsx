@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Star, Tag, X, Save, CheckCircle, Ghost, Trash2, Edit2, Image, MessageCircle, UserX, Skull, MoreHorizontal } from 'lucide-react';
+import { Search, Plus, Star, Tag, X, Save, CheckCircle, Ghost, Trash2, Edit2, Image, MessageCircle, UserX, Skull, MoreHorizontal, Book } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { fetchAllMatchedUsersForDiary, unghostUser } from '../services/userService';
 import { JournalEntry, UserProfile } from '../types';
 import { Button } from './Button';
+import { PageHeader } from './PageHeader';
 
 interface JournalViewProps {
     onOpenChat?: (partnerId: string) => void;
@@ -279,21 +280,21 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                        Černá Kniha 📕
-                    </h1>
-                    <p className="text-slate-400 text-sm">Tvůj soukromý seznam úlovků</p>
-                </div>
-                <Button
-                    size="sm"
-                    onClick={() => { resetForm(); setIsAddModalOpen(true); }}
-                    className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full w-10 h-10 !p-0 flex items-center justify-center shadow-lg shadow-red-900/20"
-                >
-                    <Plus size={24} />
-                </Button>
-            </div>
+            <PageHeader
+                title="Černá"
+                highlight="Kniha"
+                subtitle="Tvůj soukromý seznam úlovků"
+                icon={<Book size={24} />}
+                action={
+                    <Button
+                        size="sm"
+                        onClick={() => { resetForm(); setIsAddModalOpen(true); }}
+                        className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full w-10 h-10 !p-0 flex items-center justify-center shadow-lg shadow-red-900/20"
+                    >
+                        <Plus size={24} />
+                    </Button>
+                }
+            />
 
             {/* Search */}
             <div className="relative mb-6">

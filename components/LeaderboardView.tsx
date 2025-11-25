@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, UserPlus, Check, X as XIcon } from 'lucide-react';
 import { UserStats, LeaderboardEntry, RivalRequest } from '../types';
 import { fetchLeaderboard, fetchRivalsLeaderboard, sendRivalRequest, fetchPendingRivalRequests, respondToRivalRequest } from '../services/userService';
+import { PageHeader } from './PageHeader';
 
 interface LeaderboardViewProps {
   userStats: UserStats;
@@ -52,17 +53,13 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
 
   return (
     <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-black text-white uppercase tracking-tighter italic">
-            Žebříček <span className="text-yellow-500">Lovců</span>
-          </h1>
-          <p className="text-xs text-slate-400 font-medium">Porovnej své skóre s ostatními</p>
-        </div>
-        <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
-          <Trophy className="text-yellow-500" size={24} />
-        </div>
-      </div>
+      <PageHeader
+        title="Žebříček"
+        highlight="Lovců"
+        subtitle="Porovnej své skóre s ostatními"
+        icon={<Trophy size={24} />}
+        variant="gold"
+      />
 
       <div className="flex bg-slate-800/50 p-1 rounded-xl mb-6 backdrop-blur-sm border border-slate-700/50">
         {(['global', 'weekly', 'rivals'] as const).map((t) => (
