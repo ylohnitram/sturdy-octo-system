@@ -228,35 +228,7 @@ const App: React.FC = () => {
       }
     };
 
-    // Location Tracking (Every 5 minutes)
-    useEffect(() => {
-      if (!session?.user?.id) return;
 
-      const updatePos = () => {
-        if ('geolocation' in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              // Only update if we have a valid session
-              if (session?.user?.id) {
-                await updateUserLocation(session.user.id, latitude, longitude);
-                console.log('[Location] Updated:', latitude, longitude);
-              }
-            },
-            (err) => console.error('[Location] Error:', err),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-          );
-        }
-      };
-
-      // Initial update
-      updatePos();
-
-      // Interval update (every 5 minutes)
-      const interval = setInterval(updatePos, 5 * 60 * 1000);
-
-      return () => clearInterval(interval);
-    }, [session?.user?.id]);
 
     // Helper function to load user data with retry logic
     const loadUserDataWithRetry = async (userId: string, maxRetries = 2): Promise<any> => { // Reduced retries
@@ -295,6 +267,36 @@ const App: React.FC = () => {
       if (subscription) subscription.unsubscribe();
     };
   }, []);
+
+  // Location Tracking (Every 5 minutes)
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const updatePos = () => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            // Only update if we have a valid session
+            if (session?.user?.id) {
+              await updateUserLocation(session.user.id, latitude, longitude);
+              console.log('[Location] Updated:', latitude, longitude);
+            }
+          },
+          (err) => console.error('[Location] Error:', err),
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+      }
+    };
+
+    // Initial update
+    updatePos();
+
+    // Interval update (every 5 minutes)
+    const interval = setInterval(updatePos, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [session?.user?.id]);
 
   // Real-time notification count updates
   useEffect(() => {
