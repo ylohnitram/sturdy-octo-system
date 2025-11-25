@@ -6,6 +6,14 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.2] - 2025-11-25
+### Changed
+- **[Branding] New Logo:** Implementováno nové logo "claw marks" (drápy) napříč celou aplikací.
+  - Aktualizovány všechny logo soubory v `/public/` (logo.png, PWA ikony, favicon).
+  - Vytvořen automatický skript `scripts/generate-logos.js` pro generování variant loga.
+  - Logo má transparentní pozadí pro hlavní soubor, černé pozadí pro PWA/mobile ikony.
+  - Favicon optimalizován pro malé rozměry.
+
 ## [2.21.1] - 2025-11-25
 ### Improved
 - **[UI] Premium Card Design System:** Kompletní redesign všech seznamů a karet v aplikaci.

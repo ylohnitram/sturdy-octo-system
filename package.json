@@ -1,7 +1,7 @@
 {
   "name": "notch",
   "private": true,
-  "version": "2.21.1",
+  "version": "2.21.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,6 +34,8 @@
     "husky": "^9.1.7",
     "jsdom": "^22.1.0",
     "lint-staged": "^16.2.7",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.1.0",
