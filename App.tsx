@@ -613,6 +613,7 @@ const App: React.FC = () => {
                     onBack={() => setCurrentView(AppView.DISCOVERY)}
                     onConsumeCoins={consumeCoins}
                     userStats={userStats}
+                    onOpenChat={handleOpenChat}
                   />
                 </div>
               )}

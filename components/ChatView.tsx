@@ -48,14 +48,30 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
 
     // Handle deep linking to chat
     useEffect(() => {
-        if (initialChatPartnerId && initialChatPartnerId !== lastProcessedIdRef.current && matches.length > 0) {
-            const match = matches.find(m => m.partnerId === initialChatPartnerId);
-            if (match) {
-                openChat(match);
-                lastProcessedIdRef.current = initialChatPartnerId;
+        const checkAndOpen = async () => {
+            if (initialChatPartnerId && initialChatPartnerId !== lastProcessedIdRef.current) {
+                // Try to find match in current list
+                let match = matches.find(m => m.partnerId === initialChatPartnerId);
+
+                // If not found and not currently loading, try force reload
+                if (!match && !loadingMatches) {
+                    console.log('Partner not found in cache, reloading matches...', initialChatPartnerId);
+                    const updatedMatches = await loadMatches();
+                    match = updatedMatches.find(m => m.partnerId === initialChatPartnerId);
+                }
+
+                if (match) {
+                    openChat(match);
+                    lastProcessedIdRef.current = initialChatPartnerId;
+                } else if (!loadingMatches) {
+                    // Still not found after reload? Maybe create a temporary match object if we know they are matched?
+                    // For now, just log warning.
+                    console.warn('Chat partner not found even after reload:', initialChatPartnerId);
+                }
             }
-        }
-    }, [initialChatPartnerId, matches]);
+        };
+        checkAndOpen();
+    }, [initialChatPartnerId, matches, loadingMatches]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -114,6 +130,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
         const data = await fetchMatches();
         setMatches(data);
         setLoadingMatches(false);
+        return data;
     };
 
     const openChat = async (match: MatchPreview) => {
@@ -390,8 +407,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             type="button"
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                             className={`p-2 rounded-full transition-all ${showEmojiPicker
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-red-600 text-white'
+                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
                                 }`}
                         >
                             <Smile size={20} />

@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.1] - 2025-11-26
+### Fixed
+- **[UX] Match Profile Actions:** Opraveno chování tlačítek na profilu uživatele, se kterým máte match.
+  - Místo tlačítka Like (které bylo zbytečné) se nyní zobrazuje tlačítko **Zpráva** (💬), které otevře chat.
+  - Tlačítko Dismiss (❌) nyní funguje jako **Unmatch** (zrušení propojení) s potvrzovacím dialogem.
+  - Opravena chyba, kdy se nový match nezobrazil v seznamu chatů ihned po prokliku z profilu.
+
 ## [2.24.0] - 2025-11-26
 ### Added
 - **[Feature] AI Wingman:** Asistent s umělou inteligencí pro pomoc s konverzacemi! ✨💬

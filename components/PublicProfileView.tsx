@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { X, Heart, MapPin, Zap, ArrowLeft, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Heart, MapPin, Zap, ArrowLeft, Loader2, Image as ImageIcon, MessageCircle, AlertTriangle } from 'lucide-react';
 import { UserProfile, UserTier, UserStats } from '../types';
-import { fetchUserData, sendLike } from '../services/userService';
+import { fetchUserData, sendLike, checkMatchStatus, unmatchUser } from '../services/userService';
 import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
 
@@ -10,21 +10,31 @@ interface PublicProfileViewProps {
     onBack: () => void;
     onConsumeCoins: (amount: number) => boolean;
     userStats: UserStats;
+    onOpenChat?: (partnerId: string) => void;
 }
 
-export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack, onConsumeCoins, userStats }) => {
+export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUserId, onBack, onConsumeCoins, userStats, onOpenChat }) => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [sendingLike, setSendingLike] = useState(false);
     const [hasLiked, setHasLiked] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
+    const [isMatch, setIsMatch] = useState(false);
+    const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
             setLoading(true);
             setHasLiked(false); // Reset like state for new profile
-            const { profile } = await fetchUserData(targetUserId);
-            setProfile(profile);
+
+            // Parallel fetch: Profile Data + Match Status
+            const [userData, matchStatus] = await Promise.all([
+                fetchUserData(targetUserId),
+                checkMatchStatus(targetUserId)
+            ]);
+
+            setProfile(userData.profile);
+            setIsMatch(matchStatus);
             setLoading(false);
         };
         loadProfile();
@@ -40,6 +50,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
             if (result.success) {
                 setHasLiked(true);
                 if (result.isMatch) {
+                    setIsMatch(true); // Update local state
                     // Dispatch match event for NotificationManager to show toast
                     window.dispatchEvent(new CustomEvent('notch_match_found', {
                         detail: { name: profile.name }
@@ -48,6 +59,22 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
             }
         }
         setSendingLike(false);
+    };
+
+    const handleUnmatch = async () => {
+        if (!profile) return;
+        const success = await unmatchUser(profile.id);
+        if (success) {
+            onBack(); // Go back after unmatching
+        } else {
+            alert('Chyba při rušení propojení.');
+        }
+    };
+
+    const handleChat = () => {
+        if (profile && onOpenChat) {
+            onOpenChat(profile.id);
+        }
     };
 
     if (loading) {
@@ -122,13 +149,15 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
 
                     {/* Actions */}
                     <div className="grid grid-cols-4 gap-4 items-center mt-2">
+                        {/* Dismiss / Unmatch Button */}
                         <button
-                            onClick={onBack}
+                            onClick={() => isMatch ? setShowUnmatchConfirm(true) : onBack()}
                             className="col-span-1 aspect-square rounded-full border-2 border-slate-600 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:border-slate-500 hover:text-white transition-all"
                         >
                             <X size={28} />
                         </button>
 
+                        {/* Gallery Button */}
                         <button
                             onClick={() => setShowGallery(true)}
                             className="col-span-2 h-14 rounded-2xl bg-slate-800/80 backdrop-blur border border-slate-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-slate-700 transition-all relative overflow-hidden"
@@ -137,26 +166,68 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({ targetUser
                             <span>Galerie</span>
                         </button>
 
-                        <button
-                            onClick={handleLike}
-                            disabled={sendingLike || hasLiked}
-                            className={`col-span-1 aspect-square rounded-full flex items-center justify-center shadow-lg transition-all ${hasLiked
+                        {/* Like / Chat Button */}
+                        {isMatch ? (
+                            <button
+                                onClick={handleChat}
+                                className="col-span-1 aspect-square rounded-full flex items-center justify-center shadow-lg transition-all bg-gradient-to-br from-blue-600 to-cyan-600 text-white hover:scale-105 shadow-blue-900/50"
+                            >
+                                <MessageCircle size={28} />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleLike}
+                                disabled={sendingLike || hasLiked}
+                                className={`col-span-1 aspect-square rounded-full flex items-center justify-center shadow-lg transition-all ${hasLiked
                                     ? 'bg-green-600 text-white cursor-default'
                                     : sendingLike
                                         ? 'bg-slate-700 text-white'
                                         : 'bg-gradient-to-br from-red-600 to-orange-600 text-white hover:scale-105 shadow-red-900/50'
-                                }`}
-                        >
-                            {sendingLike ? (
-                                <Loader2 size={28} className="animate-spin" />
-                            ) : (
-                                <Heart size={28} fill={hasLiked ? "currentColor" : "currentColor"} />
-                            )}
-                        </button>
+                                    }`}
+                            >
+                                {sendingLike ? (
+                                    <Loader2 size={28} className="animate-spin" />
+                                ) : (
+                                    <Heart size={28} fill={hasLiked ? "currentColor" : "currentColor"} />
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* Unmatch Confirmation Modal */}
+            {showUnmatchConfirm && (
+                <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-slate-900 w-full max-w-sm rounded-2xl border border-red-900/30 shadow-2xl animate-in zoom-in-95">
+                        <div className="bg-red-900/10 p-6 text-center">
+                            <div className="flex justify-center mb-3 text-red-500">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <h4 className="text-red-500 font-bold text-lg mb-2">Zrušit propojení?</h4>
+                            <p className="text-xs text-red-400/70 leading-relaxed">
+                                Opravdu chceš zrušit match s <strong>{profile?.name}</strong>? Tato akce je nevratná a zmizí ti z chatu.
+                            </p>
+                        </div>
+                        <div className="p-4 flex gap-2">
+                            <button
+                                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-medium transition-colors"
+                                onClick={() => setShowUnmatchConfirm(false)}
+                            >
+                                Ne, nechat
+                            </button>
+                            <button
+                                className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-colors"
+                                onClick={handleUnmatch}
+                            >
+                                Ano, zrušit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Gallery Modal */}
             {showGallery && profile && (
                 <PublicGalleryModal
                     targetUserId={profile.id}

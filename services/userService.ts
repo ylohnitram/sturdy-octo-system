@@ -1071,6 +1071,7 @@ export interface MatchPreview {
     partnerId: string;
     partnerUsername: string;
     partnerAvatar: string;
+    partnerBio?: string;
     lastMessage?: string;
     lastMessageTime?: string;
     unreadCount: number;
@@ -1092,10 +1093,54 @@ export const fetchMatches = async (): Promise<MatchPreview[]> => {
         partnerId: m.partner_id,
         partnerUsername: m.partner_username,
         partnerAvatar: m.partner_avatar,
+        partnerBio: m.partner_bio,
         lastMessage: m.last_message,
         lastMessageTime: m.last_message_time,
         unreadCount: m.unread_count
     }));
+};
+
+export const checkMatchStatus = async (targetUserId: string): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data, error } = await supabase
+        .from('matches')
+        .select('id')
+        .or(`and(user1_id.eq.${user.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user.id})`)
+        .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
+        console.error('Error checking match status:', error);
+    }
+
+    return !!data;
+};
+
+export const unmatchUser = async (targetUserId: string): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    try {
+        // 1. Delete from matches
+        const { error: matchError } = await supabase
+            .from('matches')
+            .delete()
+            .or(`and(user1_id.eq.${user.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user.id})`);
+
+        if (matchError) throw matchError;
+
+        // 2. Delete likes (both directions to be clean)
+        await supabase
+            .from('likes')
+            .delete()
+            .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUserId}),and(from_user_id.eq.${targetUserId},to_user_id.eq.${user.id})`);
+
+        return true;
+    } catch (e) {
+        console.error('Error unmatching user:', e);
+        return false;
+    }
 };
 
 export const fetchConversation = async (partnerId: string): Promise<ChatMessage[]> => {
