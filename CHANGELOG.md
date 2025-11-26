@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.22.0] - 2025-11-26
+### Added
+- **[UX] Swipe Navigation:** Implementována globální navigace gesty (swipe) mezi obrazovkami.
+  - Umožňuje plynulý přechod mezi záložkami (Žebříček ↔ Černá Kniha ↔ Galerie ↔ Zprávy ↔ Profil) tažením prstu.
+  - **Smart Discovery Handling:** Na obrazovce **Lov (Discovery)** je swipe navigace záměrně vypnuta, aby nekolidovala s gesty pro Like/Pass (Tinder style).
+  - Použita knihovna `react-swipeable` pro plynulou detekci gest.
+
 ## [2.21.10] - 2025-11-26
 ### Fixed
 - **[UI] Text Clipping:** Definitivní oprava useknutých písmen v nadpisech.

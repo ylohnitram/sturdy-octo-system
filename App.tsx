@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import { supabase } from './services/supabaseClient';
 import { fetchUserData, updateUserLocation } from './services/userService';
 import { Navigation } from './components/Navigation';
@@ -63,6 +64,39 @@ const App: React.FC = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  // Swipe Navigation Logic
+  const NAV_ORDER = [
+    AppView.DISCOVERY,
+    AppView.LEADERBOARD,
+    AppView.JOURNAL,
+    AppView.GALLERY,
+    AppView.CHAT,
+    AppView.PROFILE
+  ];
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      // Swipe Left -> Go to Next Tab (Right)
+      if (currentView === AppView.DISCOVERY) return; // Disable on Discovery (Tinder cards)
+
+      const currentIndex = NAV_ORDER.indexOf(currentView);
+      if (currentIndex !== -1 && currentIndex < NAV_ORDER.length - 1) {
+        setCurrentView(NAV_ORDER[currentIndex + 1]);
+      }
+    },
+    onSwipedRight: () => {
+      // Swipe Right -> Go to Prev Tab (Left)
+      if (currentView === AppView.DISCOVERY) return; // Disable on Discovery (Tinder cards)
+
+      const currentIndex = NAV_ORDER.indexOf(currentView);
+      if (currentIndex !== -1 && currentIndex > 0) {
+        setCurrentView(NAV_ORDER[currentIndex - 1]);
+      }
+    },
+    preventScrollOnSwipe: true,
+    trackMouse: false
+  });
 
   // State for current view - Initialize from localStorage or default to PROFILE
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -566,7 +600,7 @@ const App: React.FC = () => {
             notificationsEnabled={true}
           />
 
-          <main className="h-screen overflow-hidden relative pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]">
+          <main {...handlers} className="h-screen overflow-hidden relative pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
             <div className="relative z-10 h-full">
               {renderView()}
