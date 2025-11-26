@@ -53,7 +53,6 @@ const App: React.FC = () => {
 
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
-  const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [userStats, setUserStats] = useState<UserStats>(INITIAL_STATS);
   const [showRestoreNotification, setShowRestoreNotification] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -366,8 +365,7 @@ const App: React.FC = () => {
   const openStore = () => setIsStoreModalOpen(true);
   const closeStore = () => setIsStoreModalOpen(false);
 
-  const openStore = () => setIsStoreModalOpen(true);
-  const closeStore = () => setIsStoreModalOpen(false);
+
 
   const consumeAiCredit = (): boolean => {
     alert(`TIER: ${userStats.tier}, CREDITS: ${userStats.aiCredits}`);
