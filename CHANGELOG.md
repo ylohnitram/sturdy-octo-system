@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.10] - 2025-11-26
+### Fixed
+- **[UI] Text Clipping:** Definitivní oprava useknutých písmen v nadpisech.
+  - Zvýšen padding (`px-2 py-1`) kolem nadpisů v `PageHeader`.
+  - Přidán negativní margin (`-ml-2`) pro zachování vizuálního zarovnání.
+  - Zajišťuje, že kurzíva (italic) se vykreslí celá i u písmen jako "j", "y" na konci slov.
+
 ## [2.21.9] - 2025-11-26
 ### Improved
 - **[UI] Unified Screen Design:** Sjednocen vzhled všech obrazovek pomocí komponenty `PageHeader`.
