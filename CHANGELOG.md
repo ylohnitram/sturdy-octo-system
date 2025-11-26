@@ -9,9 +9,9 @@ a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [2.21.10] - 2025-11-26
 ### Fixed
 - **[UI] Text Clipping:** Definitivní oprava useknutých písmen v nadpisech.
-  - Zvýšen padding (`px-2 py-1`) kolem nadpisů v `PageHeader`.
-  - Přidán negativní margin (`-ml-2`) pro zachování vizuálního zarovnání.
-  - Zajišťuje, že kurzíva (italic) se vykreslí celá i u písmen jako "j", "y" na konci slov.
+  - Přidán pravý padding (`pr-2`) přímo na gradientní text (`span`).
+  - Toto řešení specificky řeší ořezávání kurzívy (italic) u `bg-clip-text` elementů.
+  - Zajišťuje, že písmena jako "E", "U", "Y" na konci slov jsou plně viditelná.
 
 ## [2.21.9] - 2025-11-26
 ### Improved

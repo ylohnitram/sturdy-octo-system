@@ -29,9 +29,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, highlight, subtit
                     </div>
                 )}
                 <div>
-                    {/* Added px-2 and py-1 to prevent italic text from being cut off */}
-                    <h1 className="text-2xl font-black uppercase tracking-tight italic text-white leading-none px-2 py-1 -ml-2">
-                        {title} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${gradientClass}`}>{highlight}</span>
+                    {/* Added pr-2 to span to fix italic text clipping with bg-clip-text */}
+                    <h1 className="text-2xl font-black uppercase tracking-tight italic text-white leading-none py-1">
+                        {title} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${gradientClass} pr-2`}>{highlight}</span>
                     </h1>
                     {subtitle && (
                         <p className="text-xs text-slate-400 font-medium mt-1 ml-0.5">
