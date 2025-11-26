@@ -6,6 +6,9 @@ import { UserStats, TargetGender } from '../types';
 import { generateUserBio } from '../services/geminiService';
 import { supabase } from '../services/supabaseClient';
 import { uploadAvatar, updateUserBio, scheduleAccountDeletion, updateUserPreferences, updateNotificationSettings } from '../services/userService';
+import { PageHeader } from './PageHeader';
+import { GhostListModal } from './GhostListModal';
+
 
 interface ProfileViewProps {
     userStats: UserStats;
@@ -41,6 +44,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     const [newPassword, setNewPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showGhostList, setShowGhostList] = useState(false);
 
     const [showStatsInfo, setShowStatsInfo] = useState(false);
     const [showPrefs, setShowPrefs] = useState(false);
@@ -229,7 +233,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
     return (
         <div className="flex flex-col h-full pb-20 pt-4 px-4 max-w-md mx-auto overflow-y-auto no-scrollbar min-h-0">
-            {/* Header */}
+            {/* Page Header */}
+            <PageHeader
+                title="Můj"
+                highlight="Profil"
+                subtitle="Tvoje nastavení a statistiky"
+                icon={<Users size={24} />}
+            />
+
+            {/* Profile Content */}
             <div className="flex flex-col items-center mb-6">
                 {loading ? (
                     // Skeleton Loading State
@@ -450,7 +462,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
                 {/* Ghost List */}
                 <button
-                    onClick={() => onNavigate?.('GHOST_LIST')}
+                    onClick={() => setShowGhostList(true)}
                     className="bg-slate-800 rounded-xl p-4 flex items-center gap-4 hover:bg-slate-700 transition-colors text-left w-full"
                 >
                     <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
@@ -641,6 +653,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Ghost List Modal */}
+            {showGhostList && (
+                <GhostListModal onClose={() => setShowGhostList(false)} />
             )}
 
 

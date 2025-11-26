@@ -29,7 +29,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, highlight, subtit
                     </div>
                 )}
                 <div>
-                    <h1 className="text-2xl font-black uppercase tracking-tighter italic text-white leading-none">
+                    <h1 className="text-2xl font-black uppercase tracking-tight italic text-white leading-none px-0.5">
                         {title} <span className={`text-transparent bg-clip-text bg-gradient-to-r ${gradientClass}`}>{highlight}</span>
                     </h1>
                     {subtitle && (

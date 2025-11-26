@@ -7,6 +7,7 @@ import { fetchDiscoveryCandidates, updateRadarRadius, fetchUserData, sendLike, r
 import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
 import { MatchOverlay } from './MatchOverlay';
+import { PageHeader } from './PageHeader';
 
 interface DiscoveryViewProps {
     userStats: UserStats;
@@ -169,8 +170,26 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                 />
             )}
 
+            {/* Page Header - for Swipe Mode */}
+            {viewMode === 'swipe' && (
+                <PageHeader
+                    title="Lov"
+                    subtitle="Najdi svůj další úlovek"
+                    icon={<Target size={24} />}
+                />
+            )}
+
+            {/* Page Header - for Radar Mode */}
+            {viewMode === 'radar' && (
+                <PageHeader
+                    title="Aktivní"
+                    highlight="Místa"
+                    subtitle="Uživatelé v okolí"
+                    icon={<Radar size={24} />}
+                />
+            )}
+
             {/* Top Toggle */}
-            {/* ... */}
             <div className="flex justify-between items-center mb-4">
                 <div className="bg-slate-800 p-1 rounded-xl flex">
                     <button
@@ -214,10 +233,6 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                     </div>
 
                     <div className="relative z-10 flex-grow">
-                        <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white mb-6 text-center flex items-center justify-center gap-2">
-                            <Radar className="text-red-500" size={28} /> Aktivní <span className="text-red-500">Místa</span>
-                        </h2>
-
                         {!userLocation ? (
                             <div className="text-center text-slate-400 mt-10">
                                 <p>Povolte prosím přístup k poloze pro zobrazení radaru.</p>

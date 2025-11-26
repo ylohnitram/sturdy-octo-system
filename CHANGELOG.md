@@ -6,6 +6,18 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.21.9] - 2025-11-26
+### Improved
+- **[UI] Unified Screen Design:** Sjednocen vzhled všech obrazovek pomocí komponenty `PageHeader`.
+  - Přidána hlavička do **Lovu (DiscoveryView)** a **Profilu (ProfileView)**.
+  - Sjednoceno barevné schéma **Žebříčku (LeaderboardView)** na standardní červenou variantu.
+- **[UI] Typography Fix:** Opraven problém s useknutými písmeny v nadpisech (způsobený kombinací `italic` a `tracking-tighter`).
+  - Upravena typografie v `PageHeader` na `tracking-tight` s dodatečným paddingem.
+- **[UX] Ghost List Modal:** Ghost List přesunut z hlavní navigace do modálního okna v Profilu.
+  - Zlepšena přehlednost navigace.
+  - Implementováno potvrzovací okno pro odghostování přímo v modalu.
+  - Odstraněna stará obrazovka `GhostListView`.
+
 ## [2.21.8] - 2025-11-26
 ### Changed
 - **[PWA] Black Splash Screen Background:** Změněno pozadí splash screenů z tmavě modré (#0F172A) na černou (#000000).

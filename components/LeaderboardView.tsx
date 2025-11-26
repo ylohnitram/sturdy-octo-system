@@ -58,7 +58,6 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
         highlight="Lovců"
         subtitle="Porovnej své skóre s ostatními"
         icon={<Trophy size={24} />}
-        variant="gold"
       />
 
       <div className="flex bg-slate-800/50 p-1 rounded-xl mb-6 backdrop-blur-sm border border-slate-700/50">
@@ -154,9 +153,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ userStats, onO
               <div className="flex items-center gap-4 relative z-10">
                 {/* Rank Badge */}
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900 shadow-lg shadow-yellow-500/30' :
-                    index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-lg shadow-slate-400/20' :
-                      index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-slate-900 shadow-lg shadow-orange-500/20' :
-                        'bg-slate-800 text-slate-400 border border-slate-700'
+                  index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-lg shadow-slate-400/20' :
+                    index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-slate-900 shadow-lg shadow-orange-500/20' :
+                      'bg-slate-800 text-slate-400 border border-slate-700'
                   }`}>
                   #{index + 1}
                 </div>
