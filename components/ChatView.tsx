@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Send, Ghost, Loader2, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, Ghost, Loader2, MessageCircle, Smile } from 'lucide-react';
+import { EmojiPicker } from './EmojiPicker';
 import { PageHeader } from './PageHeader';
 import { supabase } from '../services/supabaseClient';
 import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
@@ -23,6 +24,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const [inputText, setInputText] = useState('');
     const [sending, setSending] = useState(false);
     const [showGhostConfirm, setShowGhostConfirm] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
             alert('Nepodařilo se odeslat zprávu. Zkontroluj konzoli pro detaily.');
         }
         setSending(false);
+    };
+
+    const handleEmojiSelect = (emoji: string) => {
+        setInputText(prev => prev + emoji);
+        setShowEmojiPicker(false);
     };
 
     const handleGhost = async () => {
@@ -306,22 +313,40 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
             <div className="p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-slate-900 border-t border-slate-800">
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                    className="flex gap-2"
+                    className="relative"
                 >
-                    <input
-                        type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Napiš zprávu..."
-                        className="flex-grow bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white focus:outline-none focus:border-red-500 transition-colors"
-                    />
-                    <button
-                        type="submit"
-                        disabled={!inputText.trim() || sending}
-                        className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
-                    >
-                        {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-                    </button>
+                    {showEmojiPicker && (
+                        <EmojiPicker
+                            onEmojiSelect={handleEmojiSelect}
+                            onClose={() => setShowEmojiPicker(false)}
+                        />
+                    )}
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Napiš zprávu..."
+                            className="flex-grow bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white focus:outline-none focus:border-red-500 transition-colors"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            className={`p-2 rounded-full transition-all ${showEmojiPicker
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                }`}
+                        >
+                            <Smile size={20} />
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={!inputText.trim() || sending}
+                            className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
+                        >
+                            {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                        </button>
+                    </div>
                 </form>
             </div>
 

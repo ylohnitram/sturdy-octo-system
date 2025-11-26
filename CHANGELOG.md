@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.23.0] - 2025-11-26
+### Added
+- **[Feature] Emoji Picker v Chatu:** Přidán emoji picker pro zpestření konverzací! 😊🔥❤️
+  - Tlačítko 😊 vedle pole pro psaní zprávy.
+  - 6 kategorií (Smajlíci, Srdíčka, Aktivita, Jídlo, Objekty, Nedávné).
+  - Vyhledávání emoji.
+  - **Nedávně použitá emoji** se automaticky ukládají do localStorage.
+  - 500+ native emoji bez externích závislostí.
+  - Moderní dark mode design konzistentní s aplikací.
+
 ## [2.22.3] - 2025-11-26
 ### Fixed
 - **[UI] Slide Animation:** Opravena animace přepínání obrazovek, která byla dříve neviditelná nebo "skákavá".
