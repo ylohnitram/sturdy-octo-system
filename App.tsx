@@ -77,8 +77,6 @@ const App: React.FC = () => {
   const handlers = useSwipeable({
     onSwipedLeft: () => {
       // Swipe Left -> Go to Next Tab (Right)
-      if (currentView === AppView.DISCOVERY) return; // Disable on Discovery (Tinder cards)
-
       const currentIndex = NAV_ORDER.indexOf(currentView);
       if (currentIndex !== -1 && currentIndex < NAV_ORDER.length - 1) {
         setCurrentView(NAV_ORDER[currentIndex + 1]);
@@ -86,8 +84,6 @@ const App: React.FC = () => {
     },
     onSwipedRight: () => {
       // Swipe Right -> Go to Prev Tab (Left)
-      if (currentView === AppView.DISCOVERY) return; // Disable on Discovery (Tinder cards)
-
       const currentIndex = NAV_ORDER.indexOf(currentView);
       if (currentIndex !== -1 && currentIndex > 0) {
         setCurrentView(NAV_ORDER[currentIndex - 1]);
@@ -552,61 +548,68 @@ const App: React.FC = () => {
 
           <main {...handlers} className="h-screen overflow-hidden relative pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
-            <div className="relative z-10 h-full">
-              {/* Main Tabs - Kept Alive for smooth swipe */}
-              <div className={currentView === AppView.DISCOVERY ? 'block h-full' : 'hidden'}>
-                <DiscoveryView
-                  userStats={userStats}
-                  userAvatarUrl={userAvatar}
-                  onConsumeAi={consumeAiCredit}
-                  onConsumeCoins={consumeCoins}
-                  onOpenPremium={openPremium}
-                  onOpenChat={handleOpenChat}
-                />
+            <div className="relative z-10 h-full overflow-hidden">
+              {/* Main Tabs - Slider */}
+              <div
+                className="flex h-full transition-transform duration-300 ease-out will-change-transform"
+                style={{ transform: `translateX(-${Math.max(0, NAV_ORDER.indexOf(currentView)) * 100}%)` }}
+              >
+                <div className="min-w-full h-full">
+                  <DiscoveryView
+                    userStats={userStats}
+                    userAvatarUrl={userAvatar}
+                    onConsumeAi={consumeAiCredit}
+                    onConsumeCoins={consumeCoins}
+                    onOpenPremium={openPremium}
+                    onOpenChat={handleOpenChat}
+                  />
+                </div>
+
+                <div className="min-w-full h-full">
+                  <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />
+                </div>
+
+                <div className="min-w-full h-full">
+                  <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />
+                </div>
+
+                <div className="min-w-full h-full">
+                  <GalleryView />
+                </div>
+
+                <div className="min-w-full h-full">
+                  <ChatView
+                    initialChatPartnerId={initialChatPartnerId}
+                    onMessageRead={handleMessageRead}
+                    onRefreshStats={handleRefreshStats}
+                    onViewProfile={handleViewProfile}
+                  />
+                </div>
+
+                <div className="min-w-full h-full">
+                  <ProfileView
+                    userStats={userStats}
+                    avatarUrl={userAvatar}
+                    onOpenStore={openStore}
+                    onOpenPremium={openPremium}
+                    onConsumeAi={consumeAiCredit}
+                    onConsumeCoins={consumeCoins}
+                    onNavigate={(view) => setCurrentView(view as AppView)}
+                    onAvatarUpdate={(newUrl) => setUserAvatar(newUrl)}
+                  />
+                </div>
               </div>
 
-              <div className={currentView === AppView.LEADERBOARD ? 'block h-full' : 'hidden'}>
-                <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />
-              </div>
-
-              <div className={currentView === AppView.JOURNAL ? 'block h-full' : 'hidden'}>
-                <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />
-              </div>
-
-              <div className={currentView === AppView.GALLERY ? 'block h-full' : 'hidden'}>
-                <GalleryView />
-              </div>
-
-              <div className={currentView === AppView.CHAT ? 'block h-full' : 'hidden'}>
-                <ChatView
-                  initialChatPartnerId={initialChatPartnerId}
-                  onMessageRead={handleMessageRead}
-                  onRefreshStats={handleRefreshStats}
-                  onViewProfile={handleViewProfile}
-                />
-              </div>
-
-              <div className={currentView === AppView.PROFILE ? 'block h-full' : 'hidden'}>
-                <ProfileView
-                  userStats={userStats}
-                  avatarUrl={userAvatar}
-                  onOpenStore={openStore}
-                  onOpenPremium={openPremium}
-                  onConsumeAi={consumeAiCredit}
-                  onConsumeCoins={consumeCoins}
-                  onNavigate={(view) => setCurrentView(view as AppView)}
-                  onAvatarUpdate={(newUrl) => setUserAvatar(newUrl)}
-                />
-              </div>
-
-              {/* Dynamic Views - Rendered Conditionally */}
+              {/* Dynamic Views - Rendered Conditionally as Overlay */}
               {currentView === AppView.USER_PROFILE && selectedUserId && (
-                <PublicProfileView
-                  targetUserId={selectedUserId}
-                  onBack={() => setCurrentView(AppView.DISCOVERY)}
-                  onConsumeCoins={consumeCoins}
-                  userStats={userStats}
-                />
+                <div className="absolute inset-0 z-20 bg-slate-900">
+                  <PublicProfileView
+                    targetUserId={selectedUserId}
+                    onBack={() => setCurrentView(AppView.DISCOVERY)}
+                    onConsumeCoins={consumeCoins}
+                    userStats={userStats}
+                  />
+                </div>
               )}
             </div>
           </main>

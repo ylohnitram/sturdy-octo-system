@@ -48,12 +48,12 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate,
               {/* Icon container */}
               <div className={`relative z-10 p-2 rounded-xl transition-all duration-300 ${isActive
                 ? 'bg-gradient-to-br from-red-600 to-orange-600 shadow-lg shadow-red-500/30'
-                : 'bg-transparent group-hover:bg-slate-800/50'
+                : 'bg-transparent'
                 }`}>
                 <item.icon
                   size={20}
                   strokeWidth={isActive ? 2.5 : 2}
-                  className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}
+                  className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-500'}`}
                 />
                 {/* Badge for Chat */}
                 {item.view === AppView.CHAT && unreadConversationsCount && unreadConversationsCount > 0 ? (
@@ -64,7 +64,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate,
               </div>
 
               {/* Label */}
-              <span className={`text-[9px] mt-0.5 font-medium transition-colors duration-300 ${isActive ? 'text-red-400 font-bold' : 'text-slate-600 group-hover:text-slate-400'
+              <span className={`text-[9px] mt-0.5 font-medium transition-colors duration-300 ${isActive ? 'text-red-400 font-bold' : 'text-slate-600'
                 }`}>
                 {item.label}
               </span>

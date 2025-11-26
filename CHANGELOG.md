@@ -6,6 +6,14 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.22.2] - 2025-11-26
+### Improved
+- **[UX] Animated Swipe Navigation:** Přidána plynulá animace (slide effect) při přepínání mezi obrazovkami.
+  - Views jsou nyní uspořádány vedle sebe a posouvají se jako jeden celek.
+  - **Discovery Swipe:** Povolena swipe navigace i na obrazovce Lov (Discovery).
+    - Uživatel může swipovat mezi sekcemi i z této obrazovky (pozor na kolizi s kartami - swipe funguje nejlépe u okrajů nebo mimo karty).
+  - **User Profile Overlay:** Detail uživatele se nyní otevírá jako overlay přes celou obrazovku nad sliderem.
+
 ## [2.22.1] - 2025-11-26
 ### Removed
 - **[Feature] Panic Mode:** Kompletně odstraněna funkce "Panic Mode" (rychlé skrytí aplikace).
