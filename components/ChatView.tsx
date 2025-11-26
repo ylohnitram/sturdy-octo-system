@@ -332,7 +332,13 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                     </button>
                     <div
                         className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => onViewProfile && onViewProfile(activeMatch.partnerId)}
+                        onClick={() => {
+                            if (onViewProfile) {
+                                onViewProfile(activeMatch.partnerId);
+                                setActiveMatch(null); // Close chat portal so Profile is visible
+                                lastProcessedIdRef.current = null; // Reset ref to allow re-opening chat when coming back
+                            }
+                        }}
                     >
                         <img
                             src={activeMatch.partnerAvatar}

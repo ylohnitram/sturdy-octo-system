@@ -6,6 +6,10 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.2] - 2025-11-27
+### Fixed
+- **[UX] Chat Profile Navigation:** Opravena chyba, kdy se při kliknutí na profil v chatu profil otevřel "pod" chatem a nebyl vidět. Nyní se chat správně minimalizuje.
+
 ## [2.24.1] - 2025-11-26
 ### Fixed
 - **[UX] Match Profile Actions:** Opraveno chování tlačítek na profilu uživatele, se kterým máte match.
