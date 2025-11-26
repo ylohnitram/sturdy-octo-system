@@ -6,6 +6,17 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.0] - 2025-11-26
+### Added
+- **[Feature] AI Wingman:** Asistent s umělou inteligencí pro pomoc s konverzacemi! ✨💬
+  - **Tlačítko ✨ (Sparkles)** vedle emoji pickeru v chat inputu.
+  - **Ice-breaker mode:** AI pomůže napsat první zprávu (pokud ještě není konverzace).
+  - **Chat assist mode:** AI navrhne odpověď na základě celé chat historie.
+  - **Cena: 5 kreditů** za jeden assist (velmi konzervativní pricing s 500x marží).
+  - **Preview režim:** Návrh se zobrazí nejdřív v modalu, kde ho můžeš upravit, regenerovat nebo použít.
+  - **Powered by Gemini 2.0 Flash:** Bleskově rychlé a velmi levné API volání (~0.02 centu).
+  - **Kontextové prompty:** AI dostane info o tvém profilu, profilu partnera a celou konverzaci.
+
 ## [2.23.0] - 2025-11-26
 ### Added
 - **[Feature] Emoji Picker v Chatu:** Přidán emoji picker pro zpestření konverzací! 😊🔥❤️

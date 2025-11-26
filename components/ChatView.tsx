@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Send, Ghost, Loader2, MessageCircle, Smile } from 'lucide-react';
+import { ArrowLeft, Send, Ghost, Loader2, MessageCircle, Smile, Sparkles } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
 import { PageHeader } from './PageHeader';
 import { supabase } from '../services/supabaseClient';
 import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
+import { generateChatAssist } from '../services/geminiService';
 import DOMPurify from 'dompurify';
 
 interface ChatViewProps {
@@ -13,9 +14,11 @@ interface ChatViewProps {
     onMessageRead?: () => void;
     onRefreshStats?: () => void;
     onViewProfile?: (userId: string) => void;
+    userStats?: { username?: string; bio?: string; coins?: number };
+    onConsumeCoins?: (amount: number) => boolean;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats, onViewProfile }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats, onViewProfile, userStats, onConsumeCoins }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -25,6 +28,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const [sending, setSending] = useState(false);
     const [showGhostConfirm, setShowGhostConfirm] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showAIModal, setShowAIModal] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState('');
+    const [generatingAI, setGeneratingAI] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -149,6 +155,57 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const handleEmojiSelect = (emoji: string) => {
         setInputText(prev => prev + emoji);
         setShowEmojiPicker(false);
+    };
+
+    const handleAIAssist = async () => {
+        if (!onConsumeCoins || !activeMatch) return;
+
+        // Check & consume 5 coins
+        const success = onConsumeCoins(5);
+        if (!success) return; // Will show store modal automatically
+
+        setGeneratingAI(true);
+        setShowAIModal(true);
+
+        try {
+            const isIcebreaker = messages.length === 0;
+
+            const conversationHistory = messages.map(msg => ({
+                sender: (msg.senderId === currentUserId ? 'me' : 'them') as 'me' | 'them',
+                message: msg.content
+            }));
+
+            const suggestion = await generateChatAssist({
+                myProfile: {
+                    username: userStats?.username || 'Anonym',
+                    bio: userStats?.bio
+                },
+                theirProfile: {
+                    username: activeMatch.partnerUsername,
+                    bio: activeMatch.partnerBio
+                },
+                conversationHistory,
+                isIcebreaker
+            });
+
+            setAiSuggestion(suggestion);
+        } catch (error) {
+            console.error('AI Assist error:', error);
+            setAiSuggestion('Něco se pokazilo. Zkus to znovu.');
+        } finally {
+            setGeneratingAI(false);
+        }
+    };
+
+    const acceptAISuggestion = () => {
+        setInputText(aiSuggestion);
+        setShowAIModal(false);
+        setAiSuggestion('');
+    };
+
+    const regenerateAI = () => {
+        setAiSuggestion('');
+        handleAIAssist();
     };
 
     const handleGhost = async () => {
@@ -340,6 +397,15 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             <Smile size={20} />
                         </button>
                         <button
+                            type="button"
+                            onClick={handleAIAssist}
+                            disabled={!onConsumeCoins}
+                            className="p-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="AI Wingman (5 kreditů)"
+                        >
+                            <Sparkles size={20} />
+                        </button>
+                        <button
                             type="submit"
                             disabled={!inputText.trim() || sending}
                             className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
@@ -349,6 +415,66 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                     </div>
                 </form>
             </div>
+
+            {/* AI Wingman Modal */}
+            {showAIModal && (
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[10001]">
+                    <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-2xl border border-purple-500/30 p-6 max-w-md w-full shadow-2xl shadow-purple-500/20 animate-in zoom-in-95 fade-in duration-200 backdrop-blur-xl">
+                        {/* Icon */}
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
+                            <Sparkles size={32} className="text-white" />
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-black text-white text-center mb-2">
+                            AI Wingman {messages.length === 0 ? '✨' : '💬'}
+                        </h3>
+                        <p className="text-xs text-purple-300 text-center mb-4">
+                            {messages.length === 0 ? 'Pomůžeme ti napsat první zprávu' : 'Pomůžeme ti pokračovat v konverzaci'}
+                        </p>
+
+                        {/* Suggestion */}
+                        <div className="bg-slate-900/60 rounded-xl p-4 mb-4 border border-purple-500/20 min-h-[80px] flex items-center justify-center">
+                            {generatingAI ? (
+                                <div className="text-center">
+                                    <Loader2 className="animate-spin text-purple-400 mx-auto mb-2" size={24} />
+                                    <p className="text-sm text-slate-400">Generuji...</p>
+                                </div>
+                            ) : (
+                                <p className="text-white text-center">{aiSuggestion}</p>
+                            )}
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => { setShowAIModal(false); setAiSuggestion(''); }}
+                                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                                disabled={generatingAI}
+                            >
+                                Zrušit
+                            </button>
+                            {!generatingAI && aiSuggestion && (
+                                <>
+                                    <button
+                                        onClick={regenerateAI}
+                                        className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                                    >
+                                        🔄
+                                    </button>
+                                    <button
+                                        onClick={acceptAISuggestion}
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/30"
+                                    >
+                                        Použít
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* Ghost Confirmation Modal */}
             {showGhostConfirm && activeMatch && (

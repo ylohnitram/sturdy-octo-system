@@ -54,3 +54,90 @@ export const generateUserBio = async (trait: string, interests: string[]): Promi
     return `Mám rád ${interests[0]} a vyhrávám. 🎯`;
   }
 };
+
+interface ChatAssistParams {
+  myProfile: {
+    username: string;
+    bio?: string;
+  };
+  theirProfile: {
+    username: string;
+    bio?: string;
+  };
+  conversationHistory?: Array<{ sender: 'me' | 'them'; message: string }>;
+  isIcebreaker: boolean;
+}
+
+export const generateChatAssist = async (params: ChatAssistParams): Promise<string> => {
+  if (!apiKey) return "Ahoj! Jak se máš? 😊";
+
+  const { myProfile, theirProfile, conversationHistory, isIcebreaker } = params;
+
+  try {
+    let prompt = '';
+
+    if (isIcebreaker) {
+      // Ice-breaker mode
+      prompt = `You are a dating app wingman helping write a first message.
+
+MY PROFILE:
+- Username: ${myProfile.username}
+- Bio: ${myProfile.bio || 'No bio'}
+
+THEIR PROFILE:
+- Username: ${theirProfile.username}
+- Bio: ${theirProfile.bio || 'No bio'}
+
+Generate a flirty, witty, confident opening message in Czech.
+- Reference something from their bio if possible
+- Keep it under 25 words
+- Be playful and charming
+- Use 1-2 emojis max
+- Don't be creepy or too direct
+
+Just return the message, nothing else.`;
+    } else {
+      // Conversation assist mode
+      const historyText = conversationHistory
+        ?.map(msg => `${msg.sender === 'me' ? myProfile.username : theirProfile.username}: ${msg.message}`)
+        .join('\n') || '';
+
+      prompt = `You are a dating app wingman helping continue a conversation.
+
+MY PROFILE:
+- Username: ${myProfile.username}
+- Bio: ${myProfile.bio || 'No bio'}
+
+THEIR PROFILE:
+- Username: ${theirProfile.username}
+- Bio: ${theirProfile.bio || 'No bio'}
+
+CONVERSATION SO FAR:
+${historyText}
+
+Generate a witty, engaging response in Czech that continues the conversation.
+- Be natural and authentic
+- Match the conversation tone
+- Ask an interesting question or make a playful comment
+- Keep it under 30 words
+- Use 1-2 emojis max
+- Don't be creepy
+
+Just return the message, nothing else.`;
+    }
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    return response.text?.trim() || (isIcebreaker
+      ? `Ahoj ${theirProfile.username}! Tvůj profil vypadá zajímavě 😊`
+      : "To je zajímavé! Řekni mi víc 🤔");
+  } catch (error) {
+    console.error("Error generating chat assist:", error);
+    return isIcebreaker
+      ? `Ahoj ${theirProfile.username}! Tvůj profil vypadá zajímavě 😊`
+      : "To je zajímavé! Řekni mi víc 🤔";
+  }
+};

@@ -586,6 +586,8 @@ const App: React.FC = () => {
                     onMessageRead={handleMessageRead}
                     onRefreshStats={handleRefreshStats}
                     onViewProfile={handleViewProfile}
+                    userStats={{ username: userStats.username, bio: userStats.bio, coins: userStats.coins }}
+                    onConsumeCoins={consumeCoins}
                   />
                 </div>
 
