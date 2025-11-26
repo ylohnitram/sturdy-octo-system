@@ -610,7 +610,13 @@ const App: React.FC = () => {
                 <div className="absolute inset-0 z-20 bg-slate-900">
                   <PublicProfileView
                     targetUserId={selectedUserId}
-                    onBack={() => setCurrentView(AppView.DISCOVERY)}
+                    onBack={() => {
+                      if (previousView) {
+                        setCurrentView(previousView);
+                      } else {
+                        setCurrentView(AppView.DISCOVERY);
+                      }
+                    }}
                     onConsumeCoins={consumeCoins}
                     userStats={userStats}
                     onOpenChat={handleOpenChat}
@@ -621,7 +627,7 @@ const App: React.FC = () => {
           </main>
 
           <Navigation
-            currentView={currentView}
+            currentView={currentView === AppView.USER_PROFILE && previousView ? previousView : currentView}
             onNavigate={handleNavigate}
             unreadConversationsCount={userStats?.unreadConversationsCount}
           />   <PremiumModal isOpen={isPremiumModalOpen} onClose={closePremium} />

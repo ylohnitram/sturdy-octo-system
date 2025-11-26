@@ -6,6 +6,12 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.3] - 2025-11-27
+### Fixed
+- **[UX] Profile Navigation History:** Opravena navigace při prohlížení profilu (např. z chatu).
+  - Tlačítko **Zpět** nyní vrací na předchozí obrazovku (např. zpět do chatu), nikoliv vždy na Lov.
+  - Spodní navigace nyní správně zvýrazňuje aktivní sekci (např. Zprávy), i když je otevřený detail profilu.
+
 ## [2.24.2] - 2025-11-27
 ### Fixed
 - **[UX] Chat Profile Navigation:** Opravena chyba, kdy se při kliknutí na profil v chatu profil otevřel "pod" chatem a nebyl vidět. Nyní se chat správně minimalizuje.
