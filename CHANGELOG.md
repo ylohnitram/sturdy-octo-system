@@ -6,6 +6,15 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.22.3] - 2025-11-26
+### Fixed
+- **[UI] Slide Animation:** Opravena animace přepínání obrazovek, která byla dříve neviditelná nebo "skákavá".
+  - Problém byl v nesprávném výpočtu šířky kontejneru. Nyní je šířka slideru dynamicky nastavena podle počtu obrazovek (N * 100%) a každá obrazovka má šířku (100 / N)%.
+  - Animace je nyní plynulá a správně zarovnaná.
+- **[Bug] Modals in Profile:** Opraveno otevírání modálních oken (Ghost List, Statistiky, Smazání účtu) v Profilu.
+  - Modaly byly "uvězněny" uvnitř transformovaného slideru, což rozbíjelo jejich `fixed` pozicování.
+  - Vyřešeno použitím `createPortal`, který renderuje modaly přímo do `body`, mimo kontext slideru.
+
 ## [2.22.2] - 2025-11-26
 ### Improved
 - **[UX] Animated Swipe Navigation:** Přidána plynulá animace (slide effect) při přepínání mezi obrazovkami.

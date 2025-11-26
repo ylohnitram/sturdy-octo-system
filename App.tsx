@@ -552,9 +552,12 @@ const App: React.FC = () => {
               {/* Main Tabs - Slider */}
               <div
                 className="flex h-full transition-transform duration-300 ease-out will-change-transform"
-                style={{ transform: `translateX(-${Math.max(0, NAV_ORDER.indexOf(currentView)) * 100}%)` }}
+                style={{
+                  width: `${NAV_ORDER.length * 100}%`,
+                  transform: `translateX(-${Math.max(0, NAV_ORDER.indexOf(currentView)) * (100 / NAV_ORDER.length)}%)`
+                }}
               >
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <DiscoveryView
                     userStats={userStats}
                     userAvatarUrl={userAvatar}
@@ -565,19 +568,19 @@ const App: React.FC = () => {
                   />
                 </div>
 
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />
                 </div>
 
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />
                 </div>
 
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <GalleryView />
                 </div>
 
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <ChatView
                     initialChatPartnerId={initialChatPartnerId}
                     onMessageRead={handleMessageRead}
@@ -586,7 +589,7 @@ const App: React.FC = () => {
                   />
                 </div>
 
-                <div className="min-w-full h-full">
+                <div className="h-full" style={{ width: `${100 / NAV_ORDER.length}%` }}>
                   <ProfileView
                     userStats={userStats}
                     avatarUrl={userAvatar}

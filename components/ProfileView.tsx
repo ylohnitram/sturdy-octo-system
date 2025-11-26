@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Settings, Edit, Shield, Star, Share2, LogOut, Plus, Lock, Award, EyeOff, Wand2, Coins, Copy, Camera, Ticket, KeyRound, Trash2, AlertTriangle, Cookie, Footprints, Info, X, Users, Bell, Sparkles, Ghost } from 'lucide-react';
 import { Button } from './Button';
 import { UserStats, TargetGender } from '../types';
@@ -341,7 +342,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             {/* STATS INFO MODAL */}
-            {showStatsInfo && (
+            {showStatsInfo && createPortal(
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl p-6 relative">
                         <button
@@ -369,7 +370,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                         </div>
                         <Button fullWidth className="mt-6" onClick={() => setShowStatsInfo(false)}>Chápu to</Button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Invites Management */}
@@ -624,7 +626,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
 
             {/* Delete Confirmation Modal - Fixed Overlay */}
-            {showDeleteConfirm && (
+            {showDeleteConfirm && createPortal(
                 <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-slate-900 w-full max-w-sm rounded-2xl border border-red-900/30 shadow-2xl animate-in zoom-in-95">
                         <div className="bg-red-900/10 p-6 text-center">
@@ -650,12 +652,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                             </Button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Ghost List Modal */}
-            {showGhostList && (
-                <GhostListModal onClose={() => setShowGhostList(false)} />
+            {showGhostList && createPortal(
+                <GhostListModal onClose={() => setShowGhostList(false)} />,
+                document.body
             )}
 
 
