@@ -53,7 +53,7 @@ const App: React.FC = () => {
 
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
-  const [isPanicMode, setIsPanicMode] = useState(false);
+  const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [userStats, setUserStats] = useState<UserStats>(INITIAL_STATS);
   const [showRestoreNotification, setShowRestoreNotification] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -366,8 +366,8 @@ const App: React.FC = () => {
   const openStore = () => setIsStoreModalOpen(true);
   const closeStore = () => setIsStoreModalOpen(false);
 
-  const activatePanic = () => setIsPanicMode(true);
-  const deactivatePanic = () => setIsPanicMode(false);
+  const openStore = () => setIsStoreModalOpen(true);
+  const closeStore = () => setIsStoreModalOpen(false);
 
   const consumeAiCredit = (): boolean => {
     alert(`TIER: ${userStats.tier}, CREDITS: ${userStats.aiCredits}`);
@@ -473,57 +473,9 @@ const App: React.FC = () => {
     setCurrentView(view);
   };
 
-  const renderView = () => {
-    switch (currentView) {
-      case AppView.DISCOVERY:
-        return <DiscoveryView
-          userStats={userStats}
-          userAvatarUrl={userAvatar}
-          onConsumeAi={consumeAiCredit}
-          onConsumeCoins={consumeCoins}
-          onOpenPremium={openPremium}
-          onOpenChat={handleOpenChat}
-        />;
-      case AppView.LEADERBOARD:
-        return <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />;
-      case AppView.JOURNAL:
-        return <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />;
-      case AppView.GALLERY:
-        return <GalleryView />;
-      case AppView.ANALYTICS:
-        return <StatsView userStats={userStats} onOpenPremium={openPremium} />;
-      case AppView.CHAT:
-        return <ChatView
-          initialChatPartnerId={initialChatPartnerId}
-          onMessageRead={handleMessageRead}
-          onRefreshStats={handleRefreshStats}
-          onViewProfile={handleViewProfile}
-        />;
-      case AppView.PROFILE:
-        return <ProfileView
-          userStats={userStats}
-          avatarUrl={userAvatar}
-          onActivatePanic={activatePanic}
-          onOpenStore={openStore}
-          onOpenPremium={openPremium}
-          onConsumeAi={consumeAiCredit}
-          onConsumeCoins={consumeCoins}
-          onNavigate={(view) => setCurrentView(view as AppView)}
-          onAvatarUpdate={(newUrl) => setUserAvatar(newUrl)}
-        />;
-      case AppView.USER_PROFILE:
-        return selectedUserId ? (
-          <PublicProfileView
-            targetUserId={selectedUserId}
-            onBack={() => setCurrentView(AppView.DISCOVERY)}
-            onConsumeCoins={consumeCoins}
-            userStats={userStats}
-          />
-        ) : <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
-      default:
-        return <DiscoveryView userStats={userStats} onConsumeAi={consumeAiCredit} onConsumeCoins={consumeCoins} />;
-    }
-  };
+
+
+
 
   // 1. Loading State
   if (loadingSession) {
@@ -603,7 +555,61 @@ const App: React.FC = () => {
           <main {...handlers} className="h-screen overflow-hidden relative pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900 pointer-events-none z-0"></div>
             <div className="relative z-10 h-full">
-              {renderView()}
+              {/* Main Tabs - Kept Alive for smooth swipe */}
+              <div className={currentView === AppView.DISCOVERY ? 'block h-full' : 'hidden'}>
+                <DiscoveryView
+                  userStats={userStats}
+                  userAvatarUrl={userAvatar}
+                  onConsumeAi={consumeAiCredit}
+                  onConsumeCoins={consumeCoins}
+                  onOpenPremium={openPremium}
+                  onOpenChat={handleOpenChat}
+                />
+              </div>
+
+              <div className={currentView === AppView.LEADERBOARD ? 'block h-full' : 'hidden'}>
+                <LeaderboardView userStats={userStats} onOpenPremium={openPremium} />
+              </div>
+
+              <div className={currentView === AppView.JOURNAL ? 'block h-full' : 'hidden'}>
+                <JournalView onOpenChat={handleOpenChat} onViewProfile={handleViewProfile} />
+              </div>
+
+              <div className={currentView === AppView.GALLERY ? 'block h-full' : 'hidden'}>
+                <GalleryView />
+              </div>
+
+              <div className={currentView === AppView.CHAT ? 'block h-full' : 'hidden'}>
+                <ChatView
+                  initialChatPartnerId={initialChatPartnerId}
+                  onMessageRead={handleMessageRead}
+                  onRefreshStats={handleRefreshStats}
+                  onViewProfile={handleViewProfile}
+                />
+              </div>
+
+              <div className={currentView === AppView.PROFILE ? 'block h-full' : 'hidden'}>
+                <ProfileView
+                  userStats={userStats}
+                  avatarUrl={userAvatar}
+                  onOpenStore={openStore}
+                  onOpenPremium={openPremium}
+                  onConsumeAi={consumeAiCredit}
+                  onConsumeCoins={consumeCoins}
+                  onNavigate={(view) => setCurrentView(view as AppView)}
+                  onAvatarUpdate={(newUrl) => setUserAvatar(newUrl)}
+                />
+              </div>
+
+              {/* Dynamic Views - Rendered Conditionally */}
+              {currentView === AppView.USER_PROFILE && selectedUserId && (
+                <PublicProfileView
+                  targetUserId={selectedUserId}
+                  onBack={() => setCurrentView(AppView.DISCOVERY)}
+                  onConsumeCoins={consumeCoins}
+                  userStats={userStats}
+                />
+              )}
             </div>
           </main>
 

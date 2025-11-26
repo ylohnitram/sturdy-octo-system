@@ -12,7 +12,6 @@ import { GhostListModal } from './GhostListModal';
 
 interface ProfileViewProps {
     userStats: UserStats;
-    onActivatePanic: () => void;
     onOpenStore: () => void;
     onOpenPremium: () => void;
     onConsumeAi: () => boolean;
@@ -24,7 +23,6 @@ interface ProfileViewProps {
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
     userStats,
-    onActivatePanic,
     onOpenStore,
     onOpenPremium,
     onConsumeAi,

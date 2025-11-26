@@ -6,6 +6,19 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.22.1] - 2025-11-26
+### Removed
+- **[Feature] Panic Mode:** Kompletně odstraněna funkce "Panic Mode" (rychlé skrytí aplikace).
+  - Odstraněn stav `isPanicMode` a související handlery z `App.tsx`.
+  - Odstraněny props a logika z `ProfileView.tsx`.
+  - Funkce byla vyhodnocena jako nepotřebná a matoucí.
+
+### Improved
+- **[Performance] View Rendering:** Optimalizováno přepínání mezi obrazovkami.
+  - Implementován "keep-alive" mechanismus pro hlavní views (Lov, Žebříček, Deník, Galerie, Zprávy, Profil).
+  - Komponenty se nyní neničí a znovu nevytváří při každém přepnutí, ale pouze se skrývají (`display: none`).
+  - Výsledkem je **okamžitá odezva** při swipe navigaci bez blikání nebo načítání.
+
 ## [2.22.0] - 2025-11-26
 ### Added
 - **[UX] Swipe Navigation:** Implementována globální navigace gesty (swipe) mezi obrazovkami.
