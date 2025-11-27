@@ -381,7 +381,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 <div
                                     className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${isMe
-                                        ? 'bg-red-600 text-white rounded-tr-none'
+                                        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border border-red-500/50 text-white rounded-tr-none shadow-[0_0_10px_rgba(220,38,38,0.1)]'
                                         : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
                                         }`}
                                 >

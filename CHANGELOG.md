@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.2] - 2025-11-27
+### Fixed
+- **[UI] Chat Bubble Contrast:** Upraven vzhled zpráv odeslaných uživatelem.
+  - Původní červené pozadí nahrazeno tmavým gradientem s červeným ohraničením (`border-red-500/50`).
+  - Důvod: Červené emotikony (srdíčka ❤️, jahody 🍓) splývaly s červeným pozadím a nebyly vidět.
+  - Nový design je konzistentní s "premium" vzhledem aplikace a zajišťuje perfektní čitelnost.
+
 ## [2.27.1] - 2025-11-27
 ### Fixed
 - **[Critical] Journal Modal Positioning:** Definitivně opraveno centrování modálu "Nový Zářez" v Černé Knize.
