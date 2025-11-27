@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { contents, model = 'gemini-1.5-flash' } = req.body;
+        const { contents, model = 'gemini-2.5-flash' } = req.body;
 
         if (!contents) {
             return res.status(400).json({ error: 'Missing contents parameter' });

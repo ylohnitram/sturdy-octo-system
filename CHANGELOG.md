@@ -6,6 +6,14 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.0] - 2025-11-27
+### Fixed
+- **[Performance] AI Wingman Model:** Aktualizován model z `gemini-1.5-flash` na `gemini-2.5-flash` pro rychlejší a kvalitnější odpovědi.
+  - Opravena chyba, kdy AI Wingman vracel generické texty kvůli nepodporovanému modelu.
+  - Aktualizováno v `geminiService.ts` i serverless API (`api/wingman.js`).
+  - Model 2.5 Flash je aktuálně podporovaný a optimalizovaný pro rychlost.
+
+
 ## [2.26.0] - 2025-11-27
 ### Fixed
 - **[Critical] AI Wingman API:** Opravena chyba, která způsobovala selhání AI Wingman API.
