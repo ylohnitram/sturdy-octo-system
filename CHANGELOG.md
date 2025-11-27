@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.5] - 2025-11-27
+### Fixed
+- **[UX] Chat Navigation:** Při návratu z profilu uživatele zpět do chatu zůstává konverzace otevřená přesně tam, kde jste skončili.
+- **[UX] Navigation History:** Tlačítko Zpět z profilu nyní správně vrací na předchozí obrazovku (např. zpět do chatu místo na Lov).
+- **[UX] Navigation Indicator:** Spodní navigace správně zvýrazňuje aktivní sekci i při prohlížení profilu uživatele.
+- **[Data] Match Profile:** Přidáno `partnerBio` do dat o matchích pro lepší fungování AI Wingman.
+
 ## [2.24.4] - 2025-11-27
 ### Fixed
 - **[Critical] Navigation Crash:** Opravena kritická chyba "ReferenceError: previousView is not defined", která způsobovala pád aplikace při kliknutí na profil uživatele z chatu.

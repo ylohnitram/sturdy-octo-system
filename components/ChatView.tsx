@@ -335,8 +335,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         onClick={() => {
                             if (onViewProfile) {
                                 onViewProfile(activeMatch.partnerId);
-                                setActiveMatch(null); // Close chat portal so Profile is visible
-                                lastProcessedIdRef.current = null; // Reset ref to allow re-opening chat when coming back
+                                // Keep chat open in background - it will be hidden by profile overlay
                             }
                         }}
                     >

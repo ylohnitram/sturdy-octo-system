@@ -437,6 +437,7 @@ const App: React.FC = () => {
   const handleOpenChat = (partnerId: string) => {
     setInitialChatPartnerId(partnerId);
     setCurrentView(AppView.CHAT);
+    setPreviousView(null); // Clear previous view when opening chat
   };
 
   const handleNewNotification = (notification: any) => {
@@ -593,6 +594,7 @@ const App: React.FC = () => {
                     onViewProfile={handleViewProfile}
                     userStats={{ username: userStats.username, bio: userStats.bio, coins: userStats.coins }}
                     onConsumeCoins={consumeCoins}
+                    isActive={currentView === AppView.CHAT}
                   />
                 </div>
 
