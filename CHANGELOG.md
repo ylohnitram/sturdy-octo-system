@@ -6,6 +6,13 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.3] - 2025-11-27
+### Fixed
+- **[UI] iPhone 13 Mini Modal Fix:** Opraveno pozicování modálu "Nový Zářez" na malých displejích (iPhone 13 mini).
+  - Přidána `relative` pozice na vnitřní kontejner modálu pro lepší stabilitu layoutu.
+  - Zachováno `fixed` pozicování pouze na vnějším overlay wrapperu.
+  - Zajištěno správné zarovnání `items-end` pro bottom sheet efekt na mobilu.
+
 ## [2.27.2] - 2025-11-27
 ### Fixed
 - **[UI] Chat Bubble Contrast:** Upraven vzhled zpráv odeslaných uživatelem.
