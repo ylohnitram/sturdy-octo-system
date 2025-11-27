@@ -7,7 +7,7 @@ const localAi = localApiKey ? new GoogleGenAI({ apiKey: localApiKey }) : null;
 /**
  * Unified function to call Gemini via Local SDK (Dev) or Serverless API (Prod)
  */
-async function callGemini(prompt: string, model: string = 'gemini-2.5-flash'): Promise<string | null> {
+async function callGemini(prompt: string, model: string = 'gemini-1.5-flash'): Promise<string | null> {
   // 1. Try Local (Dev Mode)
   if (localAi) {
     try {
