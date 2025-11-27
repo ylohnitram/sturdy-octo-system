@@ -553,7 +553,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ onOpenChat, onViewProf
 
             {/* ADD ENTRY MODAL */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-4">
+                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center">
                             <h3 className="font-bold text-white">{editingEntryId ? 'Upravit Zářez' : 'Nový Zářez'}</h3>

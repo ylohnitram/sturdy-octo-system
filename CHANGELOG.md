@@ -6,6 +6,17 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.26.0] - 2025-11-27
+### Fixed
+- **[Critical] AI Wingman API:** Opravena chyba, která způsobovala selhání AI Wingman API.
+  - Převeden `api/wingman.js` na ES Module syntax (import/export místo require/module.exports).
+  - Opravena detekce API klíče v lokálním vývoji (podpora pro `VITE_GEMINI_API_KEY`).
+  - Vylepšeno error handling a logování pro lepší diagnostiku.
+- **[Performance] AI Response Speed:** Přepnut model z `gemini-2.5-flash` na `gemini-1.5-flash` pro rychlejší odpovědi.
+- **[UI] Journal Modal Centering:** Opraveno posunutí modálu "Nový Zářez" v Černé Knize.
+  - Odstraněn nadbytečný bottom padding, který posouvál modál mimo střed.
+  - Modál nyní správně funguje jako bottom sheet na mobilu a vycentrovaný na desktopu.
+
 ## [2.25.0] - 2025-11-27
 ### Security
 - **[Critical] Secure AI Wingman:** Implementován bezpečný backend pro volání Gemini API.
