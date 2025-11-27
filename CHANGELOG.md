@@ -6,6 +6,10 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.24.4] - 2025-11-27
+### Fixed
+- **[Critical] Navigation Crash:** Opravena kritická chyba "ReferenceError: previousView is not defined", která způsobovala pád aplikace při kliknutí na profil uživatele z chatu.
+
 ## [2.24.3] - 2025-11-27
 ### Fixed
 - **[UX] Profile Navigation History:** Opravena navigace při prohlížení profilu (např. z chatu).

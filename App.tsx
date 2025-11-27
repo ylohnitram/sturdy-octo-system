@@ -103,6 +103,9 @@ const App: React.FC = () => {
     return AppView.PROFILE;
   });
 
+  // Track previous view for back navigation (e.g. from User Profile back to Chat)
+  const [previousView, setPreviousView] = useState<AppView | null>(null);
+
   // Persist current view on change
   useEffect(() => {
     localStorage.setItem('notch_last_view', currentView);
@@ -426,6 +429,7 @@ const App: React.FC = () => {
 
   const handleViewProfile = (userId: string) => {
     setSelectedUserId(userId);
+    setPreviousView(currentView); // Save where we came from
     setCurrentView(AppView.USER_PROFILE);
     setShowNotifications(false);
   };
@@ -465,6 +469,7 @@ const App: React.FC = () => {
       setInitialChatPartnerId(null);
     }
     setCurrentView(view);
+    setPreviousView(null); // Clear previous view when manually navigating
   };
 
 
