@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender, Hotspot, RivalRequest } from '../types';
+import { UserStats, UserProfile, UserTier, JournalEntry, LeaderboardEntry, Gender, TargetGender, Hotspot, RivalRequest, HotspotUser } from '../types';
 
 const RESTRICTED_KEYWORDS = [
     'admin',
@@ -203,7 +203,40 @@ export const fetchActiveHotspots = async (radius: number, lat: number, long: num
         return [];
     }
 
-    return data || [];
+    return (data || []).map((spot: any) => ({
+        id: spot.id,
+        name: spot.name,
+        distance: spot.distance,
+        count: spot.count,
+        targetCount: spot.target_count || 0,
+        label: spot.label,
+        latitude: spot.latitude,
+        longitude: spot.longitude
+    }));
+};
+
+export const fetchHotspotUsers = async (placeId: string): Promise<HotspotUser[]> => {
+    const { data, error } = await supabase
+        .rpc('get_hotspot_users', {
+            place_id: placeId
+        });
+
+    if (error) {
+        console.error('Error fetching hotspot users:', error);
+        return [];
+    }
+
+    return (data || []).map((user: any) => ({
+        id: user.id,
+        username: user.username || 'Neznámý',
+        avatarUrl: user.avatar_url || `https://ui-avatars.com/api/?name=${user.username}`,
+        age: user.age || 0,
+        bio: user.bio || '',
+        bodyCount: user.body_count || 0,
+        tier: user.tier || 'FREE',
+        distanceKm: user.distance_km || 0,
+        status: user.status || 'target'
+    }));
 };
 
 export const sendLike = async (fromUserId: string, toUserId: string): Promise<{ success: boolean, isMatch: boolean }> => {
@@ -1270,4 +1303,65 @@ export const fetchGhostList = async (): Promise<GhostedUser[]> => {
         avatarUrl: item.avatar_url,
         blockedAt: item.blocked_at
     }));
+};
+
+export const checkDiaryEligibility = async (currentUserId: string, partnerId: string): Promise<{ canAdd: boolean, ageAtMatch?: number }> => {
+    try {
+        // 1. Check Match
+        const { data: match } = await supabase
+            .from('matches')
+            .select('created_at')
+            .or(`and(user1_id.eq.${currentUserId},user2_id.eq.${partnerId}),and(user1_id.eq.${partnerId},user2_id.eq.${currentUserId})`)
+            .single();
+
+        if (!match) return { canAdd: false };
+
+        // 2. Check Ghost Status
+        const { data: ghost } = await supabase
+            .from('blocked_users')
+            .select('id')
+            .eq('blocker_id', currentUserId)
+            .eq('blocked_id', partnerId)
+            .single();
+
+        const isGhosted = !!ghost;
+
+        // 3. Check Messages (if not ghosted)
+        let hasMessages = false;
+        if (!isGhosted) {
+            const { count } = await supabase
+                .from('messages')
+                .select('id', { count: 'exact', head: true })
+                .or(`and(sender_id.eq.${currentUserId},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${currentUserId})`);
+
+            hasMessages = (count || 0) > 0;
+        }
+
+        if (!isGhosted && !hasMessages) return { canAdd: false };
+
+        // 4. Calculate Age at Match
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('birth_date')
+            .eq('id', partnerId)
+            .single();
+
+        let ageAtMatch: number | undefined;
+        if (profile?.birth_date) {
+            const birthDate = new Date(profile.birth_date);
+            const matchDate = new Date(match.created_at);
+            let age = matchDate.getFullYear() - birthDate.getFullYear();
+            const m = matchDate.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && matchDate.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            ageAtMatch = age;
+        }
+
+        return { canAdd: true, ageAtMatch };
+
+    } catch (e) {
+        console.error('Error checking diary eligibility:', e);
+        return { canAdd: false };
+    }
 };

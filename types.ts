@@ -113,7 +113,22 @@ export interface Hotspot {
   name: string;
   distance: number;
   count: number;
+  targetCount: number; // Number of users not yet reacted to
   label: string;
   latitude: number;
   longitude: number;
+}
+
+export type HotspotUserStatus = 'target' | 'liked' | 'dismissed' | 'matched';
+
+export interface HotspotUser {
+  id: string;
+  username: string;
+  avatarUrl: string;
+  age: number;
+  bio: string;
+  bodyCount: number;
+  tier: UserTier;
+  distanceKm: number;
+  status: HotspotUserStatus;
 }

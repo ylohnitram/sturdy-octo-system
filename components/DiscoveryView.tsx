@@ -8,6 +8,7 @@ import { supabase } from '../services/supabaseClient';
 import { PublicGalleryModal } from './PublicGalleryModal';
 import { MatchOverlay } from './MatchOverlay';
 import { PageHeader } from './PageHeader';
+import { HotspotUsersModal } from './HotspotUsersModal';
 
 interface DiscoveryViewProps {
     userStats: UserStats;
@@ -16,9 +17,10 @@ interface DiscoveryViewProps {
     onConsumeCoins: (amount: number) => boolean;
     onOpenPremium: () => void;
     onOpenChat: (partnerId: string) => void; // Added prop
+    onViewProfile: (userId: string) => void; // Added prop
 }
 
-export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAvatarUrl, onConsumeAi, onConsumeCoins, onOpenPremium, onOpenChat }) => {
+export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAvatarUrl, onConsumeAi, onConsumeCoins, onOpenPremium, onOpenChat, onViewProfile }) => {
     const [viewMode, setViewMode] = useState<'swipe' | 'radar'>('swipe');
     const [profiles, setProfiles] = useState<UserProfile[]>([]);
     const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -33,6 +35,9 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
 
     // Match Overlay State
     const [matchData, setMatchData] = useState<{ partnerId: string; partnerName: string; partnerAvatar: string } | null>(null);
+
+    // Hotspot Modal State
+    const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null);
 
     // Radius State
     const [radius, setRadius] = useState(10);
@@ -244,22 +249,49 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                             </div>
                         ) : (
                             <div className="space-y-3 mt-4 overflow-y-auto max-h-[400px]">
-                                {hotspots.map(spot => (
-                                    <div key={spot.id} className="bg-slate-900/80 backdrop-blur p-4 rounded-xl border border-slate-700 flex items-center justify-between">
-                                        <div>
-                                            <div className="font-bold text-white">{spot.name}</div>
-                                            <div className="text-xs text-slate-400 flex items-center gap-1">
-                                                <MapPin size={12} /> {spot.distance.toFixed(1)}km
+                                {hotspots.map(spot => {
+                                    const isDepleted = spot.targetCount === 0;
+                                    return (
+                                        <div
+                                            key={spot.id}
+                                            onClick={() => setSelectedHotspot(spot)}
+                                            className={`backdrop-blur p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${isDepleted
+                                                ? 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-900/60'
+                                                : 'bg-slate-900/80 border-slate-700 hover:bg-slate-800 hover:border-red-500/30'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {isDepleted && (
+                                                    <div className="w-8 h-8 bg-slate-700/50 rounded-full flex items-center justify-center">
+                                                        <Target size={16} className="text-slate-500" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className={`font-bold ${isDepleted ? 'text-slate-500' : 'text-white'
+                                                        }`}>{spot.name}</div>
+                                                    <div className="text-xs text-slate-400 flex items-center gap-1">
+                                                        <MapPin size={12} /> {spot.distance.toFixed(1)}km
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className={`font-black text-lg flex items-center justify-end gap-1 ${isDepleted ? 'text-slate-600' : 'text-red-500'
+                                                    }`}>
+                                                    <Users size={16} /> {spot.count}
+                                                </div>
+                                                {isDepleted ? (
+                                                    <div className="text-[10px] text-slate-600 font-bold uppercase">Vystříleno</div>
+                                                ) : spot.targetCount > 0 ? (
+                                                    <div className="text-[10px] text-red-400 font-bold uppercase flex items-center gap-1">
+                                                        <Target size={10} /> {spot.targetCount} nových
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-[10px] text-green-400 font-bold uppercase">{spot.label}</div>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-red-500 font-black text-lg flex items-center justify-end gap-1">
-                                                <Users size={16} /> {spot.count}
-                                            </div>
-                                            <div className="text-[10px] text-green-400 font-bold uppercase">{spot.label}</div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -388,6 +420,14 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                     onClose={() => setShowGallery(false)}
                     onConsumeCoins={onConsumeCoins}
                     userIsPremium={userStats.tier === UserTier.PREMIUM}
+                />
+            )}
+
+            {selectedHotspot && (
+                <HotspotUsersModal
+                    hotspot={selectedHotspot}
+                    onClose={() => setSelectedHotspot(null)}
+                    onViewProfile={onViewProfile}
                 />
             )}
         </div>

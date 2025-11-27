@@ -571,6 +571,7 @@ const App: React.FC = () => {
                     onConsumeCoins={consumeCoins}
                     onOpenPremium={openPremium}
                     onOpenChat={handleOpenChat}
+                    onViewProfile={handleViewProfile}
                   />
                 </div>
 

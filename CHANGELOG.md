@@ -6,6 +6,17 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.4] - 2025-11-27
+### Added
+- **[Feature] Interactive Radar Hotspots:** Radar nyní zobrazuje interaktivní hotspoty s detaily.
+  - Kliknutím na hotspot se zobrazí seznam uživatelů v dané lokalitě.
+  - Rozlišení mezi "čerstvými" cíli (Target) a již reagovanými uživateli (Liked, Matched, Dismissed).
+  - Vizuální indikace "vystřílených" míst (šedá ikona) vs. aktivních hotspotů (červená pulzující ikona).
+  - Možnost prokliku na profil uživatele přímo ze seznamu v hotspotu.
+### Improved
+- **[Logic] Ghost Filtering:** Radar a Hotspoty nyní automaticky filtrují uživatele, kteří vás ghostnuli (nebo vy je).
+- **[UI] Hotspot Detail:** Nový modál `HotspotUsersModal` s přehledným seznamem uživatelů, jejich statusy a vzdáleností.
+
 ## [2.27.3] - 2025-11-27
 ### Fixed
 - **[UI] iPhone 13 Mini Modal Fix:** Opraveno pozicování modálu "Nový Zářez" na malých displejích (iPhone 13 mini).
