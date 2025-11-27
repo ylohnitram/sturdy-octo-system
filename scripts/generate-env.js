@@ -5,6 +5,7 @@ import { writeFileSync } from 'fs';
 
 const envContent = `VITE_SUPABASE_URL=${process.env.VITE_SUPABASE_URL || ''}
 VITE_SUPABASE_ANON_KEY=${process.env.VITE_SUPABASE_ANON_KEY || ''}
+GEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}
 `;
 
 writeFileSync('.env.production', envContent);
