@@ -6,6 +6,14 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.25.0] - 2025-11-27
+### Security
+- **[Critical] Secure AI Wingman:** Implementován bezpečný backend pro volání Gemini API.
+  - API klíč se již nenachází v klientském kódu (prevence zneužití).
+  - Vytvořen serverless endpoint `/api/wingman` (Vercel Functions).
+  - Hybridní režim: Lokálně volá SDK napřímo (pro rychlost), v produkci přes zabezpečené API.
+  - Přidán `SECURITY.md` a bezpečnostní audit.
+
 ## [2.24.5] - 2025-11-27
 ### Fixed
 - **[UX] Chat Navigation:** Při návratu z profilu uživatele zpět do chatu zůstává konverzace otevřená přesně tam, kde jste skončili.
