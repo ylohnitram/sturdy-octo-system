@@ -595,6 +595,7 @@ const App: React.FC = () => {
                     userStats={{ username: userStats.username, bio: userStats.bio, coins: userStats.coins }}
                     onConsumeCoins={consumeCoins}
                     isActive={currentView === AppView.CHAT}
+                    isVisible={currentView !== AppView.USER_PROFILE}
                   />
                 </div>
 

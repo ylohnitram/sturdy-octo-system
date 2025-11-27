@@ -16,9 +16,10 @@ interface ChatViewProps {
     onViewProfile?: (userId: string) => void;
     userStats?: { username?: string; bio?: string; coins?: number };
     onConsumeCoins?: (amount: number) => boolean;
+    isVisible?: boolean; // Hide chat portal when viewing profile
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats, onViewProfile, userStats, onConsumeCoins }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId, onMessageRead, onRefreshStats, onViewProfile, userStats, onConsumeCoins, isVisible = true }) => {
     const [matches, setMatches] = useState<MatchPreview[]>([]);
     const [activeMatch, setActiveMatch] = useState<MatchPreview | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -321,6 +322,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     }
 
     // --- RENDER DETAIL ---
+    // Don't render portal if chat should be hidden (e.g. when viewing profile)
+    if (!isVisible && activeMatch) {
+        return null;
+    }
+
     // Use Portal to break out of the main app container and cover everything (Header, Nav)
     return createPortal(
         <div className="flex flex-col h-full bg-slate-950 fixed inset-0 z-[9999]">
