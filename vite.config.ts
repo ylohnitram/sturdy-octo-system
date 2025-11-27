@@ -75,7 +75,9 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       // Only expose key in development mode for local testing
-      'process.env.GEMINI_API_KEY': mode === 'development' ? JSON.stringify(env.GEMINI_API_KEY) : JSON.stringify(''),
+      'process.env.GEMINI_API_KEY': mode === 'development'
+        ? JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || '')
+        : JSON.stringify(''),
       'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version)
     },
     resolve: {

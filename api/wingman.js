@@ -1,6 +1,6 @@
-const { GoogleGenAI } = require("@google/genai");
+import { GoogleGenAI } from "@google/genai";
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     // Set CORS headers
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['*'];
     const origin = req.headers.origin;

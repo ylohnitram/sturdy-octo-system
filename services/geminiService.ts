@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 // Local key for dev mode (undefined in production due to vite.config.ts)
-const localApiKey = process.env.GEMINI_API_KEY || '';
+const localApiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || '';
 const localAi = localApiKey ? new GoogleGenAI({ apiKey: localApiKey }) : null;
 
 /**
@@ -24,15 +24,25 @@ async function callGemini(prompt: string, model: string = 'gemini-2.5-flash'): P
 
   // 2. Try Serverless API (Production)
   try {
+    // In local development without a proxy, this fetch will fail or return HTML (404/200)
+    // We check if we are in DEV mode and warn the user if no local key is set
+    if (import.meta.env.DEV && !localApiKey) {
+      console.warn('⚠️ Missing GEMINI_API_KEY or VITE_GEMINI_API_KEY in .env for local development.');
+      // We continue to try fetch in case there is a proxy, but it's unlikely to work
+    }
+
     const response = await fetch('/api/wingman', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: prompt, model })
     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      console.error('API Error:', err);
+    const contentType = response.headers.get('content-type');
+    if (!response.ok || !contentType || !contentType.includes('application/json')) {
+      // Handle non-JSON response (likely HTML from Vite SPA fallback)
+      if (import.meta.env.DEV) {
+        console.warn('API call failed in DEV mode. Ensure you have a local API server or use a local API key.');
+      }
       return null;
     }
 
