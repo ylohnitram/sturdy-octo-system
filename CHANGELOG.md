@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.1] - 2025-11-27
+### Fixed
+- **[Critical] Journal Modal Positioning:** Definitivně opraveno centrování modálu "Nový Zářez" v Černé Knize.
+  - Modál nyní používá `createPortal` pro renderování přímo do `document.body`.
+  - Vyřešen problém s `transform` na parent elementu (slider), který rozbíjel `fixed` pozicování.
+  - Modál je nyní správně vycentrovaný na desktopu i jako bottom sheet na mobilu.
+  - Přidán backdrop click handler pro intuitivní zavření modálu.
+  - Odstraněno rozostření pozadí při swipování mezi obrazovkami.
+
+
 ## [2.27.0] - 2025-11-27
 ### Fixed
 - **[Performance] AI Wingman Model:** Aktualizován model z `gemini-1.5-flash` na `gemini-2.5-flash` pro rychlejší a kvalitnější odpovědi.
