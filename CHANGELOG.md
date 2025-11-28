@@ -14,6 +14,9 @@ a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **[UX] Location Permission:** Vylepšeno chování žádosti o polohu.
   - Přidán loading indikátor "Zjišťuji polohu..." místo okamžité chybové hlášky.
   - Upozornění "Povolte prosím přístup k poloze" se zobrazí až po skutečném selhání nebo odmítnutí přístupu.
+### Changed
+- **[UX] Wording:** Změněn text "Vystříleno" na "Prozkoumáno" v Radaru.
+  - Odstraněna nevhodná konotace, nový termín lépe vystihuje prozkoumání lokality a hledání lásky.
 
 ## [2.27.4] - 2025-11-27
 ### Added

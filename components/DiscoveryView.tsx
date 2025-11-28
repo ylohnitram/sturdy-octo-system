@@ -318,7 +318,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                                                     <Users size={16} /> {spot.count}
                                                 </div>
                                                 {isDepleted ? (
-                                                    <div className="text-[10px] text-slate-600 font-bold uppercase">Vystříleno</div>
+                                                    <div className="text-[10px] text-slate-600 font-bold uppercase">Prozkoumáno</div>
                                                 ) : spot.targetCount > 0 ? (
                                                     <div className="text-[10px] text-red-400 font-bold uppercase flex items-center gap-1">
                                                         <Target size={10} /> {spot.targetCount} nových
