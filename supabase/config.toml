@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "stripe-webhook": {
+      "verify_jwt": false
+    },
+    "create-checkout-session": {
+      "verify_jwt": true
+    },
+    "cancel-subscription": {
+      "verify_jwt": true
+    },
+    "reactivate-subscription": {
+      "verify_jwt": true
+    }
+  }
+}

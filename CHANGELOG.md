@@ -6,6 +6,32 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.28.0] - 2025-11-28
+### Added
+- **[Feature] Stripe Payments Integration:** Implementována kompletní platební brána přes Stripe pro Notch Gold předplatné.
+  - **Bezpečná architektura**: API klíče jsou uloženy pouze v Supabase Edge Functions, nikdy ve frontend kódu.
+  - **Databázové schéma**: Nové tabulky `customers` a `subscriptions` pro správu předplatných.
+  - **Edge Functions**: 4 serverless funkce pro bezpečnou komunikaci se Stripe:
+    - `stripe-webhook`: Zpracování webhook eventů s validací podpisu
+    - `create-checkout-session`: Vytvoření platební session s 7denní trial periodou
+    - `cancel-subscription`: Zrušení předplatného ke konci období (uživatel si zachová přístup)
+    - `reactivate-subscription`: Obnovení zrušeného předplatného
+  - **Automatická synchronizace**: Premium status se automaticky aktualizuje podle stavu předplatného
+  - **UI komponenty**:
+    - Aktualizovaný `PremiumModal` s reálnou Stripe integrací a loading states
+    - Nová komponenta `SubscriptionManagement` pro správu předplatného
+    - Retention flow při zrušení s přehledem ztrácených výhod
+  - **Dokumentace**: Kompletní deployment guide (`STRIPE_DEPLOYMENT.md`) a README pro Edge Functions
+- **[Service] Payment Service:** Nový `paymentService.ts` s funkcemi pro checkout, zrušení a obnovení předplatného
+- **[Types] Subscription Types:** Přidány TypeScript typy pro `Subscription`, `StripeCustomer` a `SubscriptionStatus`
+
+### Technical
+- Databázová migrace `16_stripe_subscriptions.sql` s RLS policies a automatickými triggery
+- Supabase Edge Functions v Deno runtime s TypeScript supportem
+- Environment variables pro Stripe klíče a webhook secret
+- Automatická synchronizace `profiles.is_premium` podle subscription statusu
+
+
 ## [2.27.5] - 2025-11-28
 ### Fixed
 - **[UI] Radar Modal Fix:** Opraveno pozicování modálu `HotspotUsersModal` v Radaru.

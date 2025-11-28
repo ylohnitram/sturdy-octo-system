@@ -1,24 +1,138 @@
 
+import { supabase } from './supabaseClient';
+import { Subscription } from '../types';
+
 /**
- * Mock Payment Service
- * Connects to Stripe in production.
+ * Payment Service - Stripe Integration
+ * Connects to Stripe via Supabase Edge Functions for secure payment processing
  */
 
-export const createCheckoutSession = async (packageId: string): Promise<{ url: string } | null> => {
-  console.log(`Creating checkout session for package: ${packageId}`);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+export interface CheckoutSessionResponse {
+  url: string;
+}
 
-  // In a real app, this would call your backend API
-  // const response = await fetch('/api/create-checkout-session', { ... });
-  
-  // Return a mock success for now
-  return { url: 'https://checkout.stripe.com/mock-session' };
+export interface CancelSubscriptionResponse {
+  success: boolean;
+  message: string;
+  current_period_end?: string;
+}
+
+/**
+ * Creates a Stripe Checkout Session for subscription purchase
+ * @param priceId - Stripe Price ID for the subscription plan
+ * @returns Checkout session URL to redirect user to
+ */
+export const createCheckoutSession = async (priceId: string): Promise<CheckoutSessionResponse> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      body: { price_id: priceId },
+    });
+
+    if (error) {
+      console.error('Error creating checkout session:', error);
+      throw new Error(error.message || 'Failed to create checkout session');
+    }
+
+    if (!data?.url) {
+      throw new Error('No checkout URL returned');
+    }
+
+    return { url: data.url };
+  } catch (err) {
+    console.error('createCheckoutSession error:', err);
+    throw err;
+  }
 };
 
-export const verifyPurchase = async (sessionId: string): Promise<boolean> => {
-    console.log(`Verifying session: ${sessionId}`);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return true;
+/**
+ * Cancels the user's subscription at the end of the current billing period
+ * User retains access until period end
+ */
+export const cancelSubscription = async (): Promise<CancelSubscriptionResponse> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase.functions.invoke('cancel-subscription');
+
+    if (error) {
+      console.error('Error canceling subscription:', error);
+      throw new Error(error.message || 'Failed to cancel subscription');
+    }
+
+    return data;
+  } catch (err) {
+    console.error('cancelSubscription error:', err);
+    throw err;
+  }
 };
+
+/**
+ * Reactivates a subscription that was scheduled for cancellation
+ */
+export const reactivateSubscription = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase.functions.invoke('reactivate-subscription');
+
+    if (error) {
+      console.error('Error reactivating subscription:', error);
+      throw new Error(error.message || 'Failed to reactivate subscription');
+    }
+
+    return data;
+  } catch (err) {
+    console.error('reactivateSubscription error:', err);
+    throw err;
+  }
+};
+
+/**
+ * Fetches the user's current subscription status
+ */
+export const getUserSubscription = async (): Promise<Subscription | null> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing', 'past_due'])
+      .order('created', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No subscription found
+        return null;
+      }
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('getUserSubscription error:', err);
+    return null;
+  }
+};
+

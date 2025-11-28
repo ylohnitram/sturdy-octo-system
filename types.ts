@@ -132,3 +132,38 @@ export interface HotspotUser {
   distanceKm: number;
   status: HotspotUserStatus;
 }
+
+// Stripe Subscription Types
+export type SubscriptionStatus =
+  | 'active'
+  | 'trialing'
+  | 'past_due'
+  | 'canceled'
+  | 'incomplete'
+  | 'incomplete_expired';
+
+export interface StripeCustomer {
+  id: string; // user_id
+  stripe_customer_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subscription {
+  id: string; // Stripe subscription ID
+  user_id: string;
+  status: SubscriptionStatus;
+  metadata: Record<string, any>;
+  price_id: string;
+  quantity: number;
+  cancel_at_period_end: boolean;
+  created: string;
+  current_period_start: string;
+  current_period_end: string;
+  ended_at?: string | null;
+  cancel_at?: string | null;
+  canceled_at?: string | null;
+  trial_start?: string | null;
+  trial_end?: string | null;
+  updated_at: string;
+}
