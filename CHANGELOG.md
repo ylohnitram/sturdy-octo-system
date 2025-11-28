@@ -6,6 +6,15 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.27.5] - 2025-11-28
+### Fixed
+- **[UI] Radar Modal Fix:** Opraveno pozicování modálu `HotspotUsersModal` v Radaru.
+  - Modál se nyní renderuje přes `createPortal` přímo do `body`, což řeší problém s překrýváním a "tmavou obrazovkou" bez obsahu.
+  - Funguje správně na desktopu i mobilu nezávisle na rodičovském kontejneru.
+- **[UX] Location Permission:** Vylepšeno chování žádosti o polohu.
+  - Přidán loading indikátor "Zjišťuji polohu..." místo okamžité chybové hlášky.
+  - Upozornění "Povolte prosím přístup k poloze" se zobrazí až po skutečném selhání nebo odmítnutí přístupu.
+
 ## [2.27.4] - 2025-11-27
 ### Added
 - **[Feature] Interactive Radar Hotspots:** Radar nyní zobrazuje interaktivní hotspoty s detaily.

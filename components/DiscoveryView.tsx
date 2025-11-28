@@ -30,6 +30,8 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
     const [isBoostActive, setIsBoostActive] = useState(false);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
     const [userLocation, setUserLocation] = useState<{ lat: number, long: number } | null>(null);
+    const [isLocationLoading, setIsLocationLoading] = useState(true);
+    const [locationError, setLocationError] = useState<string | null>(null);
     const [dailyLikes, setDailyLikes] = useState(0);
     const [showGallery, setShowGallery] = useState(false);
 
@@ -67,9 +69,14 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
 
     const updateLocation = async () => {
         if ('geolocation' in navigator) {
+            // Only show loading if we don't have a location yet
+            if (!userLocation) setIsLocationLoading(true);
+
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
                 setUserLocation({ lat: latitude, long: longitude });
+                setIsLocationLoading(false);
+                setLocationError(null);
 
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
@@ -79,7 +86,30 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                 }
             }, (error) => {
                 console.error("Error getting location:", error);
+                setIsLocationLoading(false);
+
+                // Map error codes to user-friendly messages
+                let errorMessage = "Nepodařilo se zjistit polohu.";
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "Povolte prosím přístup k poloze pro zobrazení radaru.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "Poloha není momentálně dostupná.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "Zjišťování polohy trvalo příliš dlouho.";
+                        break;
+                }
+                setLocationError(errorMessage);
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
             });
+        } else {
+            setIsLocationLoading(false);
+            setLocationError("Geolokace není ve vašem prohlížeči podporována.");
         }
     };
 
@@ -238,9 +268,17 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({ userStats, userAva
                     </div>
 
                     <div className="relative z-10 flex-grow">
-                        {!userLocation ? (
-                            <div className="text-center text-slate-400 mt-10">
-                                <p>Povolte prosím přístup k poloze pro zobrazení radaru.</p>
+                        {isLocationLoading && !userLocation ? (
+                            <div className="flex flex-col items-center justify-center h-full mt-10">
+                                <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <p className="text-slate-400 animate-pulse">Zjišťuji polohu...</p>
+                            </div>
+                        ) : !userLocation ? (
+                            <div className="text-center text-slate-400 mt-10 px-4">
+                                <p>{locationError || "Povolte prosím přístup k poloze pro zobrazení radaru."}</p>
+                                <button onClick={updateLocation} className="mt-4 px-4 py-2 bg-slate-700 rounded-lg text-white text-sm hover:bg-slate-600 transition-colors">
+                                    Zkusit znovu
+                                </button>
                             </div>
                         ) : hotspots.length === 0 ? (
                             <div className="text-center text-slate-400 mt-10">

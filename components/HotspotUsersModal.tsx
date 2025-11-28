@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Target, Heart, XCircle, MessageCircle, MapPin, Zap } from 'lucide-react';
 import { Hotspot, HotspotUser, UserTier } from '../types';
 import { fetchHotspotUsers } from '../services/userService';
@@ -68,9 +69,9 @@ export const HotspotUsersModal: React.FC<HotspotUsersModalProps> = ({ hotspot, o
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-900 rounded-3xl border border-slate-700 max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl">
+    return createPortal(
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-slate-900 rounded-3xl border border-slate-700 max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="p-6 border-b border-slate-700">
                     <div className="flex items-start justify-between mb-2">
@@ -78,9 +79,9 @@ export const HotspotUsersModal: React.FC<HotspotUsersModalProps> = ({ hotspot, o
                             <h2 className="text-2xl font-bold text-white mb-1">{hotspot.name}</h2>
                             <div className="flex items-center gap-2 text-sm text-slate-400">
                                 <MapPin size={14} />
-                                <span>{hotspot.distance.toFixed(1)} km</span>
+                                <span className="text-slate-300">{hotspot.distance.toFixed(1)} km</span>
                                 <span>•</span>
-                                <span className="capitalize">{hotspot.label}</span>
+                                <span className="capitalize text-slate-300">{hotspot.label}</span>
                             </div>
                         </div>
                         <button
@@ -129,8 +130,8 @@ export const HotspotUsersModal: React.FC<HotspotUsersModalProps> = ({ hotspot, o
                                     key={user.id}
                                     onClick={() => onViewProfile?.(user.id)}
                                     className={`bg-slate-800/50 backdrop-blur rounded-xl border p-4 transition-all cursor-pointer hover:bg-slate-800 ${user.status === 'target'
-                                            ? 'border-red-500/50 shadow-lg shadow-red-900/20'
-                                            : 'border-slate-700'
+                                        ? 'border-red-500/50 shadow-lg shadow-red-900/20'
+                                        : 'border-slate-700'
                                         }`}
                                 >
                                     <div className="flex items-start gap-3">
@@ -186,6 +187,7 @@ export const HotspotUsersModal: React.FC<HotspotUsersModalProps> = ({ hotspot, o
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
