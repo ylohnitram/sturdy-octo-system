@@ -6,6 +6,60 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.0] - 2025-11-30
+### Added
+- **[Feature] Multimedia Chat Messaging:** Kompletní podpora pro odesílání fotografií a hlasových zpráv v chatu! 📷🎤
+  - **Fotografie:**
+    - Výběr z galerie nebo fotoaparátu přes tlačítko 📷
+    - Automatická komprese obrázků (max 1920px, 80% JPEG kvalita)
+    - Preview modal s volitelným popiskem před odesláním
+    - Click-to-expand lightbox pro fullscreen prohlížení
+    - Podpora formátů: JPEG, PNG, WebP, GIF
+  - **Hlasové zprávy:**
+    - Tap-to-record nahrávání přes tlačítko 🎤
+    - Real-time zobrazení délky nahrávání
+    - Možnost zrušení před odesláním
+    - Custom audio player s play/pause a progress barem
+    - Formát: WebM/Opus (nativní MediaRecorder API)
+  - **Nové komponenty:**
+    - `AudioRecorder.tsx` - Nahrávání hlasových zpráv
+    - `AudioPlayer.tsx` - Přehrávání audio zpráv
+    - `ImagePreviewModal.tsx` - Preview fotek před odesláním
+    - `ImageLightbox.tsx` - Fullscreen prohlížeč obrázků
+  - **Service layer:**
+    - Rozšířená funkce `sendMessage()` s podporou file uploadu
+    - Nový `mediaUtils.ts` s kompresí, validací a konverzí
+    - Upload do Supabase Storage bucket `chat-media`
+  - **Databáze:**
+    - Nové sloupce v `messages`: `type`, `media_url`, `metadata`
+    - Podpora pro 3 typy zpráv: text, image, audio
+    - Metadata pro délku audia a rozměry obrázků
+
+### Improved
+- **[UX] Chat Input Bar:** Vylepšený input bar s multiline podporou
+  - **Textarea** místo inputu pro delší zprávy
+  - **Enter** → odešle zprávu
+  - **Shift+Enter** → nový řádek
+  - Auto-resize (max 3 řádky viditelné, pak scroll)
+  - Tlačítko Send **vždy viditelné** (ne podmíněně)
+  - Layout: `[📷] [🎤] [Textarea] [😊] [✨] [📤]`
+
+### Technical
+- Databázová migrace `17_chat_media_support.sql`
+- Storage bucket `chat-media` s RLS policies
+- TypeScript typy: `MessageType`, `MessageMetadata`
+- Validace souborů (typ, velikost)
+- Limity: Obrázky 10MB, Audio 5MB
+- Realtime synchronizace pro multimedia zprávy
+
+### Documentation
+- `CHAT_MEDIA_SETUP.md` - Kompletní setup guide
+- `CHAT_MEDIA_QUICKSTART.md` - Rychlý start
+- `STORAGE_FIX.md` - Troubleshooting pro storage bucket
+- `CHAT_MEDIA_CHECKLIST.md` - Checklist pro deployment
+- `.agent/implementation_plans/chat_media_implementation_summary.md` - Technická dokumentace
+
+
 ## [2.28.0] - 2025-11-28
 ### Added
 - **[Feature] Stripe Payments Integration:** Implementována kompletní platební brána přes Stripe pro Notch Gold předplatné.
