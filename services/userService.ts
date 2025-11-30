@@ -1251,12 +1251,17 @@ export const sendMessage = async (
                 throw uploadError;
             }
 
-            // Get public URL (with RLS protection)
-            const { data: urlData } = supabase.storage
+            // Get signed URL for private bucket (expires in 1 year)
+            const { data: urlData, error: urlError } = await supabase.storage
                 .from('chat-media')
-                .getPublicUrl(fileName);
+                .createSignedUrl(fileName, 31536000); // 1 year in seconds
 
-            mediaUrl = urlData.publicUrl;
+            if (urlError || !urlData) {
+                console.error('Error creating signed URL:', urlError);
+                throw urlError || new Error('Failed to create signed URL');
+            }
+
+            mediaUrl = urlData.signedUrl;
 
             // Add file metadata
             finalMetadata = {

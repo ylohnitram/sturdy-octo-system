@@ -6,6 +6,29 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.1] - 2025-11-30
+### Fixed
+- **[Critical] Chat Image Display:** Opraveno zobrazování obrázků v chatu
+  - Změna z `getPublicUrl()` na `createSignedUrl()` pro privátní bucket
+  - Signed URLs s expirací 1 rok (31 536 000 sekund)
+  - Obrázky se nyní správně zobrazují jako náhledy v chatu
+
+### Added
+- **[Feature] Image Gallery Navigation:** Galerie pro procházení obrázků v chatu
+  - Click-to-expand lightbox pro fullscreen zobrazení
+  - Navigační šipky (← →) pro listování mezi obrázky
+  - Keyboard controls: `←` `→` pro navigaci, `Esc` pro zavření
+  - Počítadlo obrázků: "1 / 5" (aktuální / celkem)
+  - Error handling s placeholder při selhání načtení
+  - Smooth animace a hover efekty
+  - Responzivní design (mobil + desktop)
+
+### Technical
+- Signed URLs pro zabezpečený přístup k privátním médiím
+- Gallery state management v ChatView
+- Enhanced ImageLightbox komponenta s navigací
+
+
 ## [2.29.0] - 2025-11-30
 ### Added
 - **[Feature] Multimedia Chat Messaging:** Kompletní podpora pro odesílání fotografií a hlasových zpráv v chatu! 📷🎤

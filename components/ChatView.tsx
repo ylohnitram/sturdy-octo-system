@@ -44,6 +44,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const [selectedImage, setSelectedImage] = useState<{ file: File; url: string } | null>(null);
     const [showAudioRecorder, setShowAudioRecorder] = useState(false);
     const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+    const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -393,11 +395,35 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     };
 
     const handleImageClick = (imageUrl: string) => {
+        // Get all image messages for gallery
+        const imageMessages = messages.filter(m => m.type === 'image' && m.mediaUrl);
+        const currentIndex = imageMessages.findIndex(m => m.mediaUrl === imageUrl);
+
         setLightboxImage(imageUrl);
+        setLightboxImages(imageMessages.map(m => m.mediaUrl!));
+        setLightboxIndex(currentIndex);
     };
 
     const handleCloseLightbox = () => {
         setLightboxImage(null);
+        setLightboxImages([]);
+        setLightboxIndex(0);
+    };
+
+    const handleNextImage = () => {
+        if (lightboxImages.length > 0) {
+            const nextIndex = (lightboxIndex + 1) % lightboxImages.length;
+            setLightboxIndex(nextIndex);
+            setLightboxImage(lightboxImages[nextIndex]);
+        }
+    };
+
+    const handlePrevImage = () => {
+        if (lightboxImages.length > 0) {
+            const prevIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
+            setLightboxIndex(prevIndex);
+            setLightboxImage(lightboxImages[prevIndex]);
+        }
     };
 
     // --- RENDER LIST ---
@@ -806,7 +832,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
             {lightboxImage && (
                 <ImageLightbox
                     imageUrl={lightboxImage}
+                    images={lightboxImages}
+                    currentIndex={lightboxIndex}
                     onClose={handleCloseLightbox}
+                    onNext={handleNextImage}
+                    onPrev={handlePrevImage}
                 />
             )}
         </div >,
