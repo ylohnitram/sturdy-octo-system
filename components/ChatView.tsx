@@ -607,12 +607,43 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             <ImageIcon size={20} />
                         </button>
 
-                        <input
-                            type="text"
+                        {/* Audio button - only show when not recording */}
+                        {!showAudioRecorder && (
+                            <button
+                                type="button"
+                                onClick={handleAudioRecord}
+                                disabled={sending}
+                                className="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all disabled:opacity-50"
+                                title="Nahrát hlasovou zprávu"
+                            >
+                                <Mic size={20} />
+                            </button>
+                        )}
+
+                        {/* Audio recorder component */}
+                        {showAudioRecorder && (
+                            <AudioRecorder
+                                onRecordComplete={handleAudioRecordComplete}
+                                onCancel={handleCancelAudio}
+                            />
+                        )}
+
+                        <textarea
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
-                            placeholder="Napiš zprávu..."
-                            className="flex-grow bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white focus:outline-none focus:border-red-500 transition-colors"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSend();
+                                }
+                            }}
+                            placeholder="Napiš zprávu... (Shift+Enter pro nový řádek)"
+                            className="flex-grow bg-slate-800 border border-slate-700 rounded-2xl px-4 py-2 text-white focus:outline-none focus:border-red-500 transition-colors resize-none max-h-32 min-h-[40px]"
+                            rows={1}
+                            style={{
+                                height: 'auto',
+                                overflowY: inputText.split('\n').length > 3 ? 'auto' : 'hidden'
+                            }}
                         />
 
                         <button
@@ -636,31 +667,14 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             <Sparkles size={20} />
                         </button>
 
-                        {/* Conditional: Show mic if no text, show send if there's text */}
-                        {inputText.trim() ? (
-                            <button
-                                type="submit"
-                                disabled={sending}
-                                className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
-                            >
-                                {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-                            </button>
-                        ) : showAudioRecorder ? (
-                            <AudioRecorder
-                                onRecordComplete={handleAudioRecordComplete}
-                                onCancel={handleCancelAudio}
-                            />
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={handleAudioRecord}
-                                disabled={sending}
-                                className="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all disabled:opacity-50"
-                                title="Nahrát hlasovou zprávu"
-                            >
-                                <Mic size={20} />
-                            </button>
-                        )}
+                        {/* Send button - always visible */}
+                        <button
+                            type="submit"
+                            disabled={!inputText.trim() || sending}
+                            className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
+                        >
+                            {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                        </button>
                     </div>
                 </form>
             </div>
