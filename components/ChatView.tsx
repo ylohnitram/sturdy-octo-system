@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Send, Ghost, Loader2, MessageCircle, Smile, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, Ghost, Loader2, MessageCircle, Smile, Sparkles, Image as ImageIcon, Mic } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
 import { PageHeader } from './PageHeader';
+import { AudioRecorder } from './AudioRecorder';
+import { AudioPlayer } from './AudioPlayer';
+import { ImagePreviewModal } from './ImagePreviewModal';
+import { ImageLightbox } from './ImageLightbox';
 import { supabase } from '../services/supabaseClient';
 import { fetchMatches, fetchConversation, sendMessage, ghostUser, markConversationAsRead, MatchPreview, ChatMessage } from '../services/userService';
 import { generateChatAssist } from '../services/geminiService';
+import { compressImage, blobToFile, validateImageFile, validateAudioFile } from '../services/mediaUtils';
 import DOMPurify from 'dompurify';
 
 interface ChatViewProps {
@@ -33,6 +38,13 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
     const [aiSuggestion, setAiSuggestion] = useState('');
     const [generatingAI, setGeneratingAI] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    // Multimedia states
+    const [showImagePreview, setShowImagePreview] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<{ file: File; url: string } | null>(null);
+    const [showAudioRecorder, setShowAudioRecorder] = useState(false);
+    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const lastProcessedIdRef = useRef<string | null>(null);
@@ -107,7 +119,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             id: newMsg.id,
                             matchId: newMsg.match_id,
                             senderId: newMsg.sender_id,
-                            content: newMsg.content,
+                            content: newMsg.content || '',
+                            type: newMsg.type || 'text',
+                            mediaUrl: newMsg.media_url,
+                            metadata: newMsg.metadata || {},
                             createdAt: newMsg.created_at,
                             readAt: newMsg.read_at
                         }];
@@ -244,6 +259,147 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
         }
     };
 
+    // --- MULTIMEDIA HANDLERS ---
+
+    const handleImageSelect = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate image
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            alert(validation.error);
+            return;
+        }
+
+        // Create preview URL
+        const url = URL.createObjectURL(file);
+        setSelectedImage({ file, url });
+        setShowImagePreview(true);
+
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleSendImage = async (caption: string) => {
+        if (!activeMatch || !selectedImage) return;
+
+        setSending(true);
+
+        try {
+            // Compress image
+            const compressedBlob = await compressImage(selectedImage.file);
+            const compressedFile = blobToFile(compressedBlob, `image_${Date.now()}.jpg`);
+
+            // Get image dimensions
+            const img = new Image();
+            img.src = selectedImage.url;
+            await new Promise((resolve) => { img.onload = resolve; });
+
+            const metadata = {
+                width: img.width,
+                height: img.height
+            };
+
+            // Send message with image
+            const newMsg = await sendMessage(
+                activeMatch.matchId,
+                caption,
+                compressedFile,
+                'image',
+                metadata
+            );
+
+            if (newMsg) {
+                setMessages(prev => [...prev, newMsg]);
+                setShowImagePreview(false);
+                setSelectedImage(null);
+                URL.revokeObjectURL(selectedImage.url);
+            } else {
+                alert('Nepodařilo se odeslat obrázek.');
+            }
+        } catch (error) {
+            console.error('Error sending image:', error);
+            alert('Chyba při odesílání obrázku.');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handleCancelImage = () => {
+        if (selectedImage) {
+            URL.revokeObjectURL(selectedImage.url);
+            setSelectedImage(null);
+        }
+        setShowImagePreview(false);
+    };
+
+    const handleAudioRecord = () => {
+        setShowAudioRecorder(true);
+    };
+
+    const handleAudioRecordComplete = async (audioBlob: Blob, duration: number) => {
+        if (!activeMatch) return;
+
+        setSending(true);
+        setShowAudioRecorder(false);
+
+        try {
+            // Convert blob to file
+            const audioFile = blobToFile(audioBlob, `audio_${Date.now()}.webm`);
+
+            // Validate audio
+            const validation = validateAudioFile(audioFile);
+            if (!validation.valid) {
+                alert(validation.error);
+                setSending(false);
+                return;
+            }
+
+            const metadata = {
+                duration: Math.round(duration)
+            };
+
+            // Send message with audio
+            const newMsg = await sendMessage(
+                activeMatch.matchId,
+                '', // No text content for audio
+                audioFile,
+                'audio',
+                metadata
+            );
+
+            if (newMsg) {
+                setMessages(prev => [...prev, newMsg]);
+            } else {
+                alert('Nepodařilo se odeslat hlasovou zprávu.');
+            }
+        } catch (error) {
+            console.error('Error sending audio:', error);
+            alert('Chyba při odesílání hlasové zprávy.');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handleCancelAudio = () => {
+        setShowAudioRecorder(false);
+    };
+
+    const handleImageClick = (imageUrl: string) => {
+        setLightboxImage(imageUrl);
+    };
+
+    const handleCloseLightbox = () => {
+        setLightboxImage(null);
+    };
+
     // --- RENDER LIST ---
     if (!activeMatch) {
         return (
@@ -377,15 +533,40 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                 ) : (
                     messages.map(msg => {
                         const isMe = msg.senderId === currentUserId;
+                        const messageType = msg.type || 'text';
+
                         return (
                             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 <div
-                                    className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${isMe
+                                    className={`max-w-[75%] ${messageType === 'text' ? 'px-4 py-2' : 'p-1'} rounded-2xl text-sm ${isMe
                                         ? 'bg-gradient-to-br from-slate-800 to-slate-900 border border-red-500/50 text-white rounded-tr-none shadow-[0_0_10px_rgba(220,38,38,0.1)]'
                                         : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
                                         }`}
                                 >
-                                    {msg.content}
+                                    {messageType === 'text' && msg.content}
+
+                                    {messageType === 'image' && msg.mediaUrl && (
+                                        <div className="space-y-2">
+                                            <img
+                                                src={msg.mediaUrl}
+                                                alt="Shared image"
+                                                className="rounded-xl max-w-full cursor-pointer hover:opacity-90 transition-opacity"
+                                                style={{ maxHeight: '300px', objectFit: 'cover' }}
+                                                onClick={() => handleImageClick(msg.mediaUrl!)}
+                                            />
+                                            {msg.content && (
+                                                <p className="px-3 py-1 text-sm">{msg.content}</p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {messageType === 'audio' && msg.mediaUrl && (
+                                        <AudioPlayer
+                                            audioUrl={msg.mediaUrl}
+                                            duration={msg.metadata?.duration}
+                                            isOwnMessage={isMe}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         );
@@ -396,6 +577,15 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
 
             {/* Input */}
             <div className="p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] bg-slate-900 border-t border-slate-800">
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                />
+
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                     className="relative"
@@ -407,6 +597,16 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         />
                     )}
                     <div className="flex gap-2">
+                        {/* Image button - left side */}
+                        <button
+                            type="button"
+                            onClick={handleImageSelect}
+                            className="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
+                            title="Odeslat fotku"
+                        >
+                            <ImageIcon size={20} />
+                        </button>
+
                         <input
                             type="text"
                             value={inputText}
@@ -414,6 +614,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                             placeholder="Napiš zprávu..."
                             className="flex-grow bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white focus:outline-none focus:border-red-500 transition-colors"
                         />
+
                         <button
                             type="button"
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -424,6 +625,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         >
                             <Smile size={20} />
                         </button>
+
                         <button
                             type="button"
                             onClick={handleAIAssist}
@@ -433,13 +635,32 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         >
                             <Sparkles size={20} />
                         </button>
-                        <button
-                            type="submit"
-                            disabled={!inputText.trim() || sending}
-                            className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
-                        >
-                            {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-                        </button>
+
+                        {/* Conditional: Show mic if no text, show send if there's text */}
+                        {inputText.trim() ? (
+                            <button
+                                type="submit"
+                                disabled={sending}
+                                className="p-2 bg-red-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-500 transition-colors"
+                            >
+                                {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                            </button>
+                        ) : showAudioRecorder ? (
+                            <AudioRecorder
+                                onRecordComplete={handleAudioRecordComplete}
+                                onCancel={handleCancelAudio}
+                            />
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleAudioRecord}
+                                disabled={sending}
+                                className="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all disabled:opacity-50"
+                                title="Nahrát hlasovou zprávu"
+                            >
+                                <Mic size={20} />
+                            </button>
+                        )}
                     </div>
                 </form>
             </div>
@@ -501,58 +722,79 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
 
             {/* Ghost Confirmation Modal */}
-            {showGhostConfirm && activeMatch && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[10000]">
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-200">
-                        {/* Icon */}
-                        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-                            <Ghost size={32} className="text-red-400" />
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="text-xl font-black text-white text-center mb-2">
-                            Ghostnout {activeMatch.partnerUsername}?
-                        </h3>
-
-                        {/* Description */}
-                        <div className="space-y-2 mb-6">
-                            <div className="flex items-start gap-2 text-sm text-slate-300">
-                                <div className="text-green-400 mt-0.5">✓</div>
-                                <div>Už neuvidíš jeho zprávy</div>
+            {
+                showGhostConfirm && activeMatch && (
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[10000]">
+                        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+                            {/* Icon */}
+                            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                                <Ghost size={32} className="text-red-400" />
                             </div>
-                            <div className="flex items-start gap-2 text-sm text-slate-300">
-                                <div className="text-green-400 mt-0.5">✓</div>
-                                <div>Zmizí ze seznamu chatů</div>
-                            </div>
-                            <div className="flex items-start gap-2 text-sm text-slate-300">
-                                <div className="text-green-400 mt-0.5">✓</div>
-                                <div>Můžeš ho později odghostnout v <span className="font-bold text-white">Ghost List</span> (Profil → Ghost List)</div>
-                            </div>
-                        </div>
 
-                        {/* Buttons */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowGhostConfirm(false)}
-                                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
-                            >
-                                Zrušit
-                            </button>
-                            <button
-                                onClick={confirmGhost}
-                                className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/30"
-                            >
-                                Ghostnout
-                            </button>
+                            {/* Title */}
+                            <h3 className="text-xl font-black text-white text-center mb-2">
+                                Ghostnout {activeMatch.partnerUsername}?
+                            </h3>
+
+                            {/* Description */}
+                            <div className="space-y-2 mb-6">
+                                <div className="flex items-start gap-2 text-sm text-slate-300">
+                                    <div className="text-green-400 mt-0.5">✓</div>
+                                    <div>Už neuvidíš jeho zprávy</div>
+                                </div>
+                                <div className="flex items-start gap-2 text-sm text-slate-300">
+                                    <div className="text-green-400 mt-0.5">✓</div>
+                                    <div>Zmizí ze seznamu chatů</div>
+                                </div>
+                                <div className="flex items-start gap-2 text-sm text-slate-300">
+                                    <div className="text-green-400 mt-0.5">✓</div>
+                                    <div>Můžeš ho později odghostnout v <span className="font-bold text-white">Ghost List</span> (Profil → Ghost List)</div>
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowGhostConfirm(false)}
+                                    className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
+                                >
+                                    Zrušit
+                                </button>
+                                <button
+                                    onClick={confirmGhost}
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/30"
+                                >
+                                    Ghostnout
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </div >
-            )
+                    </div >
+                )
             }
+
+            {/* Image Preview Modal */}
+            {showImagePreview && selectedImage && (
+                <ImagePreviewModal
+                    imageFile={selectedImage.file}
+                    imageUrl={selectedImage.url}
+                    onSend={handleSendImage}
+                    onCancel={handleCancelImage}
+                    isSending={sending}
+                />
+            )}
+
+            {/* Image Lightbox */}
+            {lightboxImage && (
+                <ImageLightbox
+                    imageUrl={lightboxImage}
+                    onClose={handleCloseLightbox}
+                />
+            )}
         </div >,
         document.body
     );

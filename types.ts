@@ -133,6 +133,17 @@ export interface HotspotUser {
   status: HotspotUserStatus;
 }
 
+// Chat Message Types
+export type MessageType = 'text' | 'image' | 'audio';
+
+export interface MessageMetadata {
+  duration?: number; // For audio messages (in seconds)
+  width?: number; // For images
+  height?: number; // For images
+  size?: number; // File size in bytes
+  mimeType?: string; // MIME type of the media
+}
+
 // Stripe Subscription Types
 export type SubscriptionStatus =
   | 'active'

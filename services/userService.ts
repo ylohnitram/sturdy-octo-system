@@ -1095,6 +1095,15 @@ export interface ChatMessage {
     matchId: string;
     senderId: string;
     content: string;
+    type?: 'text' | 'image' | 'audio'; // Message type
+    mediaUrl?: string; // URL to media file
+    metadata?: {
+        duration?: number; // For audio (seconds)
+        width?: number; // For images
+        height?: number; // For images
+        size?: number; // File size in bytes
+        mimeType?: string; // MIME type
+    };
     createdAt: string;
     readAt?: string;
 }
@@ -1194,22 +1203,83 @@ export const fetchConversation = async (partnerId: string): Promise<ChatMessage[
         id: m.id,
         matchId: m.match_id,
         senderId: m.sender_id,
-        content: m.content,
+        content: m.content || '',
+        type: m.type || 'text',
+        mediaUrl: m.media_url,
+        metadata: m.metadata || {},
         createdAt: m.created_at,
         readAt: m.read_at
     }));
 };
 
-export const sendMessage = async (matchId: string, content: string): Promise<ChatMessage | null> => {
+export interface SendMessageParams {
+    matchId: string;
+    content?: string; // Text content or caption
+    file?: File; // Media file (image or audio)
+    type?: 'text' | 'image' | 'audio';
+    metadata?: any; // Additional metadata
+}
+
+export const sendMessage = async (
+    matchId: string,
+    content: string,
+    file?: File,
+    type: 'text' | 'image' | 'audio' = 'text',
+    metadata?: any
+): Promise<ChatMessage | null> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    let mediaUrl: string | undefined;
+    let finalMetadata = metadata || {};
+
+    // If there's a file, upload it to storage
+    if (file && (type === 'image' || type === 'audio')) {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(7);
+            const fileName = `${matchId}/${timestamp}_${randomStr}.${fileExt}`;
+
+            // Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('chat-media')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                console.error('Error uploading media:', uploadError);
+                throw uploadError;
+            }
+
+            // Get public URL (with RLS protection)
+            const { data: urlData } = supabase.storage
+                .from('chat-media')
+                .getPublicUrl(fileName);
+
+            mediaUrl = urlData.publicUrl;
+
+            // Add file metadata
+            finalMetadata = {
+                ...finalMetadata,
+                size: file.size,
+                mimeType: file.type
+            };
+        } catch (error) {
+            console.error('Error uploading media file:', error);
+            return null;
+        }
+    }
+
+    // Insert message into database
     const { data, error } = await supabase
         .from('messages')
         .insert({
             match_id: matchId,
             sender_id: user.id,
-            content: content
+            content: content || null,
+            type: type,
+            media_url: mediaUrl,
+            metadata: finalMetadata
         })
         .select()
         .single();
@@ -1223,7 +1293,10 @@ export const sendMessage = async (matchId: string, content: string): Promise<Cha
         id: data.id,
         matchId: data.match_id,
         senderId: data.sender_id,
-        content: data.content,
+        content: data.content || '',
+        type: data.type || 'text',
+        mediaUrl: data.media_url,
+        metadata: data.metadata || {},
         createdAt: data.created_at,
         readAt: data.read_at
     };
