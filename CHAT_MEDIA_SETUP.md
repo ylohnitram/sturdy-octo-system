@@ -20,8 +20,16 @@ In the Supabase Dashboard:
 1. Go to **Storage** → **Buckets**
 2. Click **New Bucket**
 3. Name: `chat-media`
-4. **Public**: Set to `false` (private bucket)
+4. **Public**: Set to `true` (✅ **PUBLIC BUCKET**)
+   - ⚠️ **Important:** Even though the bucket is public, RLS policies control who can access the files
+   - This ensures images are visible to both sender and receiver
 5. Click **Create Bucket**
+
+**Why Public Bucket?**
+- ✅ Images visible to all match participants
+- ✅ No issues with signed URLs
+- ✅ RLS policies provide security
+- ✅ Simpler and more reliable
 
 ### 2. Set Up Storage Policies
 

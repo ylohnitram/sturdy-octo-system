@@ -6,6 +6,26 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.4] - 2025-12-01
+### Fixed
+- **[Critical] Image Visibility:** Opraveno zobrazování obrázků v chatu pro příjemce
+  - Obrázky se nyní zobrazují **oběma účastníkům** konverzace
+  - Změna z private bucketu se signed URLs na **public bucket s RLS policies**
+  - RLS policies zajišťují bezpečnost - pouze účastníci matche vidí média
+  - Použití `getPublicUrl()` místo `createSignedUrl()`
+
+### Changed
+- **[Storage] Public Bucket:** Storage bucket `chat-media` je nyní public
+  - ⚠️ **Vyžaduje změnu v Supabase:** Změň bucket na public v Dashboard
+  - RLS policies kontrolují přístup k souborům
+  - Jednodušší a spolehlivější než signed URLs
+  - Žádné problémy s expirací URLs
+
+### Documentation
+- `IMAGE_VISIBILITY_FIX.md` - Detailní vysvětlení problému a řešení
+- `CHAT_MEDIA_SETUP.md` - Aktualizováno pro public bucket
+
+
 ## [2.29.3] - 2025-12-01
 ### Fixed
 - **[Bug] AI Wingman Cancel:** Opraveno nefunkční tlačítko Zrušit během generování zprávy
