@@ -50,6 +50,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const lastProcessedIdRef = useRef<string | null>(null);
+    const aiAbortControllerRef = useRef<AbortController | null>(null);
 
     // Initial load
     useEffect(() => {
@@ -737,9 +738,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ onBack, initialChatPartnerId
                         {/* Buttons */}
                         <div className="flex gap-2">
                             <button
-                                onClick={() => { setShowAIModal(false); setAiSuggestion(''); }}
+                                onClick={() => {
+                                    // Abort ongoing AI request
+                                    if (aiAbortControllerRef.current) {
+                                        aiAbortControllerRef.current.abort();
+                                        aiAbortControllerRef.current = null;
+                                    }
+                                    setShowAIModal(false);
+                                    setAiSuggestion('');
+                                    setGeneratingAI(false);
+                                }}
                                 className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors"
-                                disabled={generatingAI}
                             >
                                 Zrušit
                             </button>

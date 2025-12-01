@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.3] - 2025-12-01
+### Fixed
+- **[Bug] AI Wingman Cancel:** Opraveno nefunkční tlačítko Zrušit během generování zprávy
+  - Tlačítko Zrušit nyní funguje **okamžitě** i během generování
+  - Odstraněn `disabled` stav z tlačítka Zrušit
+  - Přidán AbortController pro zrušení probíhajícího API requestu
+  - Při zrušení se modal okamžitě zavře a generování se zastaví
+  - Lepší UX - uživatel má plnou kontrolu nad generováním
+
+
 ## [2.29.2] - 2025-12-01
 ### Improved
 - **[UX] Audio Recorder:** Vylepšeno ovládání nahrávání hlasových zpráv
