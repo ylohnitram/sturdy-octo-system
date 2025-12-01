@@ -4,9 +4,10 @@ import { Mic, X, Send, Loader2 } from 'lucide-react';
 interface AudioRecorderProps {
     onRecordComplete: (audioBlob: Blob, duration: number) => void;
     onCancel: () => void;
+    autoStart?: boolean;
 }
 
-export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, onCancel }) => {
+export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, onCancel, autoStart = true }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [duration, setDuration] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -14,7 +15,12 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, 
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Auto-start recording on mount if autoStart is true
     useEffect(() => {
+        if (autoStart) {
+            startRecording();
+        }
+
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -56,6 +62,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, 
         } catch (error) {
             console.error('Error accessing microphone:', error);
             alert('Nepodařilo se získat přístup k mikrofonu. Zkontrolujte oprávnění.');
+            onCancel(); // Close recorder on error
         }
     };
 
@@ -93,16 +100,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, 
 
     return (
         <div className="audio-recorder">
-            {!isRecording && !audioBlob && (
-                <button
-                    onClick={startRecording}
-                    className="record-button"
-                    aria-label="Začít nahrávání"
-                >
-                    <Mic size={20} />
-                </button>
-            )}
-
             {isRecording && (
                 <div className="recording-controls">
                     <div className="recording-indicator">
@@ -142,25 +139,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordComplete, 
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                }
-
-                .record-button {
-                    background: linear-gradient(135deg, #ff4757, #ff6b81);
-                    border: none;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-
-                .record-button:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
                 }
 
                 .recording-controls,

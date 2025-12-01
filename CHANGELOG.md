@@ -6,6 +6,16 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.2] - 2025-12-01
+### Improved
+- **[UX] Audio Recorder:** Vylepšeno ovládání nahrávání hlasových zpráv
+  - Nahrávání se nyní spustí **automaticky** při kliknutí na ikonu mikrofonu
+  - Odstraněna nutnost dvojitého kliknutí (1x otevřít recorder, 2x start)
+  - Přidán `autoStart` prop do AudioRecorder komponenty
+  - Při chybě oprávnění k mikrofonu se recorder automaticky zavře
+  - Jednodušší a intuitivnější UX - jedno kliknutí = nahrávání běží
+
+
 ## [2.29.1] - 2025-11-30
 ### Fixed
 - **[Critical] Chat Image Display:** Opraveno zobrazování obrázků v chatu
