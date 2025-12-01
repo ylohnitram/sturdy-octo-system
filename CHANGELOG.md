@@ -6,6 +6,37 @@ Formát vychází z [Keep a Changelog](https://keepachangelog.com/cs/1.0.0/),
 a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.29.6] - 2025-12-01
+### Fixed
+- **[Critical] Chat Images Persistence:** Opraveno zmizení obrázků po znovuotevření chatu
+  - Vytvořeny chybějící RPC funkce pro chat (`get_conversation_messages`, `get_user_matches`)
+  - RPC funkce nyní správně vrací `media_url`, `type` a `metadata` pole
+  - Obrázky a audio zprávy se nyní zobrazují i po reload chatu
+  - Přidána migrace `19_chat_rpc_functions.sql`
+
+### Added
+- **[Database] Chat RPC Functions:** Kompletní sada RPC funkcí pro chat
+  - `get_conversation_messages` - Načte zprávy včetně multimédií
+  - `get_user_matches` - Načte seznam matchů s filtrováním ghostnutých
+  - `get_unread_conversations_count` - Spočítá nepřečtené konverzace
+  - `mark_conversation_as_read` - Označí zprávy jako přečtené
+
+### Documentation
+- `CHAT_IMAGES_FIX.md` - Detailní vysvětlení problému a řešení
+
+
+## [2.29.5] - 2025-12-01
+### Fixed
+- **[Critical] Ghosting Unghost:** Opravena možnost poslat zprávu po odghostnutí uživatele
+  - Vytvořeny explicitní RPC funkce `ghost_user` a `unghost_user`
+  - Funkce správně přidávají/odebírají záznamy z `blocked_users`
+  - Po odghostnutí je nyní možné normálně chatovat
+  - Přidána migrace `18_fix_ghosting_functions.sql`
+
+### Documentation
+- `GHOSTING_FIX.md` - Návod na opravu ghosting funkcionality
+
+
 ## [2.29.4] - 2025-12-01
 ### Fixed
 - **[Critical] Image Visibility:** Opraveno zobrazování obrázků v chatu pro příjemce
